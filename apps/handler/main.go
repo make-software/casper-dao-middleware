@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"casper-dao-middleware/apps/handler/config"
-	"casper-dao-middleware/internal/dao_event_parser"
-	"casper-dao-middleware/internal/persistence"
-	"casper-dao-middleware/internal/services/event_processing"
+	"casper-dao-middleware/internal/crdao/dao_event_parser"
+	"casper-dao-middleware/internal/crdao/persistence"
+	"casper-dao-middleware/internal/crdao/services/event_processing"
 	"casper-dao-middleware/pkg/assert"
 	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/casper"

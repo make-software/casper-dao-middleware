@@ -29,7 +29,7 @@ Each component could be tested via unit or integrations tests.
 To run unit tests for the component, make sure you are in the root of the component:
 
 ```
-cd internal/{component} && go test ./...
+cd internal/crdao/{component} && go test ./...
 ```
 
 ## Integration tests
@@ -45,7 +45,7 @@ After your environment is ready, make sure you set up required env variables.
 Run integration tests:
 
 ```
-cd internal/{component} &&  go test -tags=integration ./...
+cd internal/crdao/{component} &&  go test -tags=integration ./...
 ```
 
 ## Tools

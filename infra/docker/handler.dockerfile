@@ -42,7 +42,7 @@ WORKDIR /app/
 
 COPY --from=gobuilder /build/crdao-handler .
 COPY --from=gobuilder /build/go/bin /usr/local/bin
-COPY --from=gobuilder /build/internal//resources/ ./resources
+COPY --from=gobuilder /build/internal/crdao//resources/ ./resources
 COPY --from=gobuilder /build/infra/docker/scripts/sync-db.sh /usr/local/bin/sync-db.sh
 RUN chmod +x /usr/local/bin/sync-db.sh
 

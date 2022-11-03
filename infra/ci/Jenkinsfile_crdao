@@ -26,7 +26,7 @@ pipeline {
       }
       steps {
         script {
-          sh "until docker ps; do sleep 3; done && docker build -t $registry$dockerImageApi:${env.GIT_HASH} -f infra/docker/crdao-api.dockerfile . "
+          sh "until docker ps; do sleep 3; done && docker build -t $registry$dockerImageApi:${env.GIT_HASH} -f infra/docker/api.dockerfile . "
         }
       }
    }
@@ -40,7 +40,7 @@ pipeline {
       }
       steps {
         script {
-          sh "until docker ps; do sleep 3; done && docker build -t $registry$dockerImageHandler:${env.GIT_HASH} -f infra/docker/crdao-handler.dockerfile . "
+          sh "until docker ps; do sleep 3; done && docker build -t $registry$dockerImageHandler:${env.GIT_HASH} -f infra/docker/handler.dockerfile . "
         }
       }
    }

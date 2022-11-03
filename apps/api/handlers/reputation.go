@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"casper-dao-middleware/internal/dao_event_parser"
-	"casper-dao-middleware/internal/persistence"
-	"casper-dao-middleware/internal/services/reputation"
+	"casper-dao-middleware/internal/crdao/dao_event_parser"
+	"casper-dao-middleware/internal/crdao/persistence"
+	"casper-dao-middleware/internal/crdao/services/reputation"
 	"casper-dao-middleware/pkg/errors"
 	"casper-dao-middleware/pkg/http-params"
 	"casper-dao-middleware/pkg/http-response"

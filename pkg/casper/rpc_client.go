@@ -22,7 +22,7 @@ type blockIdentifier struct {
 	Height uint64 `json:"Height,omitempty"`
 }
 
-//go:generate mockgen -destination=../../internal/network-store/tests/mocks/rpc_client_mock.go -package=mocks -source=./rpc_client.go RpcClient
+//go:generate mockgen -destination=../../internal/crdao/network-store/tests/mocks/rpc_client_mock.go -package=mocks -source=./rpc_client.go RpcClient
 type RPCClient interface {
 	GetDeploy(hash string) (GetDeployResult, error)
 	GetStateItem(stateRootHash, key string, path []string) (StateGetItemResult, error)

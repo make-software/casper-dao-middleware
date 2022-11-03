@@ -8,8 +8,8 @@ import (
 	"casper-dao-middleware/apps/api/config"
 	"casper-dao-middleware/apps/api/handlers"
 	"casper-dao-middleware/apps/api/swagger"
-	"casper-dao-middleware/internal/dao_event_parser"
-	"casper-dao-middleware/internal/persistence"
+	"casper-dao-middleware/internal/crdao/dao_event_parser"
+	"casper-dao-middleware/internal/crdao/persistence"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
