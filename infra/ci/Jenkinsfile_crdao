@@ -1,0 +1,153 @@
+def buildNumber = env.BUILD_NUMBER as int
+if (buildNumber > 1) milestone(buildNumber - 1)
+milestone(buildNumber)
+
+pipeline {
+
+  agent any
+
+  environment {
+    registry = '494750395663.dkr.ecr.us-east-1.amazonaws.com/make/crdao'
+    api_app = 'api'
+    handler_app = 'handler'
+    dockerImageApi = '/$api_app'
+    dockerImageHandler = '/$handler_app'
+    GIT_HASH = GIT_COMMIT.take(7)
+  }
+
+  stages {
+
+    stage('Build image CrDAO API') {
+      when {
+        anyOf {
+          branch "master";
+          branch "rc-*"
+        }
+      }
+      steps {
+        script {
+          sh "until docker ps; do sleep 3; done && docker build -t $registry$dockerImageApi:${env.GIT_HASH} -f infra/docker/crdao-api.dockerfile . "
+        }
+      }
+   }
+
+    stage('Build image CrDAO Handler') {
+      when {
+        anyOf {
+          branch "master";
+          branch "rc-*"
+        }
+      }
+      steps {
+        script {
+          sh "until docker ps; do sleep 3; done && docker build -t $registry$dockerImageHandler:${env.GIT_HASH} -f infra/docker/crdao-handler.dockerfile . "
+        }
+      }
+   }
+
+    stage('Push image CrDAO API') {
+      when {
+        anyOf {
+          branch "master";
+          branch "rc-*"
+        }
+      }
+        steps {
+            script {
+                docker.withRegistry('https://494750395663.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:make-ecr-casper-dev') {
+                    sh "docker push $registry$dockerImageApi:${env.GIT_HASH}"
+                }
+            }
+        }
+    }
+
+    stage('Push image CrDAO Handler') {
+      when {
+        anyOf {
+          branch "master";
+          branch "rc-*"
+        }
+      }
+        steps {
+            script {
+                docker.withRegistry('https://494750395663.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:make-ecr-casper-dev') {
+                    sh "docker push $registry$dockerImageHandler:${env.GIT_HASH}"
+                }
+            }
+        }
+    }
+
+    stage('Clone casper-infra repo') {
+      when {
+        anyOf {
+          branch "master";
+          branch "rc-*"
+        }
+      }
+      environment {
+        GIT_CREDS_USR = credentials('repo-git-user')
+        GIT_CREDS_PSW = credentials('repo-git-pass')
+      }
+      steps {
+        sh "git clone https://$GIT_CREDS_USR:$GIT_CREDS_PSW@bitbucket.org/makellc/casper-infra.git"
+        sh 'git config --global user.email \'jenkins@make.servies\''
+        sh 'git config --global user.name "Jenkins CI"'
+      }
+   }
+
+    stage('DEV') {
+      when { branch 'master' }
+        environment {
+          env = 'dev'
+        }
+        steps {
+          dir(path: 'casper-infra') {
+            sh 'cd ./kubernetes/environment/$env/crdao && pwd && ls -la && sed -i "s|/$api_app.*|/$api_app:$GIT_HASH|g" crdao-$api_app.yaml'
+            sh 'cd ./kubernetes/environment/$env/crdao && pwd && ls -la && sed -i "s|/$handler_app.*|/$handler_app:$GIT_HASH|g" crdao-$handler_app.yaml'
+            sh 'git status && git commit -am "$api_app-$env and $handler_app-$env releasing from branch $BRANCH_NAME" && pwd && ls -la && chmod a+x ../infra/ci/push.sh && ../infra/ci/push.sh || echo \'no changes\''
+          }
+        }
+     }
+
+    //   stage('STG') {
+    //     when { branch 'rc-*' }
+    //       environment {
+    //         env = 'stg'
+    //       }
+    //     steps {
+    //       dir(path: 'casper-infra') {
+    //         sh 'cd ./kubernetes/environment/$env/$app && pwd && ls -la && sed -i "s|/$app.*|/$app:$GIT_HASH|g" $app.yaml'
+    //         sh 'git status && git commit -am "$app-$env releasing from branch $BRANCH_NAME" && pwd && ls -la && chmod a+x ../infra/ci/push.sh && ../infra/ci/push.sh || echo \'no changes\''
+    //       }
+    //     }
+    //   }
+
+    //   stage('ArgoCD') {
+    //   when {
+    //     anyOf {
+    //       branch "master";
+    //       branch "rc-*"
+    //     }
+    //   }
+    //     steps {
+    //         sh 'sleep 180'
+    //     }
+    //   }
+  }
+
+    // post {
+    //     success {
+    //       script {
+    //         if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME =~ 'rc-1.*')
+    //         slackSend (color: '#00FF00', message: "SUCCESSFUL\n*Job:* `${env.JOB_NAME}`\n*Build:* `${env.BUILD_NUMBER}`\n *Commit:* `${env.GIT_HASH}`\n *Image:* `494750395663.dkr.ecr.us-east-1.amazonaws.com/make/casper/explorer:${env.GIT_HASH}`\n*More info at:* `${env.BUILD_URL}`")
+    //       }
+    //     }
+
+    //     failure {
+    //       script {
+    //         if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME =~ 'rc-1.*')
+    //         slackSend (color: '#FF0000', message: "FAILED\n*Job:* `${env.JOB_NAME}`\n*Build:* `${env.BUILD_NUMBER}`\n *Commit:* `${env.GIT_HASH}`\n *Image:* `494750395663.dkr.ecr.us-east-1.amazonaws.com/make/casper/explorer:${env.GIT_HASH}`\n*More info at:* `${env.BUILD_URL}`")
+    //       }
+    //     }
+    // }
+}

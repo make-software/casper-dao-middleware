@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS `crdao-test`;
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';

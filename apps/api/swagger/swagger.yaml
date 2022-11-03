@@ -1,0 +1,458 @@
+definitions:
+  entities.AggregatedReputationChange:
+    properties:
+      address:
+        type: string
+      earned_amount:
+        type: integer
+      lost_amount:
+        type: integer
+      released_amount:
+        type: integer
+      staked_amount:
+        type: integer
+      timestamp:
+        type: string
+      voting_id:
+        type: integer
+    type: object
+  entities.TotalReputation:
+    properties:
+      available_amount:
+        type: integer
+      staked_amount:
+        type: integer
+    type: object
+  entities.Vote:
+    properties:
+      address:
+        type: string
+      amount:
+        type: integer
+      deploy_hash:
+        type: string
+      is_in_favour:
+        type: boolean
+      timestamp:
+        type: string
+      voting_id:
+        type: integer
+    type: object
+  entities.Voting:
+    properties:
+      creator:
+        type: string
+      deploy_hash:
+        type: string
+      has_ended:
+        type: boolean
+      informal_voting_id:
+        type: integer
+      is_formal:
+        type: boolean
+      timestamp:
+        type: string
+      voting_id:
+        type: integer
+      voting_quorum:
+        type: integer
+      voting_time:
+        type: integer
+    type: object
+  http_response.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/http_response.ErrorResult'
+    type: object
+  http_response.ErrorResult:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      message:
+        type: string
+    type: object
+  http_response.PaginatedResponse:
+    properties:
+      data: {}
+      item_count:
+        type: integer
+      page_count:
+        type: integer
+    type: object
+  http_response.SuccessResponse:
+    properties:
+      data: {}
+    type: object
+info:
+  contact: {}
+  title: Casper-CRDao API
+  version: 0.0.1
+paths:
+  /accounts/{address}/aggregated-reputation-changes:
+    get:
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: date
+        description: Comma-separated list of sorting fields (address)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      - description: Hash or PublicKey
+        in: path
+        maxLength: 66
+        name: address
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entities.AggregatedReputationChange'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: user AggregatedReputationChange
+      tags:
+      - Reputation
+  /accounts/{address}/total-reputation:
+    get:
+      parameters:
+      - description: Hash or PublicKey
+        in: path
+        maxLength: 66
+        name: address
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.TotalReputation'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Calculate address TotalReputation
+      tags:
+      - Reputation
+  /accounts/{address}/votes:
+    get:
+      parameters:
+      - description: Hash or PublicKey
+        in: path
+        maxLength: 66
+        name: address
+        required: true
+        type: string
+      - description: Optional fields' schema (voting{})
+        in: query
+        name: includes
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: voting_id
+        description: Comma-separated list of sorting fields (voting_id,address)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Vote'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of votes for address
+      tags:
+      - Vote
+  /votings:
+    get:
+      parameters:
+      - description: IsFormal flag (boolean)
+        in: query
+        name: is_formal
+        type: boolean
+      - description: IsActive flag (boolean)
+        in: query
+        name: is_active
+        type: boolean
+      - description: Optional fields' schema (votes_number{}, account_vote(hash))
+        in: query
+        name: includes
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: voting_id
+        description: Comma-separated list of sorting fields (voting_id)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Voting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of votings
+      tags:
+      - Voting
+  /votings/{voting_id}/votes:
+    get:
+      parameters:
+      - description: Comma-separated list of VotingIDs (number)
+        in: query
+        name: voting_id
+        type: string
+      - description: Optional fields' schema (voting{})
+        in: query
+        name: includes
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: voting_id
+        description: Comma-separated list of sorting fields (voting_id,address)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Vote'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of votes for votingID
+      tags:
+      - Vote
+produces:
+- application/json
+swagger: "2.0"

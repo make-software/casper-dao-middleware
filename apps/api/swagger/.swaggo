@@ -1,0 +1,2 @@
+replace casper-dao-middleware/pkg/casper/types.PublicKey string
+replace casper-dao-middleware/pkg/casper/types.Hash string

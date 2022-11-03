@@ -1,0 +1,9 @@
+.idea
+.vscode
+
+.dist/*
+!.dist/.gitkeep
+.env
+.env.test
+
+vendor
