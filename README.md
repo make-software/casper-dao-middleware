@@ -48,6 +48,29 @@ Run integration tests:
 cd internal/crdao/{component} &&  go test -tags=integration ./...
 ```
 
+## Run apps locally
+- Install [docker](https://docs.docker.com/compose/install/) and [docker-compose](https://docker-docs.netlify.app/compose/install/)
+
+- Run local [docker-compose.yaml](./infra/local/docker-compose.db.yaml) file
+```bash
+docker-compose -f ./infra/local/docker-compose.db.yaml up -d
+```
+
+- Prepare .env files
+```bash
+cp ./apps/handler/.env.example ./apps/handler/.env && cp ./apps/api/.env.example ./apps/api/.env
+```
+
+- Run local migrations
+```bash
+make sync-db
+```
+
+- Run application
+```bash
+cd ./apps/{app} && go run .
+```
+
 ## Tools
 
 ### Swagger
