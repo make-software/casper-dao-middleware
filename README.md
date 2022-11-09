@@ -191,10 +191,3 @@ casper-middleware
 Plural names were used for higher-level packages to have a possibility to reuse singular names in the code.
 
 The structure shouldn't be considered final and should evolve together with the project.
-
-## (╯°□°）╯︵ ┻━┻
-
-The following Golang conventions aren't followed in this project:
-
-- using short variable names because we want the code to be clear at any stage of development, even after 500K LOC
-- avoiding underscores in package names because the same reason as before
