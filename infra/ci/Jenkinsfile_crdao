@@ -55,7 +55,7 @@ pipeline {
       }
         steps {
             script {
-                docker.withRegistry('', '') {
+                docker.withRegistry('https://${DR2}', 'ecr:us-east-1:make-ecr-casper-dev') {
                     sh "docker push $registry$dockerImageApi:${env.GIT_HASH}"
                 }
             }
@@ -71,7 +71,7 @@ pipeline {
       }
         steps {
             script {
-                docker.withRegistry('', '') {
+                docker.withRegistry('https://${DR2}', 'ecr:us-east-1:make-ecr-casper-dev') {
                     sh "docker push $registry$dockerImageHandler:${env.GIT_HASH}"
                 }
             }
