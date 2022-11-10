@@ -5,7 +5,7 @@ COPY ./ /build
 
 ENV CGO_ENABLED=0 GOOS=linux GOOS=linux GOARCH=amd64 GOPATH=/build/go
 
-RUN go build -a -installsuffix cgo -ldflags="-s -w" -o ./crdao-handler ./apps/crdao-handler/
+RUN go build -a -installsuffix cgo -ldflags="-s -w" -o ./crdao-handler ./apps/handler/
 
 RUN go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
@@ -42,7 +42,7 @@ WORKDIR /app/
 
 COPY --from=gobuilder /build/crdao-handler .
 COPY --from=gobuilder /build/go/bin /usr/local/bin
-COPY --from=gobuilder /build/internal/crdao//resources/ ./resources
+COPY --from=gobuilder /build/internal/crdao/resources/ ./resources
 COPY --from=gobuilder /build/infra/docker/scripts/sync-db.sh /usr/local/bin/sync-db.sh
 RUN chmod +x /usr/local/bin/sync-db.sh
 
