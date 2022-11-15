@@ -407,7 +407,7 @@ paths:
         type: string
       - collectionFormat: csv
         default: voting_id
-        description: Comma-separated list of sorting fields (voting_id,address)
+        description: Comma-separated list of sorting fields (voting_id, address)
         in: query
         items:
           type: string

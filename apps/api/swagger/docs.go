@@ -565,7 +565,7 @@ const docTemplate = `{
                         },
                         "collectionFormat": "csv",
                         "default": "voting_id",
-                        "description": "Comma-separated list of sorting fields (voting_id,address)",
+                        "description": "Comma-separated list of sorting fields (voting_id, address)",
                         "name": "order_by",
                         "in": "query"
                     }

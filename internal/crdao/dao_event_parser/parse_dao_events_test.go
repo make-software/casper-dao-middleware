@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	contract_events "casper-dao-middleware/internal/crdao//dao_event_parser/events"
+	contract_events "casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/pkg/casper"
 
 	"github.com/stretchr/testify/assert"
