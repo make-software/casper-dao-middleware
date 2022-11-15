@@ -1,0 +1,11 @@
+#!/bin/sh
+
+HANDLERS_FILES="apps/api/handlers/*"
+
+if git diff --cached --quiet -- "$HANDLERS_FILES"; then
+    exit 0
+else
+    echo "Generating Swagger"
+    make swagger && make swagger-format
+    git add ./apps/api/swagger
+fi
