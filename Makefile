@@ -30,10 +30,10 @@ help:
 	@echo "  install-deps                      Install project dependencies to the vendor directory"
 	@echo "  setup                             Install project dependencies for local development"
 	@echo "  run-local-infra                   Runs project infra for local development"
-	@echo "  stop-local-infra                   Stops project infra for local development and removes containers"
+	@echo "  stop-local-infra                  Stops project infra for local development and removes containers"
 	@echo "  sync-db                           Actualises network store database for local development"
 	@echo "  sync-test-db                      Actualises network store database for running tests locally"
-	@echo "  swagger                      	    Generate swagger documentation based on comments in api/handlers"
+	@echo "  swagger                      	   Generate swagger documentation based on comments in api/handlers"
 	@echo "  swagger-format                    Run swagger comments formatting"
 
 
