@@ -14,6 +14,7 @@ import (
 type DAOContractPackageHashes struct {
 	ReputationContractPackageHash types.Hash
 	VoterContractPackageHash      types.Hash
+	VariableRepositoryContract    types.Hash
 }
 
 func NewDAOContractPackageHashesFromHashesMap(contractHashes map[string]string, casperClient casper.RPCClient) (DAOContractPackageHashes, error) {
@@ -43,6 +44,8 @@ func NewDAOContractPackageHashesFromHashesMap(contractHashes map[string]string, 
 			result.ReputationContractPackageHash = contractPackageHash
 		case "voter_contract":
 			result.VoterContractPackageHash = contractPackageHash
+		case "variable_repository_contract":
+			result.VariableRepositoryContract = contractPackageHash
 		}
 	}
 
@@ -53,5 +56,6 @@ func (d DAOContractPackageHashes) Validate() error {
 	return validation.ValidateStruct(&d,
 		validation.Field(&d.ReputationContractPackageHash, validation.Required),
 		validation.Field(&d.VoterContractPackageHash, validation.Required),
+		validation.Field(&d.VariableRepositoryContract, validation.Required),
 	)
 }

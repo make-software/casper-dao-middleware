@@ -1,6 +1,7 @@
 package event_processing
 
 import (
+	"casper-dao-middleware/internal/crdao/services/settings"
 	"context"
 
 	"casper-dao-middleware/internal/crdao/dao_event_parser"
@@ -17,10 +18,11 @@ type ProcessEventStream struct {
 	di.EntityManagerAware
 	di.DAOContractPackageHashesAware
 
-	daoContractHashes         map[string]string
-	eventStreamPath           string
-	nodeStartFromEventID      uint64
-	dictionarySetEventsBuffer uint32
+	daoContractHashes                     map[string]string
+	eventStreamPath                       string
+	variableRepositoryContractStorageUref string
+	nodeStartFromEventID                  uint64
+	dictionarySetEventsBuffer             uint32
 }
 
 func NewProcessEventStream() *ProcessEventStream {
@@ -42,6 +44,10 @@ func (c *ProcessEventStream) SetDictionarySetEventsBuffer(buffer uint32) *Proces
 	return c
 }
 
+func (c *ProcessEventStream) SetVariableRepositoryContractStorageUref(uref string) {
+	c.variableRepositoryContractStorageUref = uref
+}
+
 func (c *ProcessEventStream) SetEventStreamPath(eventPath string) *ProcessEventStream {
 	c.eventStreamPath = eventPath
 	return c
@@ -56,6 +62,18 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	daoEventParser, err := dao_event_parser.NewDaoEventParser(c.GetCasperClient(), c.daoContractHashes, c.dictionarySetEventsBuffer)
 	if err != nil {
 		return err
+	}
+
+	syncDaoSetting := settings.NewSyncDAOSettings()
+	syncDaoSetting.SetCasperClient(c.GetCasperClient())
+	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.variableRepositoryContractStorageUref)
+	syncDaoSetting.SetEntityManager(c.GetEntityManager())
+
+	for _, setting := range settings.DaoSettings {
+		syncDaoSetting.SetSetting(setting)
+		if err := syncDaoSetting.Execute(); err != nil {
+			zap.S().With(zap.String("setting", setting)).Info("failed to sync DAO setting")
+		}
 	}
 
 	processRawDeploy := NewProcessRawDeploy()

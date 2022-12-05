@@ -15,11 +15,12 @@ import (
 )
 
 type Env struct {
-	LogLevel                  zapcore.Level `env:"LOG_LEVEL" envDefault:"info"`
-	EventStreamPath           string        `env:"EVENT_STREAM_PATH,required"`
-	DictionarySetEventsBuffer uint32        `env:"DICTIONARY_SET_EVENTS_READ_BACK_BUFFER" envDefault:"100"`
-	DaoContractHashes         map[string]string
-	NewNodeStartFromEventID   uint64
+	LogLevel                                      zapcore.Level `env:"LOG_LEVEL" envDefault:"info"`
+	EventStreamPath                               string        `env:"EVENT_STREAM_PATH,required"`
+	VariableRepositoryContractStorageNamedKeyUref string        `env:"VARIABLE_REPOSITORY_CONTRACT_STORAGE_NAMED_KEY_UREF,required"`
+	DictionarySetEventsBuffer                     uint32        `env:"DICTIONARY_SET_EVENTS_READ_BACK_BUFFER" envDefault:"100"`
+	DaoContractHashes                             map[string]string
+	NewNodeStartFromEventID                       uint64
 
 	NodeSSEURL *url.URL
 	NodeRPCURL *url.URL

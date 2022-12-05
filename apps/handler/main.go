@@ -74,6 +74,7 @@ func main() {
 		processEventStream.SetDictionarySetEventsBuffer(env.DictionarySetEventsBuffer)
 		processEventStream.SetEntityManager(entityManager)
 		processEventStream.SetDAOContractPackageHashes(hashes)
+		processEventStream.SetVariableRepositoryContractStorageUref(env.VariableRepositoryContractStorageNamedKeyUref)
 
 		return processEventStream.Execute(ctx)
 	}))
