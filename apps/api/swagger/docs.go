@@ -385,14 +385,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "boolean",
-                        "description": "IsFormal flag (boolean)",
-                        "name": "is_formal",
+                        "description": "HasEnded flag (boolean)",
+                        "name": "has_ended",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "HasEnded flag (boolean)",
-                        "name": "has_ended",
+                        "description": "IsFormal flag (boolean)",
+                        "name": "is_formal",
                         "in": "query"
                     },
                     {

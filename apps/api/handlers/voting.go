@@ -138,8 +138,8 @@ func (h *Voting) HandleGetAccountVotes(w http.ResponseWriter, r *http.Request) {
 //
 // @Router  /votings [GET]
 //
-// @Param   is_formal       query    bool     false "IsFormal flag (boolean)"
 // @Param   has_ended       query    bool     false "HasEnded flag (boolean)"
+// @Param   is_formal       query    bool     false "IsFormal flag (boolean)"
 // @Param   includes        query    string   false "Optional fields' schema (votes_number{}, account_vote(hash))"
 // @Param   page            query    int      false "Page number"                                        default(1)
 // @Param   page_size       query    string   false "Number of items per page"                           default(10)
