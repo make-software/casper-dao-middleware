@@ -11,7 +11,7 @@ type GetVotings struct {
 
 	votingIDs []uint32
 	isFormal  *bool
-	isActive  *bool
+	hasEnded  *bool
 }
 
 func NewGetVotings() *GetVotings {
@@ -26,15 +26,15 @@ func (c *GetVotings) SetIsFormal(isFormal *bool) {
 	c.isFormal = isFormal
 }
 
-func (c *GetVotings) SetIsActive(isActive *bool) {
-	c.isActive = isActive
+func (c *GetVotings) SetHasEnded(hasEnded *bool) {
+	c.hasEnded = hasEnded
 }
 
 func (c *GetVotings) Execute() (*pagination.Result, error) {
 	filters := map[string]interface{}{}
 
-	if c.isActive != nil {
-		filters["is_active"] = *c.isActive
+	if c.hasEnded != nil {
+		filters["has_ended"] = *c.hasEnded
 	}
 
 	if c.isFormal != nil {

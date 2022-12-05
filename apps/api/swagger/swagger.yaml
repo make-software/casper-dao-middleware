@@ -302,9 +302,9 @@ paths:
         in: query
         name: is_formal
         type: boolean
-      - description: IsActive flag (boolean)
+      - description: HasEnded flag (boolean)
         in: query
-        name: is_active
+        name: has_ended
         type: boolean
       - description: Optional fields' schema (votes_number{}, account_vote(hash))
         in: query

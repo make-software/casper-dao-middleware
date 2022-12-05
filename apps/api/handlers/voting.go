@@ -139,7 +139,7 @@ func (h *Voting) HandleGetAccountVotes(w http.ResponseWriter, r *http.Request) {
 // @Router  /votings [GET]
 //
 // @Param   is_formal       query    bool     false "IsFormal flag (boolean)"
-// @Param   is_active       query    bool     false "IsActive flag (boolean)"
+// @Param   has_ended       query    bool     false "HasEnded flag (boolean)"
 // @Param   includes        query    string   false "Optional fields' schema (votes_number{}, account_vote(hash))"
 // @Param   page            query    int      false "Page number"                                        default(1)
 // @Param   page_size       query    string   false "Number of items per page"                           default(10)
@@ -157,7 +157,7 @@ func (h *Voting) HandleGetVotings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isActive, err := http_params.ParseOptionalBool("is_active", r)
+	hasEnded, err := http_params.ParseOptionalBool("has_ended", r)
 	if err != nil {
 		http_response.Error(w, r, err)
 		return
@@ -174,7 +174,7 @@ func (h *Voting) HandleGetVotings(w http.ResponseWriter, r *http.Request) {
 	getVotings := voting.NewGetVotings()
 	getVotings.SetEntityManager(h.entityManager)
 	getVotings.SetPaginationParams(paginationParams)
-	getVotings.SetIsActive(isActive)
+	getVotings.SetHasEnded(hasEnded)
 	getVotings.SetIsFormal(isFormal)
 
 	paginatedVotings, err := getVotings.Execute()

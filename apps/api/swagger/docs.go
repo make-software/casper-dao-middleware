@@ -391,8 +391,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "IsActive flag (boolean)",
-                        "name": "is_active",
+                        "description": "HasEnded flag (boolean)",
+                        "name": "has_ended",
                         "in": "query"
                     },
                     {
