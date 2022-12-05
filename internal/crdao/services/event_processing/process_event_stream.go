@@ -81,6 +81,7 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	processRawDeploy.SetCasperClient(c.GetCasperClient())
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
 	processRawDeploy.SetDAOContractPackageHashes(c.GetDAOContractPackageHashes())
+	processRawDeploy.SetVariableRepositoryContractStorageUref(c.variableRepositoryContractStorageUref)
 
 	stopListening := func() {
 		eventListener.Close()
