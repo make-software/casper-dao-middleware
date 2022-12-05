@@ -52,6 +52,10 @@ func (o *OptionalData) ContainsFunc(name string) ([]string, bool) {
 		return nil, false
 	}
 
+	if data.funcArgs == nil {
+		return nil, false
+	}
+
 	return data.funcArgs.params, true
 }
 
