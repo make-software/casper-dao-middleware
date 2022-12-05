@@ -2,13 +2,14 @@ package settings
 
 import (
 	"bytes"
-	"casper-dao-middleware/internal/crdao/dao_event_parser/utils"
-	"casper-dao-middleware/internal/crdao/di"
-	"casper-dao-middleware/internal/crdao/entities"
 	"encoding/hex"
 	"errors"
 	"go.uber.org/zap"
 	"time"
+
+	"casper-dao-middleware/internal/crdao/dao_event_parser/utils"
+	"casper-dao-middleware/internal/crdao/di"
+	"casper-dao-middleware/internal/crdao/entities"
 )
 
 const (

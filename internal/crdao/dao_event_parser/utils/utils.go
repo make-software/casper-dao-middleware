@@ -1,14 +1,16 @@
 package utils
 
 import (
-	"casper-dao-middleware/pkg/casper/types"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/blake2b"
 	"strconv"
 	"strings"
+
+	"casper-dao-middleware/pkg/casper/types"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 type RecordValue struct {
