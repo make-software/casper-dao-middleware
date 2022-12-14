@@ -14,19 +14,22 @@ type EntityManager interface {
 	ReputationChangeRepository() repositories.ReputationChangeRepository
 	VoteRepository() repositories.VoteRepository
 	VotingRepository() repositories.VotingRepository
+	SettingRepository() repositories.SettingRepository
 }
 
 type entityManager struct {
 	reputationChangesRepo repositories.ReputationChangeRepository
 	voteRepository        repositories.VoteRepository
 	votingRepository      repositories.VotingRepository
+	settingRepository     repositories.SettingRepository
 }
 
-func NewEntityManager(db *sqlx.DB, hashes dao_event_parser.DAOContractPackageHashes) EntityManager {
+func NewEntityManager(db *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) EntityManager {
 	return &entityManager{
 		reputationChangesRepo: repositories.NewReputationChange(db, hashes),
 		voteRepository:        repositories.NewVote(db),
 		votingRepository:      repositories.NewVoting(db),
+		settingRepository:     repositories.NewSetting(db),
 	}
 }
 
@@ -40,4 +43,8 @@ func (e entityManager) VoteRepository() repositories.VoteRepository {
 
 func (e entityManager) VotingRepository() repositories.VotingRepository {
 	return e.votingRepository
+}
+
+func (e entityManager) SettingRepository() repositories.SettingRepository {
+	return e.settingRepository
 }

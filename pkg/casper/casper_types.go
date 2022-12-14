@@ -294,9 +294,9 @@ type StoredValue struct {
 }
 
 type CLValue struct {
-	CLType interface{} `json:"cl_type"`
-	Parsed interface{} `json:"parsed"`
-	Bytes  []byte      `json:"bytes"`
+	CLType interface{}     `json:"cl_type"`
+	Parsed interface{}     `json:"parsed"`
+	Bytes  json.RawMessage `json:"bytes"`
 }
 
 type Account struct {

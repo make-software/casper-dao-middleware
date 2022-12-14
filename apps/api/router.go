@@ -20,7 +20,7 @@ import (
 func NewRouter(
 	cfg *config.Env,
 	entityManager persistence.EntityManager,
-	daoContractPackageHashes dao_event_parser.DAOContractPackageHashes,
+	daoContractPackageHashes dao_event_parser.DAOContractsMetadata,
 ) http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)

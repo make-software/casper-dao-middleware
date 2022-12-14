@@ -1,6 +1,7 @@
 package event_processing
 
 import (
+	"casper-dao-middleware/internal/crdao/services/settings"
 	"context"
 
 	"casper-dao-middleware/internal/crdao/dao_event_parser"
@@ -15,7 +16,7 @@ type ProcessEventStream struct {
 	di.BaseStreamURLAware
 	di.CasperClientAware
 	di.EntityManagerAware
-	di.DAOContractPackageHashesAware
+	di.DAOContractsMetadataAware
 
 	daoContractHashes         map[string]string
 	eventStreamPath           string
@@ -58,11 +59,24 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 		return err
 	}
 
+	syncDaoSetting := settings.NewSyncDAOSettings()
+	syncDaoSetting.SetCasperClient(c.GetCasperClient())
+	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
+	syncDaoSetting.SetEntityManager(c.GetEntityManager())
+
+	for _, setting := range settings.DaoSettings {
+		syncDaoSetting.SetSetting(setting)
+		if err := syncDaoSetting.Execute(); err != nil {
+			zap.S().With(zap.String("setting", setting)).Info("failed to sync DAO setting")
+		}
+	}
+
 	processRawDeploy := NewProcessRawDeploy()
 	processRawDeploy.SetDAOEventParser(daoEventParser)
 	processRawDeploy.SetCasperClient(c.GetCasperClient())
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
-	processRawDeploy.SetDAOContractPackageHashes(c.GetDAOContractPackageHashes())
+	processRawDeploy.SetDAOContractPackageHashes(c.GetDAOContractsMetadata())
+	processRawDeploy.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
 
 	stopListening := func() {
 		eventListener.Close()

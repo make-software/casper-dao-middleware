@@ -26,6 +26,7 @@ type blockIdentifier struct {
 type RPCClient interface {
 	GetDeploy(hash string) (GetDeployResult, error)
 	GetStateItem(stateRootHash, key string, path []string) (StateGetItemResult, error)
+	GetDictionaryItem(stateRootHash, uref, key string) (StateGetItemResult, error)
 	GetAccountBalance(stateRootHash, balanceUref string) (big.Int, error)
 	GetAccountMainPurseURef(accountHash string) (string, error)
 	GetEraInfoBySwitchBlockHeight(height uint64) (GetEraInfoBySwitchBlockResult, error)
@@ -86,6 +87,31 @@ func (c *rpcClient) GetStateItem(stateRootHash, key string, path []string) (Stat
 		params["path"] = path
 	}
 	resp, err := c.rpcCall("state_get_item", params)
+	if err != nil {
+		return StateGetItemResult{}, newErrorFromRPCError(err)
+	}
+
+	var result StateGetItemResult
+	err = json.Unmarshal(resp.Result, &result)
+	if err != nil {
+		return StateGetItemResult{}, fmt.Errorf("failed to get result: %w", err)
+	}
+
+	return result, nil
+}
+
+func (c *rpcClient) GetDictionaryItem(stateRootHash, uref, key string) (StateGetItemResult, error) {
+	params := map[string]interface{}{
+		"state_root_hash": stateRootHash,
+		"dictionary_identifier": map[string]interface{}{
+			"URef": map[string]string{
+				"dictionary_item_key": key,
+				"seed_uref":           uref,
+			},
+		},
+	}
+
+	resp, err := c.rpcCall("state_get_dictionary_item", params)
 	if err != nil {
 		return StateGetItemResult{}, newErrorFromRPCError(err)
 	}

@@ -9,7 +9,7 @@ import (
 type GetAggregatedReputationChanges struct {
 	di.PaginationParamsAware
 	di.EntityManagerAware
-	di.DAOContractPackageHashesAware
+	di.DAOContractsMetadataAware
 
 	addressHash types.Hash
 }

@@ -8,7 +8,7 @@ import (
 
 type GetTotalReputation struct {
 	di.EntityManagerAware
-	di.DAOContractPackageHashesAware
+	di.DAOContractsMetadataAware
 
 	addressHash types.Hash
 }

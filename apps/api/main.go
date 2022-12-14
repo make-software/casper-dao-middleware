@@ -55,11 +55,11 @@ func main() {
 		boot.CloseMySQL(dbConn)
 	})
 
-	assert.OK(container.Provide(func(cfg *config.Env) (dao_event_parser.DAOContractPackageHashes, error) {
-		return dao_event_parser.NewDAOContractPackageHashesFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+	assert.OK(container.Provide(func(cfg *config.Env) (dao_event_parser.DAOContractsMetadata, error) {
+		return dao_event_parser.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
 	}))
 
-	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao_event_parser.DAOContractPackageHashes) persistence.EntityManager {
+	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
 	}))
 
