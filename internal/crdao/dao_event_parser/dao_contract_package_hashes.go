@@ -52,6 +52,7 @@ func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]string, casp
 			for _, namedKey := range stateItemRes.StoredValue.Contract.NamedKeys {
 				if namedKey.Name == variableRepositoryContractStorageUrefName {
 					result.VariableRepositoryContractStorageUref = namedKey.Key
+					break
 				}
 			}
 		}

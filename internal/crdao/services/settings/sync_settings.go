@@ -7,7 +7,8 @@ import (
 	"go.uber.org/zap"
 	"time"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser/utils"
+	"casper-dao-middleware/internal/crdao/dao_event_parser"
+	"casper-dao-middleware/internal/crdao/dao_event_parser/types"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
 )
@@ -66,7 +67,7 @@ func (c *SyncDAOSetting) Execute() error {
 		return err
 	}
 
-	settingItemKey, err := utils.ToDictionaryItemKey(c.setting)
+	settingItemKey, err := dao_event_parser.ToDictionaryItemKey(c.setting)
 	if err != nil {
 		return err
 	}
@@ -86,7 +87,7 @@ func (c *SyncDAOSetting) Execute() error {
 		return err
 	}
 
-	record, err := utils.NewRecordFromBytes(decoded)
+	record, err := types.NewRecordFromBytes(decoded)
 	if err != nil {
 		return err
 	}
