@@ -24,7 +24,7 @@ type entityManager struct {
 	settingRepository     repositories.SettingRepository
 }
 
-func NewEntityManager(db *sqlx.DB, hashes dao_event_parser.DAOContractPackageHashes) EntityManager {
+func NewEntityManager(db *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) EntityManager {
 	return &entityManager{
 		reputationChangesRepo: repositories.NewReputationChange(db, hashes),
 		voteRepository:        repositories.NewVote(db),

@@ -11,32 +11,35 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 )
 
-type DAOContractPackageHashes struct {
-	ReputationContractPackageHash types.Hash
-	VoterContractPackageHash      types.Hash
-	VariableRepositoryContract    types.Hash
+const variableRepositoryContractStorageUrefName = "storage_repository_contract"
+
+type DAOContractsMetadata struct {
+	ReputationContractPackageHash         types.Hash
+	VoterContractPackageHash              types.Hash
+	VariableRepositoryContractPackageHash types.Hash
+	VariableRepositoryContractStorageUref string
 }
 
-func NewDAOContractPackageHashesFromHashesMap(contractHashes map[string]string, casperClient casper.RPCClient) (DAOContractPackageHashes, error) {
-	result := DAOContractPackageHashes{}
+func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]string, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
+	result := DAOContractsMetadata{}
 	stateRootHash, err := casperClient.GetStateRootHashByHash("")
 	if err != nil {
-		return DAOContractPackageHashes{}, err
+		return DAOContractsMetadata{}, err
 	}
 
 	for contractName, contractHashHex := range contractHashes {
 		stateItemRes, err := casperClient.GetStateItem(stateRootHash.StateRootHash, fmt.Sprintf("hash-%s", contractHashHex), []string{})
 		if err != nil {
-			return DAOContractPackageHashes{}, err
+			return DAOContractsMetadata{}, err
 		}
 
 		if stateItemRes.StoredValue.Contract == nil {
-			return DAOContractPackageHashes{}, errors.New("expected Contract StoredValue")
+			return DAOContractsMetadata{}, errors.New("expected Contract StoredValue")
 		}
 
 		contractPackageHash, err := types.NewHashFromHexString(strings.TrimPrefix(stateItemRes.StoredValue.Contract.ContractPackageHash, "contract-package-wasm"))
 		if err != nil {
-			return DAOContractPackageHashes{}, err
+			return DAOContractsMetadata{}, err
 		}
 
 		switch contractName {
@@ -45,17 +48,24 @@ func NewDAOContractPackageHashesFromHashesMap(contractHashes map[string]string, 
 		case "voter_contract":
 			result.VoterContractPackageHash = contractPackageHash
 		case "variable_repository_contract":
-			result.VariableRepositoryContract = contractPackageHash
+			result.VariableRepositoryContractPackageHash = contractPackageHash
+			for _, namedKey := range stateItemRes.StoredValue.Contract.NamedKeys {
+				if namedKey.Name == variableRepositoryContractStorageUrefName {
+					result.VariableRepositoryContractStorageUref = namedKey.Key
+				}
+			}
 		}
+
 	}
 
 	return result, result.Validate()
 }
 
-func (d DAOContractPackageHashes) Validate() error {
+func (d DAOContractsMetadata) Validate() error {
 	return validation.ValidateStruct(&d,
 		validation.Field(&d.ReputationContractPackageHash, validation.Required),
 		validation.Field(&d.VoterContractPackageHash, validation.Required),
-		validation.Field(&d.VariableRepositoryContract, validation.Required),
+		validation.Field(&d.VariableRepositoryContractPackageHash, validation.Required),
+		validation.Field(&d.VariableRepositoryContractStorageUref, validation.Required),
 	)
 }

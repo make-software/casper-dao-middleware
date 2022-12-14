@@ -4,25 +4,25 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser/utils"
-	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/internal/crdao/dao_event_parser/types"
+	pkgTypes "casper-dao-middleware/pkg/casper/types"
 )
 
 const ValueUpdatedEventName = "ValueUpdated"
 
 type ValueUpdated struct {
 	Key            string
-	Value          utils.RecordValue
+	Value          types.RecordValue
 	ActivationTime *uint64
 }
 
 func ParseValueUpdatedEvent(bytes []byte) (ValueUpdated, error) {
-	key, reminder, err := types.ParseStringFromBytes(bytes)
+	key, reminder, err := pkgTypes.ParseStringFromBytes(bytes)
 	if err != nil {
 		return ValueUpdated{}, err
 	}
 
-	recordValue, reminder, err := utils.NewRecordValueFromBytesWithReminder(reminder)
+	recordValue, reminder, err := types.NewRecordValueFromBytesWithReminder(reminder)
 	if err != nil {
 		return ValueUpdated{}, err
 	}

@@ -14,10 +14,10 @@ import (
 
 type Reputation struct {
 	entityManager            persistence.EntityManager
-	daoContractPackageHashes dao_event_parser.DAOContractPackageHashes
+	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
 }
 
-func NewReputation(entityManager persistence.EntityManager, packageHashes dao_event_parser.DAOContractPackageHashes) *Reputation {
+func NewReputation(entityManager persistence.EntityManager, packageHashes dao_event_parser.DAOContractsMetadata) *Reputation {
 	return &Reputation{
 		entityManager:            entityManager,
 		daoContractPackageHashes: packageHashes,
@@ -49,7 +49,7 @@ func (h *Reputation) HandleGetTotalReputation(w http.ResponseWriter, r *http.Req
 	getTotalReputation := reputation.NewGetTotalReputation()
 	getTotalReputation.SetAddressHash(*addressHash)
 	getTotalReputation.SetEntityManager(h.entityManager)
-	getTotalReputation.SetDAOContractPackageHashes(h.daoContractPackageHashes)
+	getTotalReputation.SetDAOContractsMetadata(h.daoContractPackageHashes)
 
 	http_response.FromFunction(getTotalReputation.Execute, w, r)
 }
@@ -86,7 +86,7 @@ func (h *Reputation) HandleGetAggregatedReputationChange(w http.ResponseWriter, 
 	getAggregatedReputation.SetAddressHash(*addressHash)
 	getAggregatedReputation.SetEntityManager(h.entityManager)
 	getAggregatedReputation.SetPaginationParams(paginationParams)
-	getAggregatedReputation.SetDAOContractPackageHashes(h.daoContractPackageHashes)
+	getAggregatedReputation.SetDAOContractsMetadata(h.daoContractPackageHashes)
 
 	http_response.FromFunction(getAggregatedReputation.Execute, w, r)
 

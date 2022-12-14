@@ -1,12 +1,12 @@
 package dao_event_parser
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/utils"
 	"encoding/hex"
 	"encoding/json"
 	"testing"
 
 	contract_events "casper-dao-middleware/internal/crdao/dao_event_parser/events"
+	"casper-dao-middleware/internal/crdao/dao_event_parser/types"
 	"casper-dao-middleware/pkg/casper"
 
 	"github.com/stretchr/testify/assert"
@@ -115,7 +115,7 @@ func TestParseRecord(t *testing.T) {
 	hexStr := `0700000006fb215974a59c00`
 
 	res, _ := hex.DecodeString(hexStr)
-	record, err := utils.NewRecordFromBytes(res)
+	record, err := types.NewRecordFromBytes(res)
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, record.Value.UValue)
@@ -129,7 +129,7 @@ func TestParseRecord(t *testing.T) {
 	hexStr = `05000000040be9583a0104000000038bce12e22e000000000000`
 
 	res, _ = hex.DecodeString(hexStr)
-	record, err = utils.NewRecordFromBytes(res)
+	record, err = types.NewRecordFromBytes(res)
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, record.Value.UValue)
@@ -147,7 +147,7 @@ func TestParseRecord(t *testing.T) {
 	hexStr = `08000000fb215974a59c000000`
 
 	res, _ = hex.DecodeString(hexStr)
-	record, err = utils.NewRecordFromBytes(res)
+	record, err = types.NewRecordFromBytes(res)
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, record.Value.U64Value)
@@ -163,7 +163,7 @@ func TestParseRecord(t *testing.T) {
 	hexStr = `08000000fb215974a59c000001080000004743000000000000384a000000000000`
 
 	res, _ = hex.DecodeString(hexStr)
-	record, err = utils.NewRecordFromBytes(res)
+	record, err = types.NewRecordFromBytes(res)
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, record.Value.U64Value)
@@ -181,7 +181,7 @@ func TestParseRecord(t *testing.T) {
 	hexStr = `010000000100`
 
 	res, _ = hex.DecodeString(hexStr)
-	record, err = utils.NewRecordFromBytes(res)
+	record, err = types.NewRecordFromBytes(res)
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, record.Value.BoolValue)

@@ -27,10 +27,10 @@ type ReputationChange struct {
 	conn          *sqlx.DB
 	indexedFields map[string]struct{}
 
-	contractPackageHashes dao_event_parser.DAOContractPackageHashes
+	contractPackageHashes dao_event_parser.DAOContractsMetadata
 }
 
-func NewReputationChange(conn *sqlx.DB, hashes dao_event_parser.DAOContractPackageHashes) *ReputationChange {
+func NewReputationChange(conn *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) *ReputationChange {
 	return &ReputationChange{
 		conn: conn,
 		indexedFields: map[string]struct{}{

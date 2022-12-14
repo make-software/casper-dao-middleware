@@ -105,5 +105,6 @@ func (c *SyncDAOSetting) Execute() error {
 		return err
 	}
 
+	zap.S().With(zap.String("setting", c.setting)).Info("Variable contract setting tracked")
 	return nil
 }

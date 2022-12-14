@@ -16,13 +16,12 @@ type ProcessEventStream struct {
 	di.BaseStreamURLAware
 	di.CasperClientAware
 	di.EntityManagerAware
-	di.DAOContractPackageHashesAware
+	di.DAOContractsMetadataAware
 
-	daoContractHashes                     map[string]string
-	eventStreamPath                       string
-	variableRepositoryContractStorageUref string
-	nodeStartFromEventID                  uint64
-	dictionarySetEventsBuffer             uint32
+	daoContractHashes         map[string]string
+	eventStreamPath           string
+	nodeStartFromEventID      uint64
+	dictionarySetEventsBuffer uint32
 }
 
 func NewProcessEventStream() *ProcessEventStream {
@@ -44,10 +43,6 @@ func (c *ProcessEventStream) SetDictionarySetEventsBuffer(buffer uint32) *Proces
 	return c
 }
 
-func (c *ProcessEventStream) SetVariableRepositoryContractStorageUref(uref string) {
-	c.variableRepositoryContractStorageUref = uref
-}
-
 func (c *ProcessEventStream) SetEventStreamPath(eventPath string) *ProcessEventStream {
 	c.eventStreamPath = eventPath
 	return c
@@ -66,7 +61,7 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 
 	syncDaoSetting := settings.NewSyncDAOSettings()
 	syncDaoSetting.SetCasperClient(c.GetCasperClient())
-	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.variableRepositoryContractStorageUref)
+	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
 	syncDaoSetting.SetEntityManager(c.GetEntityManager())
 
 	for _, setting := range settings.DaoSettings {
@@ -80,8 +75,8 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	processRawDeploy.SetDAOEventParser(daoEventParser)
 	processRawDeploy.SetCasperClient(c.GetCasperClient())
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
-	processRawDeploy.SetDAOContractPackageHashes(c.GetDAOContractPackageHashes())
-	processRawDeploy.SetVariableRepositoryContractStorageUref(c.variableRepositoryContractStorageUref)
+	processRawDeploy.SetDAOContractPackageHashes(c.GetDAOContractsMetadata())
+	processRawDeploy.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
 
 	stopListening := func() {
 		eventListener.Close()

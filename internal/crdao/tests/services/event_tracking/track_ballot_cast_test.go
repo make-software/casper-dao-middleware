@@ -31,7 +31,7 @@ type TrackBallotCastTestSuit struct {
 	entityManager persistence.EntityManager
 
 	daoContractHashesMap     map[string]string
-	daoContractPackageHashes dao_event_parser.DAOContractPackageHashes
+	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
 }
 
 func (suite *TrackBallotCastTestSuit) SetupSuite() {
@@ -43,7 +43,7 @@ func (suite *TrackBallotCastTestSuit) SetupSuite() {
 	}
 
 	var err error
-	suite.daoContractPackageHashes, err = dao_event_parser.NewDAOContractPackageHashesFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
+	suite.daoContractPackageHashes, err = dao_event_parser.NewDAOContractsMetadataFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
 	assert.NoError(suite.T(), err)
 	suite.entityManager = persistence.NewEntityManager(suite.db, suite.daoContractPackageHashes)
 }
@@ -76,7 +76,7 @@ func (suite *TrackBallotCastTestSuit) TestTrackBallotCast() {
 
 	trackBallotCast := event_tracking.NewTrackBallotCast()
 	trackBallotCast.SetEntityManager(suite.entityManager)
-	trackBallotCast.SetDAOContractPackageHashes(suite.daoContractPackageHashes)
+	trackBallotCast.SetDAOContractsMetadata(suite.daoContractPackageHashes)
 	trackBallotCast.SetDeployProcessed(casper.DeployProcessed{
 		ExecutionResult: deployResult.ExecutionResults[0].Result,
 		DeployHash:      deployHash,

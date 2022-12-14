@@ -21,7 +21,7 @@ type ProcessRawDeploy struct {
 
 	deployProcessedEvent     *casper.DeployProcessedEvent
 	daoEventsParser          *dao_event_parser.DaoEventParser
-	daoContractPackageHashes dao_event_parser.DAOContractPackageHashes
+	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
 }
 
 func NewProcessRawDeploy() ProcessRawDeploy {
@@ -40,7 +40,7 @@ func (c *ProcessRawDeploy) SetDAOEventParser(parser *dao_event_parser.DaoEventPa
 	c.daoEventsParser = parser
 }
 
-func (c *ProcessRawDeploy) SetDAOContractPackageHashes(hashes dao_event_parser.DAOContractPackageHashes) {
+func (c *ProcessRawDeploy) SetDAOContractPackageHashes(hashes dao_event_parser.DAOContractsMetadata) {
 	c.daoContractPackageHashes = hashes
 }
 
@@ -75,7 +75,7 @@ func (c *ProcessRawDeploy) Execute() error {
 			daoEventHandler = trackBurnEvent
 		case events.BallotCastName:
 			trackBallotCast := event_tracking.NewTrackBallotCast()
-			trackBallotCast.SetDAOContractPackageHashes(c.daoContractPackageHashes)
+			trackBallotCast.SetDAOContractsMetadata(c.daoContractPackageHashes)
 			trackBallotCast.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
 			daoEventHandler = trackBallotCast
 		case events.VotingEndedEventName:

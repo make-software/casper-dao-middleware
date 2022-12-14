@@ -51,12 +51,12 @@ func main() {
 		boot.CloseMySQL(dbConn)
 	})
 
-	assert.OK(container.Provide(func(cfg *config.Env) (dao_event_parser.DAOContractPackageHashes, error) {
-		return dao_event_parser.NewDAOContractPackageHashesFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+	assert.OK(container.Provide(func(cfg *config.Env) (dao_event_parser.DAOContractsMetadata, error) {
+		return dao_event_parser.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
 	}))
 
 	//nolint:gocritic
-	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao_event_parser.DAOContractPackageHashes) persistence.EntityManager {
+	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
 	}))
 
@@ -64,7 +64,7 @@ func main() {
 		return casper.NewRPCClient(cfg.NodeRPCURL.String())
 	}))
 
-	assert.OK(container.Invoke(func(env *config.Env, entityManager persistence.EntityManager, casperClient casper.RPCClient, hashes dao_event_parser.DAOContractPackageHashes) error {
+	assert.OK(container.Invoke(func(env *config.Env, entityManager persistence.EntityManager, casperClient casper.RPCClient, hashes dao_event_parser.DAOContractsMetadata) error {
 		processEventStream := event_processing.NewProcessEventStream()
 		processEventStream.SetBaseStreamURL(env.NodeSSEURL)
 		processEventStream.SetNodeStartFromEventID(env.NewNodeStartFromEventID)
@@ -73,8 +73,7 @@ func main() {
 		processEventStream.SetDAOContractHashes(env.DaoContractHashes)
 		processEventStream.SetDictionarySetEventsBuffer(env.DictionarySetEventsBuffer)
 		processEventStream.SetEntityManager(entityManager)
-		processEventStream.SetDAOContractPackageHashes(hashes)
-		processEventStream.SetVariableRepositoryContractStorageUref(env.VariableRepositoryContractStorageNamedKeyUref)
+		processEventStream.SetDAOContractsMetadata(hashes)
 
 		return processEventStream.Execute(ctx)
 	}))

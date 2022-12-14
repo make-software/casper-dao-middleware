@@ -10,7 +10,7 @@ import (
 
 type TrackBallotCast struct {
 	di.EntityManagerAware
-	di.DAOContractPackageHashesAware
+	di.DAOContractsMetadataAware
 
 	deployProcessed casper.DeployProcessed
 	eventBody       []byte
@@ -64,7 +64,7 @@ func (s *TrackBallotCast) Execute() error {
 		// one event represent negative reputation leaving from "Reputation" contract
 		entities.NewReputationChange(
 			*address,
-			s.GetDAOContractPackageHashes().ReputationContractPackageHash,
+			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			&votingID,
 			-staked,
 			s.deployProcessed.DeployHash,
@@ -73,7 +73,7 @@ func (s *TrackBallotCast) Execute() error {
 		// second event represent positive reputation coming to "Voting" contract
 		entities.NewReputationChange(
 			*address,
-			s.GetDAOContractPackageHashes().VoterContractPackageHash,
+			s.GetDAOContractsMetadata().VoterContractPackageHash,
 			&votingID,
 			staked,
 			s.deployProcessed.DeployHash,

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser/utils"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
 
@@ -88,7 +87,7 @@ func (c *DaoEventParser) parseDAOEvent(transform casper.Transform) (DAOEvent, er
 		return DAOEvent{}, ErrInvalidDAOEventFormat
 	}
 
-	clValue, err := utils.ParseDAOCLValueFromBytes(writeCLValue.Bytes)
+	clValue, err := ParseDAOCLValueFromBytes(writeCLValue.Bytes)
 	if err != nil {
 		zap.S().With(zap.Error(err)).Debug("failed to parse CLValue from bytes")
 		return DAOEvent{}, err
@@ -134,7 +133,7 @@ func (c *DaoEventParser) actualizeDAODictionarySet(dictionaryKey string) error {
 
 	// means that we need to update daoDictionarySet with new dictionary key of next event
 	nextEventIndex := actualEventsLength + 1
-	dictionaryItem, err := utils.ToDictionaryKey(dictionaryMeta.EventsUref, nextEventIndex)
+	dictionaryItem, err := ToDictionaryKey(dictionaryMeta.EventsUref, nextEventIndex)
 	if err != nil {
 		return err
 	}
@@ -184,7 +183,7 @@ func (c *DaoEventParser) calculateDAOEventsDictionarySet(daoContractHashes map[s
 
 		// iterate over all indexes to calculate all dictionary items
 		for index := startEventIdx; index <= int(eventsLenght); index++ {
-			dictionaryKey, err := utils.ToDictionaryKey(eventsUref, uint32(index))
+			dictionaryKey, err := ToDictionaryKey(eventsUref, uint32(index))
 			if err != nil {
 				return nil, err
 			}
