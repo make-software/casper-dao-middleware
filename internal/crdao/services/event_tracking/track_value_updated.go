@@ -43,7 +43,7 @@ func (s *TrackValueUpdated) Execute() error {
 	}
 
 	// in other case we need to update the setting stored in named keys
-	syncDaoSetting := settings.NewSyncDAOSettings()
+	syncDaoSetting := settings.NewSyncDAOSetting()
 	syncDaoSetting.SetCasperClient(s.GetCasperClient())
 	syncDaoSetting.SetVariableRepositoryContractStorageUref(s.variableRepositoryContractStorageUref)
 	syncDaoSetting.SetEntityManager(s.GetEntityManager())

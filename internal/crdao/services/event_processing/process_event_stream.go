@@ -63,13 +63,8 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	syncDaoSetting.SetCasperClient(c.GetCasperClient())
 	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
 	syncDaoSetting.SetEntityManager(c.GetEntityManager())
-
-	for _, setting := range settings.DaoSettings {
-		syncDaoSetting.SetSetting(setting)
-		if err := syncDaoSetting.Execute(); err != nil {
-			zap.S().With(zap.String("setting", setting)).Info("failed to sync DAO setting")
-		}
-	}
+	syncDaoSetting.SetSettings(settings.DaoSettings)
+	syncDaoSetting.Execute()
 
 	processRawDeploy := NewProcessRawDeploy()
 	processRawDeploy.SetDAOEventParser(daoEventParser)
