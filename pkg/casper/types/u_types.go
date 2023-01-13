@@ -1,12 +1,27 @@
 package types
 
 import (
+	"encoding/binary"
 	"errors"
 	"math/big"
 	"sort"
 )
 
 type U256 *big.Int
+
+func NewU256FromBytes(val []byte) U256 {
+	var result big.Int
+	result.SetBytes(val)
+
+	return &result
+}
+
+func NewU256FromUint64(val uint64) U256 {
+	var result big.Int
+	result.SetUint64(val)
+
+	return &result
+}
 
 func ParseU256FromBytes(bytes []byte) (U256, []byte, error) {
 	if len(bytes) == 0 {
@@ -34,4 +49,23 @@ func ParseU256FromBytes(bytes []byte) (U256, []byte, error) {
 	copy(rem, remainder[numBytes:])
 
 	return &val, rem, nil
+}
+
+func ParseStringFromBytes(bytes []byte) (string, []byte, error) {
+	if len(bytes) == 0 {
+		return "", nil, errors.New("empty bytes provided")
+	}
+
+	numBytes := binary.LittleEndian.Uint32(bytes)
+	if int(numBytes) > len(bytes) {
+		return "nil", nil, errors.New("invalid bytes format: number_bytes is more than bytes slice")
+	}
+	// shift to 4 bytes (unit32)
+	remainder := bytes[4:]
+
+	value := make([]byte, numBytes)
+	copy(value, remainder[:numBytes])
+
+	remainder = remainder[numBytes:]
+	return string(value), remainder, nil
 }

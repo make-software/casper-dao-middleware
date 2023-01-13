@@ -69,7 +69,7 @@ type PopulateCrDAODeploysFromClarity struct {
 	casperClient       casper.RPCClient
 
 	daoEventParser           *dao_event_parser.DaoEventParser
-	daoContractPackageHashes dao_event_parser.DAOContractPackageHashes
+	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
 }
 
 func (c *PopulateCrDAODeploysFromClarity) SetUp() error {
@@ -100,7 +100,7 @@ func (c *PopulateCrDAODeploysFromClarity) SetUp() error {
 		return err
 	}
 
-	c.daoContractPackageHashes, err = dao_event_parser.NewDAOContractPackageHashesFromHashesMap(cfg.DaoContractHashes, c.casperClient)
+	c.daoContractPackageHashes, err = dao_event_parser.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, c.casperClient)
 	return err
 }
 

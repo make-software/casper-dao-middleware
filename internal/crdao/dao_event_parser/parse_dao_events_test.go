@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	contract_events "casper-dao-middleware/internal/crdao/dao_event_parser/events"
+	"casper-dao-middleware/internal/crdao/dao_event_parser/types"
 	"casper-dao-middleware/pkg/casper"
 
 	"github.com/stretchr/testify/assert"
@@ -49,6 +50,143 @@ func TestParsVotingCreatedDaoEvents(t *testing.T) {
 	assert.NotEmpty(t, votingCreatedEvent.InformalVotingID)
 	assert.NotEmpty(t, votingCreatedEvent.ConfigInformalVotingTime)
 	assert.NotEmpty(t, votingCreatedEvent.ConfigFormalVotingTime)
+}
+
+func TestParseValueUpdatedDaoEvents(t *testing.T) {
+	//let event = events::ValueUpdated{
+	//	key: "hello".to_string(),
+	//	Value: Bytes::from(U256::from(43210301).to_bytes().unwrap()) ,
+	//	activation_time: None
+	//};
+	hexStr := `0c00000056616c7565557064617465640500000068656c6c6f05000000043d56930200`
+
+	res, _ := hex.DecodeString(hexStr)
+	valueUpdatedEvent, err := contract_events.ParseValueUpdatedEvent(res[16:])
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, valueUpdatedEvent.Value)
+	assert.Equal(t, valueUpdatedEvent.Key, "hello")
+	assert.Equal(t, (**valueUpdatedEvent.Value.UValue).Int64(), int64(43210301))
+	assert.Nil(t, valueUpdatedEvent.ActivationTime)
+
+	// with u64 encoding ===========================================================
+
+	//let event = events::ValueUpdated{
+	//	key: "key".to_string(),
+	//	Value: Bytes::from(172800000u64.to_bytes().unwrap()) ,
+	//	activation_time: None
+	//};
+	hexStr = `0c00000056616c756555706461746564030000006b65790800000000b84c0a0000000000`
+
+	res, _ = hex.DecodeString(hexStr)
+	valueUpdatedEvent, err = contract_events.ParseValueUpdatedEvent(res[16:])
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, valueUpdatedEvent.Value)
+	assert.Equal(t, valueUpdatedEvent.Key, "key")
+	assert.Equal(t, valueUpdatedEvent.Value.String(), "172800000")
+	assert.Nil(t, valueUpdatedEvent.ActivationTime)
+
+	// with activation_time encoding ===========================================================
+
+	//let event = events::ValueUpdated{
+	//	key: "key".to_string(),
+	//	Value: Bytes::from(172800000u64.to_bytes().unwrap()) ,
+	//	activation_time: Some(123522124),
+	//};
+	hexStr = `0c00000056616c756555706461746564030000006b65790800000000b84c0a00000000014ccc5c0700000000`
+
+	res, _ = hex.DecodeString(hexStr)
+	valueUpdatedEvent, err = contract_events.ParseValueUpdatedEvent(res[16:])
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, valueUpdatedEvent.Value)
+
+	assert.Equal(t, valueUpdatedEvent.Key, "key")
+	assert.Equal(t, valueUpdatedEvent.Value.String(), "172800000")
+	assert.Equal(t, *valueUpdatedEvent.ActivationTime, uint64(123522124))
+}
+
+func TestParseRecord(t *testing.T) {
+	//let rec: Record = (Bytes::from(U256::from(172234435535355 as u64).to_bytes().unwrap()), None);
+	//let rec_bytes = rec.to_bytes().unwrap();
+	//println!("{:?}", hex::encode(rec_bytes));
+
+	hexStr := `0700000006fb215974a59c00`
+
+	res, _ := hex.DecodeString(hexStr)
+	record, err := types.NewRecordFromBytes(res)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, record.Value.UValue)
+	assert.Nil(t, record.FutureValue)
+	assert.Equal(t, record.Value.String(), "172234435535355")
+
+	//let rec: Record = (Bytes::from(U512::from(978905355u64).to_bytes().unwrap()), Some((Bytes::from(U512::from(1232523u64).to_bytes().unwrap()), 12002)));
+	//let rec_bytes = rec.to_bytes().unwrap();
+	//println!("{:?}", hex::encode(rec_bytes));
+
+	hexStr = `05000000040be9583a0104000000038bce12e22e000000000000`
+
+	res, _ = hex.DecodeString(hexStr)
+	record, err = types.NewRecordFromBytes(res)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, record.Value.UValue)
+	assert.NotNil(t, record.FutureValue)
+	assert.Equal(t, record.Value.String(), "978905355")
+	assert.Equal(t, record.FutureValue.Value.String(), "1232523")
+	assert.Equal(t, record.FutureValue.ActivationTime, uint64(12002))
+
+	// ============== u64 bytes ==================================================
+
+	//let rec: Record = (Bytes::from(172234435535355u64.to_bytes().unwrap()), None);
+	//let rec_bytes = rec.to_bytes().unwrap();
+	//println!("{:?}", hex::encode(rec_bytes));
+
+	hexStr = `08000000fb215974a59c000000`
+
+	res, _ = hex.DecodeString(hexStr)
+	record, err = types.NewRecordFromBytes(res)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, record.Value.U64Value)
+	assert.Nil(t, record.FutureValue)
+	assert.Equal(t, record.Value.String(), "172234435535355")
+
+	// ============== u64 bytes with FutureValue ==================================================
+
+	//let rec: Record = (Bytes::from(172234435535355u64.to_bytes().unwrap()), Some((Bytes::from(17223u64.to_bytes().unwrap()), 19000)));
+	//let rec_bytes = rec.to_bytes().unwrap();
+	//println!("{:?}", hex::encode(rec_bytes));
+
+	hexStr = `08000000fb215974a59c000001080000004743000000000000384a000000000000`
+
+	res, _ = hex.DecodeString(hexStr)
+	record, err = types.NewRecordFromBytes(res)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, record.Value.U64Value)
+	assert.NotNil(t, record.FutureValue)
+	assert.Equal(t, record.Value.String(), "172234435535355")
+	assert.Equal(t, record.FutureValue.Value.String(), "17223")
+	assert.Equal(t, record.FutureValue.ActivationTime, uint64(19000))
+
+	// ============== boolean bytes ==================================================
+
+	//let rec: Record = (Bytes::from(true.to_bytes().unwrap()), None);
+	//let rec_bytes = rec.to_bytes().unwrap();
+	//println!("{:?}", hex::encode(rec_bytes));
+
+	hexStr = `010000000100`
+
+	res, _ = hex.DecodeString(hexStr)
+	record, err = types.NewRecordFromBytes(res)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, record.Value.BoolValue)
+	assert.Nil(t, record.FutureValue)
+	assert.Equal(t, record.Value.String(), "true")
 }
 
 func TestParseBallotCastDaoEvents(t *testing.T) {

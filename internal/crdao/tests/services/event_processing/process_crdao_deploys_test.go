@@ -30,7 +30,7 @@ type ProcessDAODeploysTestSuit struct {
 	entityManager persistence.EntityManager
 
 	daoContractHashesMap     map[string]string
-	daoContractPackageHashes dao_event_parser.DAOContractPackageHashes
+	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
 }
 
 func (suite *ProcessDAODeploysTestSuit) SetupSuite() {
@@ -43,7 +43,7 @@ func (suite *ProcessDAODeploysTestSuit) SetupSuite() {
 	}
 
 	var err error
-	suite.daoContractPackageHashes, err = dao_event_parser.NewDAOContractPackageHashesFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
+	suite.daoContractPackageHashes, err = dao_event_parser.NewDAOContractsMetadataFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
 	assert.NoError(suite.T(), err)
 	suite.entityManager = persistence.NewEntityManager(suite.db, suite.daoContractPackageHashes)
 }

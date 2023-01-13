@@ -1,17 +1,13 @@
 package dao_event_parser
 
 import (
-	"encoding/binary"
-	"encoding/hex"
 	"errors"
 	"fmt"
-	"strings"
 
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
 
 	"go.uber.org/zap"
-	"golang.org/x/crypto/blake2b"
 )
 
 var (
@@ -91,7 +87,7 @@ func (c *DaoEventParser) parseDAOEvent(transform casper.Transform) (DAOEvent, er
 		return DAOEvent{}, ErrInvalidDAOEventFormat
 	}
 
-	clValue, err := parseDAOCLValueFromBytes(writeCLValue.Bytes)
+	clValue, err := ParseDAOCLValueFromBytes(writeCLValue.Bytes)
 	if err != nil {
 		zap.S().With(zap.Error(err)).Debug("failed to parse CLValue from bytes")
 		return DAOEvent{}, err
@@ -137,7 +133,7 @@ func (c *DaoEventParser) actualizeDAODictionarySet(dictionaryKey string) error {
 
 	// means that we need to update daoDictionarySet with new dictionary key of next event
 	nextEventIndex := actualEventsLength + 1
-	dictionaryItem, err := toDictionaryKey(dictionaryMeta.EventsUref, nextEventIndex)
+	dictionaryItem, err := ToDictionaryKey(dictionaryMeta.EventsUref, nextEventIndex)
 	if err != nil {
 		return err
 	}
@@ -187,7 +183,7 @@ func (c *DaoEventParser) calculateDAOEventsDictionarySet(daoContractHashes map[s
 
 		// iterate over all indexes to calculate all dictionary items
 		for index := startEventIdx; index <= int(eventsLenght); index++ {
-			dictionaryKey, err := toDictionaryKey(eventsUref, uint32(index))
+			dictionaryKey, err := ToDictionaryKey(eventsUref, uint32(index))
 			if err != nil {
 				return nil, err
 			}
@@ -219,57 +215,4 @@ func (c *DaoEventParser) getEventLengthFromUref(stateRootHash string, eventsLeng
 	}
 
 	return uint32(parsed), nil
-}
-
-func toDictionaryKey(eventsUref string, index uint32) (string, error) {
-	urefsParts := strings.Split(eventsUref, "-")
-	// uref format uref-d1a68e4ae2c8ffe65cafcfc172caf1179bc5fa820d25eb4574a48f89225820a0-007
-	if len(urefsParts) != 3 {
-		return "", errors.New("invalid uref format provided")
-	}
-	urefHashBytes, err := hex.DecodeString(urefsParts[1])
-	if err != nil {
-		return "", err
-	}
-
-	res := make([]byte, 0)
-	key, err := blake2b.New256(res)
-	if err != nil {
-		return "", err
-	}
-
-	key.Write(urefHashBytes)
-	key.Write(calculateDictionaryIndexHash(index))
-	dictionaryKey := fmt.Sprintf("dictionary-%s", hex.EncodeToString(key.Sum(nil)))
-	return dictionaryKey, nil
-}
-
-func calculateDictionaryIndexHash(index uint32) []byte {
-	indexBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(indexBytes, index)
-
-	indexHash := blake2b.Sum256(indexBytes)
-	return []byte(hex.EncodeToString(indexHash[:]))
-}
-
-func parseDAOCLValueFromBytes(data string) (types.CLValue, error) {
-	decoded, err := hex.DecodeString(data)
-	if err != nil {
-		return types.CLValue{}, err
-	}
-
-	bytes, reminder, err := types.ParseBytesWithReminder(decoded)
-	if err != nil {
-		return types.CLValue{}, err
-	}
-
-	clType, reminder, err := types.ClTypeFromBytes(0, reminder)
-	if err != nil {
-		return types.CLValue{}, err
-	}
-
-	return types.CLValue{
-		Type:  clType,
-		Bytes: bytes,
-	}, nil
 }
