@@ -41,6 +41,7 @@ func NewRouter(
 
 	reputationHandler := handlers.NewReputation(entityManager, daoContractPackageHashes)
 	votingHandler := handlers.NewVoting(entityManager)
+	settingHandler := handlers.NewSetting(entityManager)
 
 	router.Get("/accounts/{address}/total-reputation", reputationHandler.HandleGetTotalReputation)
 	router.Get("/accounts/{address}/aggregated-reputation-changes", reputationHandler.HandleGetAggregatedReputationChange)
@@ -48,6 +49,8 @@ func NewRouter(
 
 	router.Get("/votings", votingHandler.HandleGetVotings)
 	router.Get("/votings/{voting_id}/votes", votingHandler.HandleGetVotingVotes)
+
+	router.Get("/settings", settingHandler.HandleGetSettings)
 
 	swaggerHost := string(cfg.Addr)
 	if envHost := os.Getenv("SWAGGER_HOST"); envHost != "" {

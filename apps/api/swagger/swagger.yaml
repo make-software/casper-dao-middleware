@@ -16,6 +16,13 @@ definitions:
       voting_id:
         type: integer
     type: object
+  entities.Setting:
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+    type: object
   entities.TotalReputation:
     properties:
       available_amount:
@@ -295,6 +302,75 @@ paths:
       summary: Return paginated list of votes for address
       tags:
       - Vote
+  /settings:
+    get:
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: voting_id
+        description: Comma-separated list of sorting fields (name)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Setting'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of settings
+      tags:
+      - Setting
   /votings:
     get:
       parameters:
