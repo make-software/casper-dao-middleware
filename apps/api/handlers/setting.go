@@ -25,9 +25,9 @@ func NewSetting(entityManager persistence.EntityManager) *Setting {
 //
 //	@Router		/settings [GET]
 //
-//	@Param		page			query		int			false	"Page number"													default(1)
-//	@Param		page_size		query		string		false	"Number of items per page"										default(10)
-//	@Param		order_direction	query		string		false	"Sorting direction"												Enums(ASC, DESC)		default(ASC)
+//	@Param		page			query		int			false	"Page number"									default(1)
+//	@Param		page_size		query		string		false	"Number of items per page"						default(10)
+//	@Param		order_direction	query		string		false	"Sorting direction"								Enums(ASC, DESC)		default(ASC)
 //	@Param		order_by		query		[]string	false	"Comma-separated list of sorting fields (name)"	collectionFormat(csv)	default(voting_id)
 //
 //	@Success	200				{object}	http_response.PaginatedResponse{data=entities.Setting}
