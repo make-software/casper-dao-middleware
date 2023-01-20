@@ -24,21 +24,22 @@ func NewVoting(entityManager persistence.EntityManager) *Voting {
 }
 
 // HandleGetVotingVotes
-// @Summary Return paginated list of votes for votingID
 //
-// @Router  /votings/{voting_id}/votes [GET]
+//	@Summary	Return paginated list of votes for votingID
 //
-// @Param   voting_id       query    string   false "Comma-separated list of VotingIDs (number)"
-// @Param   includes        query    string   false "Optional fields' schema (voting{})"
-// @Param   page            query    int      false "Page number"                                                 default(1)
-// @Param   page_size       query    string   false "Number of items per page"                                    default(10)
-// @Param   order_direction query    string   false "Sorting direction"                                           Enums(ASC, DESC)      default(ASC)
-// @Param   order_by        query    []string false "Comma-separated list of sorting fields (voting_id, address)" collectionFormat(csv) default(voting_id)
+//	@Router		/votings/{voting_id}/votes [GET]
 //
-// @Success 200             {object} http_response.PaginatedResponse{data=entities.Vote}
-// @Failure 400,404,500     {object} http_response.ErrorResponse{error=http_response.ErrorResult}
+//	@Param		voting_id		query		string		false	"Comma-separated list of VotingIDs (number)"
+//	@Param		includes		query		string		false	"Optional fields' schema (voting{})"
+//	@Param		page			query		int			false	"Page number"													default(1)
+//	@Param		page_size		query		string		false	"Number of items per page"										default(10)
+//	@Param		order_direction	query		string		false	"Sorting direction"												Enums(ASC, DESC)		default(ASC)
+//	@Param		order_by		query		[]string	false	"Comma-separated list of sorting fields (voting_id, address)"	collectionFormat(csv)	default(voting_id)
 //
-// @tags    Vote
+//	@Success	200				{object}	http_response.PaginatedResponse{data=entities.Vote}
+//	@Failure	400,404,500		{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		Vote
 func (h *Voting) HandleGetVotingVotes(w http.ResponseWriter, r *http.Request) {
 	votingID, err := http_params.ParseUint32("voting_id", r)
 	if err != nil {
@@ -77,21 +78,22 @@ func (h *Voting) HandleGetVotingVotes(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleGetAccountVotes
-// @Summary Return paginated list of votes for address
 //
-// @Router  /accounts/{address}/votes [GET]
+//	@Summary	Return paginated list of votes for address
 //
-// @Param   address         path     string   true  "Hash or PublicKey" maxlength(66)
-// @Param   includes        query    string   false "Optional fields' schema (voting{})"
-// @Param   page            query    int      false "Page number"                                                default(1)
-// @Param   page_size       query    string   false "Number of items per page"                                   default(10)
-// @Param   order_direction query    string   false "Sorting direction"                                          Enums(ASC, DESC)      default(ASC)
-// @Param   order_by        query    []string false "Comma-separated list of sorting fields (voting_id,address)" collectionFormat(csv) default(voting_id)
+//	@Router		/accounts/{address}/votes [GET]
 //
-// @Success 200             {object} http_response.PaginatedResponse{data=entities.Vote}
-// @Failure 400,404,500     {object} http_response.ErrorResponse{error=http_response.ErrorResult}
+//	@Param		address			path		string		true	"Hash or PublicKey"	maxlength(66)
+//	@Param		includes		query		string		false	"Optional fields' schema (voting{})"
+//	@Param		page			query		int			false	"Page number"													default(1)
+//	@Param		page_size		query		string		false	"Number of items per page"										default(10)
+//	@Param		order_direction	query		string		false	"Sorting direction"												Enums(ASC, DESC)		default(ASC)
+//	@Param		order_by		query		[]string	false	"Comma-separated list of sorting fields (voting_id,address)"	collectionFormat(csv)	default(voting_id)
 //
-// @tags    Vote
+//	@Success	200				{object}	http_response.PaginatedResponse{data=entities.Vote}
+//	@Failure	400,404,500		{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		Vote
 func (h *Voting) HandleGetAccountVotes(w http.ResponseWriter, r *http.Request) {
 	addressHash, err := http_params.ParseOptionalHash("address", r)
 	if err != nil {
@@ -134,22 +136,23 @@ func (h *Voting) HandleGetAccountVotes(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleGetVotings
-// @Summary Return paginated list of votings
 //
-// @Router  /votings [GET]
+//	@Summary	Return paginated list of votings
 //
-// @Param   has_ended       query    bool     false "HasEnded flag (boolean)"
-// @Param   is_formal       query    bool     false "IsFormal flag (boolean)"
-// @Param   includes        query    string   false "Optional fields' schema (votes_number{}, account_vote(hash))"
-// @Param   page            query    int      false "Page number"                                        default(1)
-// @Param   page_size       query    string   false "Number of items per page"                           default(10)
-// @Param   order_direction query    string   false "Sorting direction"                                  Enums(ASC, DESC)      default(ASC)
-// @Param   order_by        query    []string false "Comma-separated list of sorting fields (voting_id)" collectionFormat(csv) default(voting_id)
+//	@Router		/votings [GET]
 //
-// @Success 200             {object} http_response.PaginatedResponse{data=entities.Voting}
-// @Failure 400,404,500     {object} http_response.ErrorResponse{error=http_response.ErrorResult}
+//	@Param		has_ended		query		bool		false	"HasEnded flag (boolean)"
+//	@Param		is_formal		query		bool		false	"IsFormal flag (boolean)"
+//	@Param		includes		query		string		false	"Optional fields' schema (votes_number{}, account_vote(hash))"
+//	@Param		page			query		int			false	"Page number"											default(1)
+//	@Param		page_size		query		string		false	"Number of items per page"								default(10)
+//	@Param		order_direction	query		string		false	"Sorting direction"										Enums(ASC, DESC)		default(ASC)
+//	@Param		order_by		query		[]string	false	"Comma-separated list of sorting fields (voting_id)"	collectionFormat(csv)	default(voting_id)
 //
-// @tags    Voting
+//	@Success	200				{object}	http_response.PaginatedResponse{data=entities.Voting}
+//	@Failure	400,404,500		{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		Voting
 func (h *Voting) HandleGetVotings(w http.ResponseWriter, r *http.Request) {
 	isFormal, err := http_params.ParseOptionalBool("is_formal", r)
 	if err != nil {

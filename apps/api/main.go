@@ -20,9 +20,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// @title   Casper-CRDao API
-// @version 0.0.1
-// @Produce json
+//	@title		Casper-CRDao API
+//	@version	0.0.1
+//	@Produce	json
 
 func main() {
 	container := dig.New()

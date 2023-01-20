@@ -7,8 +7,8 @@ import (
 type Setting struct {
 	Name           string     `json:"name" db:"name"`
 	Value          string     `json:"value" db:"value"`
-	NextValue      *string    `json:"next_value" db:"next_value"`
-	ActivationTime *time.Time `json:"timestamp" db:"timestamp"`
+	NextValue      *string    `json:"-" db:"next_value"`
+	ActivationTime *time.Time `json:"-" db:"activation_time"`
 }
 
 func NewSetting(name, value string, nextValue *string, activationTime *time.Time) Setting {

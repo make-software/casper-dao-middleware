@@ -25,16 +25,17 @@ func NewReputation(entityManager persistence.EntityManager, packageHashes dao_ev
 }
 
 // HandleGetTotalReputation
-// @Summary Calculate address TotalReputation
 //
-// @Router  /accounts/{address}/total-reputation [GET]
+//	@Summary	Calculate address TotalReputation
 //
-// @Param   address     path     string true "Hash or PublicKey" maxlength(66)
+//	@Router		/accounts/{address}/total-reputation [GET]
 //
-// @Success 200         {object} http_response.SuccessResponse{data=entities.TotalReputation}
-// @Failure 400,404,500 {object} http_response.ErrorResponse{error=http_response.ErrorResult}
+//	@Param		address		path		string	true	"Hash or PublicKey"	maxlength(66)
 //
-// @tags    Reputation
+//	@Success	200			{object}	http_response.SuccessResponse{data=entities.TotalReputation}
+//	@Failure	400,404,500	{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		Reputation
 func (h *Reputation) HandleGetTotalReputation(w http.ResponseWriter, r *http.Request) {
 	addressHash, err := http_params.ParseOptionalHash("address", r)
 	if err != nil {
@@ -55,20 +56,21 @@ func (h *Reputation) HandleGetTotalReputation(w http.ResponseWriter, r *http.Req
 }
 
 // HandleGetAggregatedReputationChange
-// @Summary user AggregatedReputationChange
 //
-// @Param   page            query int      false "Page number"                                      default(1)
-// @Param   page_size       query string   false "Number of items per page"                         default(10)
-// @Param   order_direction query string   false "Sorting direction"                                Enums(ASC, DESC)      default(ASC)
-// @Param   order_by        query []string false "Comma-separated list of sorting fields (address)" collectionFormat(csv) default(date)
-// @Router  /accounts/{address}/aggregated-reputation-changes [GET]
+//	@Summary	user AggregatedReputationChange
 //
-// @Param   address     path     string true "Hash or PublicKey" maxlength(66)
+//	@Param		page			query	int			false	"Page number"										default(1)
+//	@Param		page_size		query	string		false	"Number of items per page"							default(10)
+//	@Param		order_direction	query	string		false	"Sorting direction"									Enums(ASC, DESC)		default(ASC)
+//	@Param		order_by		query	[]string	false	"Comma-separated list of sorting fields (address)"	collectionFormat(csv)	default(date)
+//	@Router		/accounts/{address}/aggregated-reputation-changes [GET]
 //
-// @Success 200         {object} http_response.PaginatedResponse{data=[]entities.AggregatedReputationChange}
-// @Failure 400,404,500 {object} http_response.ErrorResponse{error=http_response.ErrorResult}
+//	@Param		address		path		string	true	"Hash or PublicKey"	maxlength(66)
 //
-// @tags    Reputation
+//	@Success	200			{object}	http_response.PaginatedResponse{data=[]entities.AggregatedReputationChange}
+//	@Failure	400,404,500	{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		Reputation
 func (h *Reputation) HandleGetAggregatedReputationChange(w http.ResponseWriter, r *http.Request) {
 	addressHash, err := http_params.ParseOptionalHash("address", r)
 	if err != nil {
