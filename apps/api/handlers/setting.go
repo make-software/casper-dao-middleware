@@ -37,7 +37,7 @@ func NewSetting(entityManager persistence.EntityManager) *Setting {
 func (h *Setting) HandleGetSettings(w http.ResponseWriter, r *http.Request) {
 	paginationParams := pagination.NewParamsFromRequest(r)
 
-	getSettings := settings.NewGetSettings()
+	getSettings := settings.NewGetPaginatedSettings()
 	getSettings.SetEntityManager(h.entityManager)
 	getSettings.SetPaginationParams(paginationParams)
 

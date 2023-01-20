@@ -7,16 +7,16 @@ import (
 	"casper-dao-middleware/pkg/pagination"
 )
 
-type GetSettings struct {
+type GetPaginatedSettings struct {
 	di.PaginationParamsAware
 	di.EntityManagerAware
 }
 
-func NewGetSettings() *GetSettings {
-	return &GetSettings{}
+func NewGetPaginatedSettings() *GetPaginatedSettings {
+	return &GetPaginatedSettings{}
 }
 
-func (c *GetSettings) Execute() (*pagination.Result, error) {
+func (c *GetPaginatedSettings) Execute() (*pagination.Result, error) {
 	filters := map[string]interface{}{}
 
 	count, err := c.GetEntityManager().SettingRepository().Count(filters)
