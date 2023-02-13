@@ -7,31 +7,25 @@ import (
 	"sort"
 )
 
-type U256 *big.Int
-
-func NewU256FromBytes(val []byte) U256 {
-	var result big.Int
-	result.SetBytes(val)
-
-	return &result
+type UType interface {
+	U128 | U256 | U512
 }
 
-func NewU256FromUint64(val uint64) U256 {
-	var result big.Int
-	result.SetUint64(val)
+type (
+	U128 big.Int
+	U256 big.Int
+	U512 big.Int
+)
 
-	return &result
-}
-
-func ParseU256FromBytes(bytes []byte) (U256, []byte, error) {
+func ParseUTypeFromBytes[T UType](bytes []byte) (T, []byte, error) {
 	if len(bytes) == 0 {
-		return nil, nil, errors.New("empty bytes provided")
+		return T{}, nil, errors.New("empty bytes provided")
 	}
 
 	// read first bytes as bytes number
 	numBytes := bytes[0]
 	if int(numBytes) > len(bytes) {
-		return nil, nil, errors.New("invalid bytes format: number_bytes is more than bytes slice")
+		return T{}, nil, errors.New("invalid bytes format: number_bytes is more than bytes slice")
 	}
 
 	remainder := bytes[1:]
@@ -48,9 +42,8 @@ func ParseU256FromBytes(bytes []byte) (U256, []byte, error) {
 	rem := make([]byte, len(remainder)-int(numBytes))
 	copy(rem, remainder[numBytes:])
 
-	return &val, rem, nil
+	return T(val), rem, nil
 }
-
 func ParseStringFromBytes(bytes []byte) (string, []byte, error) {
 	if len(bytes) == 0 {
 		return "", nil, errors.New("empty bytes provided")
@@ -68,4 +61,19 @@ func ParseStringFromBytes(bytes []byte) (string, []byte, error) {
 
 	remainder = remainder[numBytes:]
 	return string(value), remainder, nil
+}
+
+func (u U128) Into() *big.Int {
+	val := big.Int(u)
+	return &val
+}
+
+func (u U256) Into() *big.Int {
+	val := big.Int(u)
+	return &val
+}
+
+func (u U512) Into() *big.Int {
+	val := big.Int(u)
+	return &val
 }

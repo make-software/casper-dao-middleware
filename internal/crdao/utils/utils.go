@@ -1,4 +1,4 @@
-package dao_event_parser
+package utils
 
 import (
 	"encoding/binary"
@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"casper-dao-middleware/pkg/casper/types"
 
 	"golang.org/x/crypto/blake2b"
 )
@@ -47,28 +45,6 @@ func ToDictionaryKey(eventsUref string, index uint32) (string, error) {
 	key.Write(calculateDictionaryIndexHash(index))
 	dictionaryKey := fmt.Sprintf("dictionary-%s", hex.EncodeToString(key.Sum(nil)))
 	return dictionaryKey, nil
-}
-
-func ParseDAOCLValueFromBytes(data string) (types.CLValue, error) {
-	decoded, err := hex.DecodeString(data)
-	if err != nil {
-		return types.CLValue{}, err
-	}
-
-	bytes, reminder, err := types.ParseBytesWithReminder(decoded)
-	if err != nil {
-		return types.CLValue{}, err
-	}
-
-	clType, reminder, err := types.ClTypeFromBytes(0, reminder)
-	if err != nil {
-		return types.CLValue{}, err
-	}
-
-	return types.CLValue{
-		Type:  clType,
-		Bytes: bytes,
-	}, nil
 }
 
 func calculateDictionaryIndexHash(index uint32) []byte {

@@ -4,13 +4,13 @@
 package event_processing
 
 import (
-	"casper-dao-middleware/pkg/boot"
 	"encoding/json"
 	"os"
 	"testing"
 	"time"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
+	"casper-dao-middleware/pkg/boot"
+
 	"casper-dao-middleware/internal/crdao/entities"
 	"casper-dao-middleware/internal/crdao/persistence"
 	"casper-dao-middleware/internal/crdao/services/event_processing"
@@ -30,7 +30,7 @@ type ProcessDAODeploysTestSuit struct {
 	entityManager persistence.EntityManager
 
 	daoContractHashesMap     map[string]string
-	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
+	daoContractPackageHashes dao.DAOContractsMetadata
 }
 
 func (suite *ProcessDAODeploysTestSuit) SetupSuite() {
@@ -43,7 +43,7 @@ func (suite *ProcessDAODeploysTestSuit) SetupSuite() {
 	}
 
 	var err error
-	suite.daoContractPackageHashes, err = dao_event_parser.NewDAOContractsMetadataFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
+	suite.daoContractPackageHashes, err = dao.NewDAOContractsMetadataFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
 	assert.NoError(suite.T(), err)
 	suite.entityManager = persistence.NewEntityManager(suite.db, suite.daoContractPackageHashes)
 }
@@ -62,7 +62,7 @@ func (suite *ProcessDAODeploysTestSuit) TestParseDaoEvents() {
 	err = json.Unmarshal([]byte(kycVoterContractDeployJSON), &deployResult)
 	assert.NoError(suite.T(), err)
 
-	daoEventParser, err := dao_event_parser.NewDaoEventParser(suite.casperClient, suite.daoContractHashesMap, 0)
+	daoEventParser, err := dao.NewDaoEventParser(suite.casperClient, suite.daoContractHashesMap, 0)
 	assert.NoError(suite.T(), err)
 
 	deployHash, _ := types.NewHashFromHexString("9fccaf372ec5f61ac851fcec593d159f928a26df8f2af5aa3522ed9e0b7cbb36")

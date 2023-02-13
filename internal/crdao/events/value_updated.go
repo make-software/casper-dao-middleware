@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser/types"
+	"casper-dao-middleware/internal/crdao/types"
 	pkgTypes "casper-dao-middleware/pkg/casper/types"
 )
 

@@ -1,9 +1,9 @@
 package event_tracking
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
 )
@@ -50,7 +50,7 @@ func (s *TrackMint) Execute() error {
 			*address,
 			s.contractPackage,
 			nil,
-			(*mintEvent.Amount).Int64(),
+			mintEvent.Amount.Into().Int64(),
 			s.deployProcessed.DeployHash,
 			entities.ReputationChangeReasonMint,
 			s.deployProcessed.Timestamp),

@@ -1,70 +1,88 @@
 package event_tracking
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type TrackVotingCreated struct {
 	di.EntityManagerAware
 
 	deployProcessed casper.DeployProcessed
-	eventBody       []byte
+	cesEvent        ces.Event
 }
 
 func NewTrackVotingCreated() *TrackVotingCreated {
 	return &TrackVotingCreated{}
 }
 
-func (s *TrackVotingCreated) SetEventBody(eventBody []byte) {
-	s.eventBody = eventBody
-}
-
 func (s *TrackVotingCreated) SetDeployProcessed(deployProcessed casper.DeployProcessed) {
 	s.deployProcessed = deployProcessed
 }
 
+func (s *TrackVotingCreated) SetCESEvent(event ces.Event) {
+	s.cesEvent = event
+}
+
 func (s *TrackVotingCreated) Execute() error {
-	votingCreated, err := events.ParseVotingCreatedEvent(s.eventBody)
+	var (
+		voting entities.Voting
+		err    error
+	)
+
+	switch s.cesEvent.Name {
+	case events.SimpleVotingCreatedEventName:
+		voting, err = s.newVotingFromSimpleVotingCreated()
+		if err != nil {
+			return err
+		}
+		// place for other type of voting
+	}
+
+	return s.GetEntityManager().VotingRepository().Save(&voting)
+}
+
+func (s *TrackVotingCreated) newVotingFromSimpleVotingCreated() (entities.Voting, error) {
+	simpleVotingCreated, err := events.ParseSimpleVotingCreatedEvent(s.cesEvent)
 	if err != nil {
-		return err
+		return entities.Voting{}, err
 	}
 
 	var creator types.Hash
-	if votingCreated.Creator.AccountHash != nil {
-		creator = *votingCreated.Creator.AccountHash
+	if simpleVotingCreated.Creator.AccountHash != nil {
+		creator = *simpleVotingCreated.Creator.AccountHash
 	} else {
-		creator = *votingCreated.Creator.ContractPackageHash
+		creator = *simpleVotingCreated.Creator.ContractPackageHash
 	}
 
 	var isFormal bool
-	var informalVotingID *uint32
-	var votingQuorum = uint64(votingCreated.ConfigInformalVotingQuorum.Int64())
-	var votingTime = votingCreated.ConfigInformalVotingTime
+	var votingQuorum uint32
+	var votingTime uint64
 
-	if votingCreated.FormalVotingID != nil {
+	if simpleVotingCreated.ConfigFormalQuorum != 0 {
 		isFormal = true
-		votingQuorum = uint64(votingCreated.ConfigFormalVotingQuorum.Int64())
-		votingTime = votingCreated.ConfigFormalVotingTime
-
-		informalID := uint32((*votingCreated.VotingID).Uint64())
-		informalVotingID = &informalID
+		votingQuorum = simpleVotingCreated.ConfigFormalQuorum
+		votingTime = simpleVotingCreated.ConfigFormalVotingTime
 	}
 
-	votingID := uint32((*votingCreated.VotingID).Uint64())
-	voting := entities.NewVoting(
+	configTotalOnboarded := simpleVotingCreated.ConfigTotalOnboarded
+
+	return entities.NewVoting(
 		creator,
 		s.deployProcessed.DeployHash,
-		votingID,
-		informalVotingID,
-		votingTime,
+		simpleVotingCreated.VotingID,
 		votingQuorum,
+		votingTime,
 		isFormal,
+		simpleVotingCreated.ConfigDoubleTimeBetweenVotings,
+		simpleVotingCreated.DocumentHash,
+		configTotalOnboarded.Into().Uint64(),
+		simpleVotingCreated.ConfigVotingClearnessDelta.Into().Uint64(),
+		simpleVotingCreated.ConfigTimeBetweenInformalAndFormalVoting,
 		s.deployProcessed.Timestamp,
-	)
-
-	return s.GetEntityManager().VotingRepository().Save(voting)
+	), nil
 }

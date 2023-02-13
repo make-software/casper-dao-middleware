@@ -2,211 +2,179 @@ package types
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
+	"fmt"
 )
 
-const CLTypeRecursionDepth = 50
-
-const (
-	CLTypeBool CLTypeID = iota
-	CLTypeI32
-	CLTypeI64
-	CLTypeU8
-	CLTypeU32
-	CLTypeU64
-	CLTypeU128
-	CLTypeU256
-	CLTypeU512
-	CLTypeUnit
-	CLTypeString
-	CLTypeKey
-	CLTypeURef
-	CLTypeOption
-	CLTypeList
-	CLTypeByteArray
-	CLTypeResult
-	CLTypeMap
-	CLTypeTuple1
-	CLTypeTuple2
-	CLTypeTuple3
-	CLTypeAny
-	CLTypePublicKey
-)
-
-var ErrExceededRecursionDepth = errors.New("recursion depth exceeded during CLType parsing")
-
-type (
-	CLTypeID byte
-
-	CLType struct {
-		CLType   *CLType
-		CLTypeID CLTypeID
-	}
-
-	CLValue struct {
-		Type  CLType
-		Bytes []byte
-	}
-)
-
-func NewCLType(clTypeID CLTypeID) CLType {
-	return CLType{
-		CLTypeID: clTypeID,
-	}
+type RawCLValue struct {
+	Type  CLType
+	Bytes []byte
 }
 
-func (cv CLType) ToString() string {
-	if cv.CLType == nil {
-		return cv.CLTypeID.ToString()
-	}
-
-	result := cv.CLTypeID.ToString()
-	return concatClTypes(result, *cv.CLType)
+// TODO: extend CLValue type
+type CLValue struct {
+	Type   CLType
+	Bool   *bool
+	I32    *int32
+	I64    *int64
+	U8     *uint8
+	U32    *uint32
+	U64    *uint64
+	U128   *U128
+	U256   *U256
+	U512   *U512
+	String *string
+	Key    *Key
+	Option *CLValue
+	List   *[]CLValue
+	//ByteArray *FixedByteArray
+	//Result    *CLValueResult
+	//Map       *CLMap
+	Tuple1    *[1]CLValue
+	Tuple2    *[2]CLValue
+	Tuple3    *[3]CLValue
+	PublicKey *PublicKey
 }
 
-func (t CLTypeID) ToString() string {
-	switch t {
-	case CLTypeBool:
-		return "Bool"
-	case CLTypeI32:
-		return "I32"
-	case CLTypeI64:
-		return "I64"
-	case CLTypeU8:
-		return "U8"
-	case CLTypeU32:
-		return "U32"
-	case CLTypeU64:
-		return "U64"
-	case CLTypeU128:
-		return "U128"
-	case CLTypeU256:
-		return "U256"
-	case CLTypeU512:
-		return "U512"
-	case CLTypeUnit:
-		return "Unit"
-	case CLTypeString:
-		return "String"
-	case CLTypeKey:
-		return "Key"
-	case CLTypeURef:
-		return "URef"
-	case CLTypeOption:
-		return "Option"
-	case CLTypeList:
-		return "List"
-	case CLTypeByteArray:
-		return "ByteArray"
-	case CLTypeResult:
-		return "Result"
-	case CLTypeMap:
-		return "Map"
-	case CLTypeTuple1:
-		return "Tuple1"
-	case CLTypeTuple2:
-		return "Tuple2"
-	case CLTypeTuple3:
-		return "Tuple3"
-	case CLTypePublicKey:
-		return "PublicKey"
-	}
-
-	return "Any"
-}
-
-func ClTypeFromBytes(depth uint8, bytes []byte) (CLType, []byte, error) {
-	if depth >= CLTypeRecursionDepth {
-		return CLType{}, nil, ErrExceededRecursionDepth
-	}
-
-	depth = depth + 1
-	remainder := make([]byte, len(bytes)-1)
-	copy(remainder, bytes[1:])
-
-	switch CLTypeID(bytes[0]) {
-	case CLTypeBool:
-		return NewCLType(CLTypeBool), remainder, nil
-	case CLTypeI32:
-		return NewCLType(CLTypeI32), remainder, nil
-	case CLTypeI64:
-		return NewCLType(CLTypeI64), remainder, nil
-	case CLTypeU8:
-		return NewCLType(CLTypeU8), remainder, nil
-	case CLTypeU32:
-		return NewCLType(CLTypeU32), remainder, nil
-	case CLTypeU64:
-		return NewCLType(CLTypeU64), remainder, nil
-	case CLTypeU128:
-		return NewCLType(CLTypeU128), remainder, nil
-	case CLTypeU256:
-		return NewCLType(CLTypeU256), remainder, nil
-	case CLTypeU512:
-		return NewCLType(CLTypeU512), remainder, nil
-	case CLTypeUnit:
-		return NewCLType(CLTypeUnit), remainder, nil
-	case CLTypeString:
-		return NewCLType(CLTypeString), remainder, nil
-	case CLTypeKey:
-		return NewCLType(CLTypeKey), remainder, nil
-	case CLTypeURef:
-		return NewCLType(CLTypeURef), remainder, nil
-	case CLTypeOption:
-		innerType, remainder, err := ClTypeFromBytes(depth, remainder)
-		if err != nil {
-			return CLType{}, nil, err
+func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byte, error) {
+	reminder := data
+	switch clType.CLTypeID {
+	case CLTypeIDU8:
+		if len(data) < 1 {
+			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
 		}
-		clValue := NewCLType(CLTypeOption)
-		clValue.CLType = &innerType
-		return clValue, remainder, nil
-	case CLTypeList:
-		innerType, remainder, err := ClTypeFromBytes(depth, remainder)
-		if err != nil {
-			return CLType{}, nil, err
+		return CLValue{
+			Type: clType,
+			U8:   &data[0],
+		}, reminder[1:], nil
+	case CLTypeIDBool:
+		if len(data) < 1 {
+			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
 		}
-		clValue := NewCLType(CLTypeList)
-		clValue.CLType = &innerType
-		return clValue, remainder, nil
-	case CLTypeByteArray:
-	case CLTypeResult:
-	case CLTypeMap:
-	case CLTypeTuple1:
-	case CLTypeTuple2:
-	case CLTypeTuple3:
-	case CLTypeAny:
-	case CLTypePublicKey:
+		var res bool
+		if data[0] == 1 {
+			res = false
+		}
+		return CLValue{
+			Type: clType,
+			Bool: &res,
+		}, reminder[1:], nil
+	case CLTypeIDU32:
+		if len(data) < 4 {
+			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
+		}
 
+		value := binary.LittleEndian.Uint32(data)
+
+		return CLValue{
+			Type: clType,
+			U32:  &value,
+		}, reminder[4:], nil
+
+	case CLTypeIDU64:
+		if len(data) < 8 {
+			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
+		}
+
+		value := binary.LittleEndian.Uint64(data)
+		return CLValue{
+			Type: clType,
+			U64:  &value,
+		}, reminder[8:], nil
+	case CLTypeIDU128:
+		val, reminder, err := ParseUTypeFromBytes[U128](data)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+		return CLValue{
+			Type: clType,
+			U128: &val,
+		}, reminder, nil
+	case CLTypeIDU256:
+		val, reminder, err := ParseUTypeFromBytes[U256](data)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+		return CLValue{
+			Type: clType,
+			U256: &val,
+		}, reminder, nil
+	case CLTypeIDU512:
+		val, reminder, err := ParseUTypeFromBytes[U512](data)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+		return CLValue{
+			Type: clType,
+			U512: &val,
+		}, reminder, nil
+
+	case CLTypeIDKey:
+		key, reminder, err := ParseKeyFromBytes(reminder)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+		return CLValue{
+			Type: clType,
+			Key:  &key,
+		}, reminder, nil
+	case CLTypeIDAny:
+		return CLValue{
+			Type: clType,
+		}, reminder, nil
+	case CLTypeIDString:
+		rawParsed, reminder, err := ParseBytesWithReminder(data)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
+		parsed := string(rawParsed)
+		return CLValue{
+			Type:   clType,
+			String: &parsed,
+		}, reminder, nil
+	case CLTypeIDOption:
+		if reminder[0] != 0 && clType.CLTypeOption != nil {
+			reminder = reminder[1:]
+			clValue, reminder, err := NewCLValueFromBytesWithReminder(clType.CLTypeOption.CLTypeInner, reminder)
+			if err != nil {
+				return CLValue{}, nil, err
+			}
+			return clValue, reminder, nil
+		}
+		reminder = reminder[1:]
+
+		return CLValue{
+			Type: clType,
+		}, reminder, nil
 	}
 
-	return CLType{}, nil, nil
+	return CLValue{}, reminder, errors.New("unknown CLType provided")
 }
 
-// ParseBytesWithReminder looks first bytes to detect length of bytes, extract it and return reminder
-func ParseBytesWithReminder(data []byte) ([]byte, []byte, error) {
-	length := binary.LittleEndian.Uint32(data)
-	if length == 0 || int(length) > len(data) {
-		return nil, nil, errors.New("invalid length value")
+func ParseCLValueFromBytesWithReminder(data string) (RawCLValue, []byte, error) {
+	decoded, err := hex.DecodeString(data)
+	if err != nil {
+		return RawCLValue{}, nil, err
 	}
 
-	// without uint32
-	data = data[4:]
+	bytes, reminder, err := ParseBytesWithReminder(decoded)
+	if err != nil {
+		return RawCLValue{}, nil, err
+	}
 
-	bytes := make([]byte, length)
-	copy(bytes, data[:length])
+	clType, reminder, err := ClTypeFromBytes(0, reminder)
+	if err != nil {
+		return RawCLValue{}, nil, err
+	}
 
-	reminder := make([]byte, len(data)-int(length))
-	copy(reminder, data[length:])
-	return bytes, reminder, nil
+	return RawCLValue{
+		Type:  clType,
+		Bytes: bytes,
+	}, reminder, nil
 }
 
-func concatClTypes(result string, clType CLType) string {
-	result += "("
-	if clType.CLType == nil {
-		return "(" + clType.CLTypeID.ToString() + ")"
-	}
-
-	result += clType.CLTypeID.ToString()
-	result += concatClTypes(result, *clType.CLType)
-	result += ")"
-	return result
+func newInvalidLengthErr(clTypeID CLTypeID) error {
+	return fmt.Errorf("invalid bytes length value for type - %s", clTypeID.ToString())
 }

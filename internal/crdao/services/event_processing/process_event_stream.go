@@ -1,14 +1,16 @@
 package event_processing
 
 import (
-	"casper-dao-middleware/internal/crdao/services/settings"
 	"context"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
-	"casper-dao-middleware/internal/crdao/di"
-	"casper-dao-middleware/pkg/casper"
-
 	"go.uber.org/zap"
+
+	"casper-dao-middleware/internal/crdao/services/settings"
+	"casper-dao-middleware/pkg/casper"
+	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/go-ces-parser"
+
+	"casper-dao-middleware/internal/crdao/di"
 )
 
 // ProcessEventStream command start number of concurrent worker to process event from synchronous event stream
@@ -18,7 +20,7 @@ type ProcessEventStream struct {
 	di.EntityManagerAware
 	di.DAOContractsMetadataAware
 
-	daoContractHashes         map[string]string
+	daoContractHashes         map[string]types.Hash
 	eventStreamPath           string
 	nodeStartFromEventID      uint64
 	dictionarySetEventsBuffer uint32
@@ -33,7 +35,7 @@ func (c *ProcessEventStream) SetNodeStartFromEventID(eventID uint64) *ProcessEve
 	return c
 }
 
-func (c *ProcessEventStream) SetDAOContractHashes(daoContractHashes map[string]string) *ProcessEventStream {
+func (c *ProcessEventStream) SetDAOContractHashes(daoContractHashes map[string]types.Hash) *ProcessEventStream {
 	c.daoContractHashes = daoContractHashes
 	return c
 }
@@ -54,23 +56,23 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 		return err
 	}
 
-	daoEventParser, err := dao_event_parser.NewDaoEventParser(c.GetCasperClient(), c.daoContractHashes, c.dictionarySetEventsBuffer)
-	if err != nil {
-		return err
-	}
-
 	syncDaoSetting := settings.NewSyncDAOSettings()
 	syncDaoSetting.SetCasperClient(c.GetCasperClient())
 	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
 	syncDaoSetting.SetEntityManager(c.GetEntityManager())
-	syncDaoSetting.SetSettings(settings.DaoSettings)
+	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
 	syncDaoSetting.Execute()
 
+	cesParser, err := ces.NewParser(c.GetCasperClient(), []types.Hash{c.GetDAOContractsMetadata().VoterContractPackageHash})
+	if err != nil {
+		zap.S().With(zap.Error(err)).Error("Failed to create CES Parser")
+		return err
+	}
+
 	processRawDeploy := NewProcessRawDeploy()
-	processRawDeploy.SetDAOEventParser(daoEventParser)
 	processRawDeploy.SetCasperClient(c.GetCasperClient())
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
-	processRawDeploy.SetDAOContractPackageHashes(c.GetDAOContractsMetadata())
+	processRawDeploy.SetCESEventParser(cesParser)
 	processRawDeploy.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
 
 	stopListening := func() {

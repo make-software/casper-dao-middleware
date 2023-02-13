@@ -177,7 +177,7 @@ func connectStream(streamURL *url.URL) (*http.Response, error) {
 
 	if resp.StatusCode != 200 {
 		log.Println("Error invalid connect response code")
-		return nil, err
+		return nil, errors.New("expected successful response on stream connect")
 	}
 
 	return resp, nil

@@ -1,9 +1,9 @@
 package event_tracking
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/internal/crdao/services/settings"
 
 	"go.uber.org/zap"

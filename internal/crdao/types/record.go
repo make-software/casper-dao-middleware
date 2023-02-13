@@ -11,6 +11,7 @@ import (
 type RecordValue struct {
 	U64Value  *uint64
 	UValue    *types.U256
+	Address   *Address
 	BoolValue *bool
 }
 
@@ -59,6 +60,25 @@ func NewRecordValueFromBytesWithReminder(rawBytes []byte) (RecordValue, []byte, 
 	// shift 4 bytes (uint32)
 	reminder := rawBytes[4:]
 
+	// length 33 represent Key CLValue
+	if numBytes == 33 {
+		key, reminder, err := types.ParseKeyFromBytes(reminder)
+		if err != nil {
+			return RecordValue{}, nil, err
+		}
+
+		var address Address
+		if key.AccountHash != nil {
+			address.AccountHash = key.AccountHash
+		} else {
+			address.ContractPackageHash = key.Hash
+		}
+
+		return RecordValue{
+			Address: &address,
+		}, reminder, nil
+	}
+
 	// numBytes == 8 could be or pure u64 or U256/U512 coded in 8 bytes
 	// but U256/U512 bytes representation is not equal to u64
 	// so if the numBytes == 8 and U256/U512 it should be the following bytes representation:
@@ -79,7 +99,7 @@ func NewRecordValueFromBytesWithReminder(rawBytes []byte) (RecordValue, []byte, 
 		}, reminder[1:], nil
 	}
 
-	val, _, err := types.ParseU256FromBytes(reminder)
+	val, _, err := types.ParseUTypeFromBytes[types.U256](reminder)
 	if err != nil {
 		return RecordValue{}, nil, err
 	}
@@ -93,11 +113,18 @@ func (r RecordValue) String() string {
 	switch {
 	case r.UValue != nil:
 		val := *r.UValue
-		return (*val).String()
+		return val.Into().String()
 	case r.U64Value != nil:
 		return strconv.FormatInt(int64(*r.U64Value), 10)
 	case r.BoolValue != nil:
 		return strconv.FormatBool(*r.BoolValue)
+	case r.Address != nil:
+		if r.Address.ContractPackageHash != nil {
+			return r.Address.ContractPackageHash.ToHex()
+		}
+		if r.Address.AccountHash != nil {
+			return r.Address.AccountHash.ToHex()
+		}
 	}
 
 	return ""

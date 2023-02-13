@@ -1,9 +1,9 @@
 package event_tracking
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
 )
@@ -50,7 +50,7 @@ func (s *TrackBurn) Execute() error {
 			*address,
 			s.contractPackage,
 			nil,
-			(*burnEvent.Amount).Int64(),
+			burnEvent.Amount.Into().Int64(),
 			s.deployProcessed.DeployHash,
 			entities.ReputationChangeReasonBurn,
 			s.deployProcessed.Timestamp),

@@ -1,27 +1,28 @@
 package event_tracking
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type TrackBallotCast struct {
 	di.EntityManagerAware
 	di.DAOContractsMetadataAware
 
+	cesEvent        ces.Event
 	deployProcessed casper.DeployProcessed
-	eventBody       []byte
 }
 
 func NewTrackBallotCast() *TrackBallotCast {
 	return &TrackBallotCast{}
 }
 
-func (s *TrackBallotCast) SetEventBody(eventBody []byte) {
-	s.eventBody = eventBody
+func (s *TrackBallotCast) SetCESEvent(event ces.Event) {
+	s.cesEvent = event
 }
 
 func (s *TrackBallotCast) SetDeployProcessed(deployProcessed casper.DeployProcessed) {
@@ -29,20 +30,19 @@ func (s *TrackBallotCast) SetDeployProcessed(deployProcessed casper.DeployProces
 }
 
 func (s *TrackBallotCast) Execute() error {
-	ballotCast, err := events.ParseBallotCastEvent(s.eventBody)
+	ballotCast, err := events.ParseBallotCastEvent(s.cesEvent)
 	if err != nil {
 		return err
 	}
 
-	var address *types.Hash
-	if ballotCast.Address.AccountHash != nil {
-		address = ballotCast.Address.AccountHash
+	var voter *types.Hash
+	if ballotCast.Voter.AccountHash != nil {
+		voter = ballotCast.Voter.AccountHash
 	} else {
-		address = ballotCast.Address.ContractPackageHash
+		voter = ballotCast.Voter.ContractPackageHash
 	}
 
-	staked := (*ballotCast.Stake).Int64()
-	votingID := uint32((*ballotCast.VotingID).Uint64())
+	staked := ballotCast.Stake.Into().Int64()
 
 	var isInFavor bool
 	if ballotCast.Choice == events.ChoiceInFavor {
@@ -50,9 +50,9 @@ func (s *TrackBallotCast) Execute() error {
 	}
 
 	vote := entities.NewVote(
-		*address,
+		*voter,
 		s.deployProcessed.DeployHash,
-		votingID,
+		ballotCast.VotingID,
 		uint64(staked),
 		isInFavor,
 		s.deployProcessed.Timestamp)
@@ -60,21 +60,22 @@ func (s *TrackBallotCast) Execute() error {
 		return err
 	}
 
+	//TODO: review logic of reputation changing
 	changes := []entities.ReputationChange{
 		// one event represent negative reputation leaving from "Reputation" contract
 		entities.NewReputationChange(
-			*address,
+			*voter,
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
-			&votingID,
+			&ballotCast.VotingID,
 			-staked,
 			s.deployProcessed.DeployHash,
 			entities.ReputationChangeReasonVote,
 			s.deployProcessed.Timestamp),
 		// second event represent positive reputation coming to "Voting" contract
 		entities.NewReputationChange(
-			*address,
+			*voter,
 			s.GetDAOContractsMetadata().VoterContractPackageHash,
-			&votingID,
+			&ballotCast.VotingID,
 			staked,
 			s.deployProcessed.DeployHash,
 			entities.ReputationChangeReasonVote,

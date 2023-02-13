@@ -24,13 +24,13 @@ type VotingEnded struct {
 func ParseVotingEndedEvent(rawBytes []byte) (VotingEnded, error) {
 	event := VotingEnded{}
 
-	votingID, reminder, err := types.ParseU256FromBytes(rawBytes)
+	votingID, reminder, err := types.ParseUTypeFromBytes[types.U256](rawBytes)
 	if err != nil {
 		return VotingEnded{}, err
 	}
 	event.VotingID = votingID
 
-	event.InformalVotingID, reminder, err = types.ParseU256FromBytes(reminder)
+	event.InformalVotingID, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 	if err != nil {
 		return VotingEnded{}, err
 	}
@@ -39,7 +39,7 @@ func ParseVotingEndedEvent(rawBytes []byte) (VotingEnded, error) {
 	if reminder[0] != 0 {
 		reminder = reminder[1:]
 		var formalVotingID types.U256
-		formalVotingID, reminder, err = types.ParseU256FromBytes(reminder)
+		formalVotingID, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 		if err != nil {
 			return VotingEnded{}, err
 		}
@@ -52,17 +52,17 @@ func ParseVotingEndedEvent(rawBytes []byte) (VotingEnded, error) {
 	}
 	event.Result = string(resultBytes)
 
-	event.VotesCount, reminder, err = types.ParseU256FromBytes(reminder)
+	event.VotesCount, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 	if err != nil {
 		return VotingEnded{}, err
 	}
 
-	event.StakeInFavour, reminder, err = types.ParseU256FromBytes(reminder)
+	event.StakeInFavour, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 	if err != nil {
 		return VotingEnded{}, err
 	}
 
-	event.StakeAgainst, reminder, err = types.ParseU256FromBytes(reminder)
+	event.StakeAgainst, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 	if err != nil {
 		return VotingEnded{}, err
 	}
@@ -104,7 +104,7 @@ func parseHashU256MapFromRemainder(reminder []byte) (map[string]types.U256, []by
 
 		reminder = reminder[32:]
 		var addressTransfer types.U256
-		addressTransfer, reminder, err = types.ParseU256FromBytes(reminder)
+		addressTransfer, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 		if err != nil {
 			return nil, nil, err
 		}

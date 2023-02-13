@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"casper-dao-middleware/apps/api/config"
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
 	"casper-dao-middleware/internal/crdao/persistence"
 	"casper-dao-middleware/pkg/assert"
 	"casper-dao-middleware/pkg/boot"
@@ -55,11 +54,11 @@ func main() {
 		boot.CloseMySQL(dbConn)
 	})
 
-	assert.OK(container.Provide(func(cfg *config.Env) (dao_event_parser.DAOContractsMetadata, error) {
-		return dao_event_parser.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+	assert.OK(container.Provide(func(cfg *config.Env) (dao.DAOContractsMetadata, error) {
+		return dao.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
 	}))
 
-	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) persistence.EntityManager {
+	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
 	}))
 

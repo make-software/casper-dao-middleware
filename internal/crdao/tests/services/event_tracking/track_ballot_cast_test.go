@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
 	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
+
 	"casper-dao-middleware/internal/crdao/persistence"
 	"casper-dao-middleware/internal/crdao/services/event_tracking"
 	"casper-dao-middleware/pkg/boot"
@@ -31,7 +31,7 @@ type TrackBallotCastTestSuit struct {
 	entityManager persistence.EntityManager
 
 	daoContractHashesMap     map[string]string
-	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
+	daoContractPackageHashes dao.DAOContractsMetadata
 }
 
 func (suite *TrackBallotCastTestSuit) SetupSuite() {
@@ -43,7 +43,7 @@ func (suite *TrackBallotCastTestSuit) SetupSuite() {
 	}
 
 	var err error
-	suite.daoContractPackageHashes, err = dao_event_parser.NewDAOContractsMetadataFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
+	suite.daoContractPackageHashes, err = dao.NewDAOContractsMetadataFromHashesMap(suite.daoContractHashesMap, suite.casperClient)
 	assert.NoError(suite.T(), err)
 	suite.entityManager = persistence.NewEntityManager(suite.db, suite.daoContractPackageHashes)
 }
@@ -60,7 +60,7 @@ func (suite *TrackBallotCastTestSuit) TestTrackBallotCast() {
 	err := json.Unmarshal([]byte(createBallotCastDeployJSON), &deployResult)
 	assert.NoError(suite.T(), err)
 
-	daoEventParser, err := dao_event_parser.NewDaoEventParser(suite.casperClient, suite.daoContractHashesMap, 0)
+	daoEventParser, err := dao.NewDaoEventParser(suite.casperClient, suite.daoContractHashesMap, 0)
 	assert.NoError(suite.T(), err)
 
 	deployHash, _ := types.NewHashFromHexString("661a754588fd07ca050b15f7f28f5189449b974f476e678f1ca913104b5644d0")

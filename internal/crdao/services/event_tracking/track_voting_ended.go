@@ -1,9 +1,9 @@
 package event_tracking
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
 
@@ -49,14 +49,14 @@ func (s *TrackVotingEnded) Execute() error {
 			address,
 			s.contractPackage,
 			nil,
-			-(*amount).Int64(),
+			-amount.Into().Int64(),
 			s.deployProcessed.DeployHash,
 			entities.ReputationChangeReasonVotingBurn,
 			s.deployProcessed.Timestamp),
 		)
 	}
 
-	votingID := uint32((*votingEnded.VotingID).Uint64())
+	votingID := uint32(votingEnded.VotingID.Into().Uint64())
 	for addressHex, amount := range votingEnded.Transfers {
 		address, _ := types.NewHashFromHexString(addressHex)
 
@@ -64,7 +64,7 @@ func (s *TrackVotingEnded) Execute() error {
 			address,
 			s.contractPackage,
 			&votingID,
-			(*amount).Int64(),
+			amount.Into().Int64(),
 			s.deployProcessed.DeployHash,
 			entities.ReputationChangeReasonVotingDistribution,
 			s.deployProcessed.Timestamp),

@@ -3,26 +3,26 @@ package events
 import (
 	"errors"
 
-	dao_types "casper-dao-middleware/internal/crdao/dao_event_parser/types"
+	dao_types "casper-dao-middleware/internal/crdao/types"
 	"casper-dao-middleware/pkg/casper/types"
 )
 
-const MintEventName = "Mint"
+const BurnEventName = "Burn"
 
-type Mint struct {
+type Burn struct {
 	Address dao_types.Address
 	Amount  types.U256
 }
 
-func ParseMintEvent(bytes []byte) (Mint, error) {
+func ParseBurnEvent(bytes []byte) (Burn, error) {
 	key, reminder, err := types.ParseKeyFromBytes(bytes)
 	if err != nil {
-		return Mint{}, err
+		return Burn{}, err
 	}
 
-	event := Mint{}
+	event := Burn{}
 	if key.AccountHash == nil && key.Hash == nil {
-		return Mint{}, errors.New("expected Address in Mint event")
+		return Burn{}, errors.New("expected Address in Burn event")
 	}
 
 	var address dao_types.Address
@@ -34,9 +34,9 @@ func ParseMintEvent(bytes []byte) (Mint, error) {
 
 	event.Address = address
 
-	event.Amount, reminder, err = types.ParseU256FromBytes(reminder)
+	event.Amount, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
 	if err != nil {
-		return Mint{}, err
+		return Burn{}, err
 	}
 
 	return event, nil

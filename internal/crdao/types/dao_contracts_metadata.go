@@ -1,9 +1,8 @@
-package dao_event_parser
+package types
 
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
@@ -11,7 +10,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 )
 
-const variableRepositoryContractStorageUrefName = "storage_repository_contract"
+const variableRepositoryContractStorageUrefName = "storage__repository__contract"
 
 type DAOContractsMetadata struct {
 	ReputationContractPackageHash         types.Hash
@@ -20,7 +19,7 @@ type DAOContractsMetadata struct {
 	VariableRepositoryContractStorageUref string
 }
 
-func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]string, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
+func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]types.Hash, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
 	result := DAOContractsMetadata{}
 	stateRootHash, err := casperClient.GetStateRootHashByHash("")
 	if err != nil {
@@ -37,10 +36,7 @@ func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]string, casp
 			return DAOContractsMetadata{}, errors.New("expected Contract StoredValue")
 		}
 
-		contractPackageHash, err := types.NewHashFromHexString(strings.TrimPrefix(stateItemRes.StoredValue.Contract.ContractPackageHash, "contract-package-wasm"))
-		if err != nil {
-			return DAOContractsMetadata{}, err
-		}
+		contractPackageHash := stateItemRes.StoredValue.Contract.ContractPackageHash
 
 		switch contractName {
 		case "reputation_contract":
@@ -54,6 +50,10 @@ func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]string, casp
 					result.VariableRepositoryContractStorageUref = namedKey.Key
 					break
 				}
+			}
+
+			if result.VariableRepositoryContractStorageUref == "" {
+				return DAOContractsMetadata{}, errors.New("error: missing variable repository contract storage uref in contract")
 			}
 		}
 

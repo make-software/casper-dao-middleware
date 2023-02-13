@@ -8,7 +8,6 @@ import (
 	"casper-dao-middleware/apps/api/config"
 	"casper-dao-middleware/apps/api/handlers"
 	"casper-dao-middleware/apps/api/swagger"
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
 	"casper-dao-middleware/internal/crdao/persistence"
 
 	"github.com/go-chi/chi/v5"
@@ -20,7 +19,7 @@ import (
 func NewRouter(
 	cfg *config.Env,
 	entityManager persistence.EntityManager,
-	daoContractPackageHashes dao_event_parser.DAOContractsMetadata,
+	daoContractPackageHashes dao.DAOContractsMetadata,
 ) http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)

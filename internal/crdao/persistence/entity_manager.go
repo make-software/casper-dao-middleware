@@ -1,8 +1,8 @@
 package persistence
 
 import (
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
 	"casper-dao-middleware/internal/crdao/repositories"
+	"casper-dao-middleware/internal/crdao/types"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -24,7 +24,7 @@ type entityManager struct {
 	settingRepository     repositories.SettingRepository
 }
 
-func NewEntityManager(db *sqlx.DB, hashes dao_event_parser.DAOContractsMetadata) EntityManager {
+func NewEntityManager(db *sqlx.DB, hashes types.DAOContractsMetadata) EntityManager {
 	return &entityManager{
 		reputationChangesRepo: repositories.NewReputationChange(db, hashes),
 		voteRepository:        repositories.NewVote(db),

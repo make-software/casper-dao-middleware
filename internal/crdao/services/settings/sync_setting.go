@@ -4,41 +4,72 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"go.uber.org/zap"
 	"time"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
-	"casper-dao-middleware/internal/crdao/dao_event_parser/types"
+	"go.uber.org/zap"
+
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/entities"
+	"casper-dao-middleware/internal/crdao/types"
+	"casper-dao-middleware/internal/crdao/utils"
 )
 
 const (
-	DefaultPolicingRate         = "default_policing_rate"
-	ReputationConversionRate    = "reputation_conversion_rate"
-	ForumKycRequired            = "forum_kyc_required"
-	FormalVotingQuorum          = "formal_voting_quorum"
-	InformalVotingQuorum        = "informal_voting_quorum"
-	VotingQuorum                = "voting_quorum"
-	FormalVotingTime            = "formal_voting_time"
-	InformalVotingTime          = "informal_voting_time"
-	VotingTime                  = "voting_time"
-	MinimumGovernanceReputation = "minimum_governance_reputation"
-	MinimumVotingReputation     = "minimum_voting_reputation"
+	PostJobDosFee                      = "PostJobDOSFee"
+	InternalAuctionTime                = "InternalAuctionTime"
+	PublicAuctionTime                  = "PublicAuctionTime"
+	DefaultPolicingRate                = "DefaultPolicingRate"
+	ReputationConversionRate           = "ReputationConversionRate"
+	FiatConversionRateAddress          = "FiatConversionRateAddress"
+	ForumKycRequired                   = "ForumKycRequired"
+	BidEscrowInformalQuorumRatio       = "BidEscrowInformalQuorumRatio"
+	BidEscrowFormalQuorumRatio         = "BidEscrowFormalQuorumRatio"
+	BidEscrowFormalVotingTime          = "BidEscrowFormalVotingTime"
+	BidEscrowInformalVotingTime        = "BidEscrowInformalVotingTime"
+	FormalVotingTime                   = "FormalVotingTime"
+	InformalVotingTime                 = "InformalVotingTime"
+	FormalQuorumRatio                  = "FormalQuorumRatio"
+	InformalQuorumRatio                = "InformalQuorumRatio"
+	InformalStakeReputation            = "InformalStakeReputation"
+	DistributePaymentToNonVoters       = "DistributePaymentToNonVoters"
+	TimeBetweenInformalAndFormalVoting = "TimeBetweenInformalAndFormalVoting"
+	VABidAcceptanceTimeout             = "VABidAcceptanceTimeout"
+	VACanBidOnPublicAuction            = "VACanBidOnPublicAuction"
+	BidEscrowWalletAddress             = "BidEscrowWalletAddress"
+	BidEscrowPaymentRatio              = "BidEscrowPaymentRatio"
+	VotingClearnessDelta               = "VotingClearnessDelta"
+	VotingStartAfterJobSubmission      = "VotingStartAfterJobSubmission"
+	DefaultReputationSlash             = "DefaultReputationSlash"
+	VotingIdsAddress                   = "VotingIdsAddress"
 )
 
-var DaoSettings = []string{
+var VariableRepoSettings = []string{
+	PostJobDosFee,
+	InternalAuctionTime,
+	PublicAuctionTime,
 	DefaultPolicingRate,
 	ReputationConversionRate,
+	FiatConversionRateAddress,
 	ForumKycRequired,
-	FormalVotingQuorum,
-	InformalVotingQuorum,
-	VotingQuorum,
+	BidEscrowInformalQuorumRatio,
+	BidEscrowFormalQuorumRatio,
+	BidEscrowFormalVotingTime,
+	BidEscrowInformalVotingTime,
 	FormalVotingTime,
 	InformalVotingTime,
-	VotingTime,
-	MinimumGovernanceReputation,
-	MinimumVotingReputation,
+	FormalQuorumRatio,
+	InformalQuorumRatio,
+	InformalStakeReputation,
+	DistributePaymentToNonVoters,
+	TimeBetweenInformalAndFormalVoting,
+	VABidAcceptanceTimeout,
+	VACanBidOnPublicAuction,
+	BidEscrowWalletAddress,
+	BidEscrowPaymentRatio,
+	VotingClearnessDelta,
+	VotingStartAfterJobSubmission,
+	DefaultReputationSlash,
+	VotingIdsAddress,
 }
 
 type SyncDAOSetting struct {
@@ -67,7 +98,7 @@ func (c *SyncDAOSetting) Execute() error {
 		return err
 	}
 
-	settingItemKey, err := dao_event_parser.ToDictionaryItemKey(c.setting)
+	settingItemKey, err := utils.ToDictionaryItemKey(c.setting)
 	if err != nil {
 		return err
 	}

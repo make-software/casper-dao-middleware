@@ -3,14 +3,13 @@ package event_processing
 import (
 	"errors"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
-	"casper-dao-middleware/internal/crdao/dao_event_parser/events"
+	"go.uber.org/zap"
+
 	"casper-dao-middleware/internal/crdao/di"
-	"casper-dao-middleware/internal/crdao/persistence"
+	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/internal/crdao/services/event_tracking"
 	"casper-dao-middleware/pkg/casper"
-
-	"go.uber.org/zap"
+	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type ProcessRawDeploy struct {
@@ -18,10 +17,9 @@ type ProcessRawDeploy struct {
 	di.CasperClientAware
 
 	variableRepositoryContractStorageUref string
+	cesParser                             *ces.EventParser
 
-	deployProcessedEvent     *casper.DeployProcessedEvent
-	daoEventsParser          *dao_event_parser.DaoEventParser
-	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
+	deployProcessedEvent *casper.DeployProcessedEvent
 }
 
 func NewProcessRawDeploy() ProcessRawDeploy {
@@ -36,70 +34,49 @@ func (c *ProcessRawDeploy) SetVariableRepositoryContractStorageUref(uref string)
 	c.variableRepositoryContractStorageUref = uref
 }
 
-func (c *ProcessRawDeploy) SetDAOEventParser(parser *dao_event_parser.DaoEventParser) {
-	c.daoEventsParser = parser
-}
-
-func (c *ProcessRawDeploy) SetDAOContractPackageHashes(hashes dao_event_parser.DAOContractsMetadata) {
-	c.daoContractPackageHashes = hashes
+func (c *ProcessRawDeploy) SetCESEventParser(parser *ces.EventParser) {
+	c.cesParser = parser
 }
 
 func (c *ProcessRawDeploy) Execute() error {
-	daoEvents, err := c.daoEventsParser.Parse(c.deployProcessedEvent)
+	results, err := c.cesParser.ParseExecutionResults(c.deployProcessedEvent.DeployProcessed.ExecutionResult)
 	if err != nil {
 		return err
 	}
 
-	var daoEventHandler interface {
-		Execute() error
-
-		SetEntityManager(manager persistence.EntityManager)
-		SetEventBody(eventBody []byte)
+	for _, result := range results {
+		if result.Error != nil {
+			zap.S().With(zap.Error(err)).Error("Failed to parse ces events")
+			return err
+		}
 	}
 
-	for _, event := range daoEvents {
-		switch event.EventName {
-		case events.VotingCreatedEventName:
+	for _, result := range results {
+		switch result.Event.Name {
+		case events.SimpleVotingCreatedEventName:
 			trackVotingCreated := event_tracking.NewTrackVotingCreated()
 			trackVotingCreated.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
-			daoEventHandler = trackVotingCreated
-		case events.MintEventName:
-			trackMintEvent := event_tracking.NewTrackMint()
-			trackMintEvent.SetEventContractPackage(c.daoContractPackageHashes.ReputationContractPackageHash)
-			trackMintEvent.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
-			daoEventHandler = trackMintEvent
-		case events.BurnEventName:
-			trackBurnEvent := event_tracking.NewTrackBurn()
-			trackBurnEvent.SetEventContractPackage(c.daoContractPackageHashes.ReputationContractPackageHash)
-			trackBurnEvent.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
-			daoEventHandler = trackBurnEvent
+			trackVotingCreated.SetCESEvent(result.Event)
+			trackVotingCreated.SetEntityManager(c.GetEntityManager())
+			if err := trackVotingCreated.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
+				return err
+			}
 		case events.BallotCastName:
 			trackBallotCast := event_tracking.NewTrackBallotCast()
-			trackBallotCast.SetDAOContractsMetadata(c.daoContractPackageHashes)
+			//trackBallotCast.SetDAOContractsMetadata(c.daoContractPackageHashes)
 			trackBallotCast.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
-			daoEventHandler = trackBallotCast
-		case events.VotingEndedEventName:
-			trackVotingEnded := event_tracking.NewTrackVotingEnded()
-			trackVotingEnded.SetEventContractPackage(c.daoContractPackageHashes.VoterContractPackageHash)
-			trackVotingEnded.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
-			daoEventHandler = trackVotingEnded
-		case events.ValueUpdatedEventName:
-			trackValueUpdated := event_tracking.NewTrackValueUpdated()
-			trackValueUpdated.SetVariableRepositoryContractStorageUref(c.variableRepositoryContractStorageUref)
-			trackValueUpdated.SetCasperClient(c.GetCasperClient())
-			daoEventHandler = trackValueUpdated
+			trackBallotCast.SetCESEvent(result.Event)
+			trackBallotCast.SetEntityManager(c.GetEntityManager())
+			if err := trackBallotCast.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
+				return err
+			}
 		case "AddedToWhitelist":
 			zap.S().Debug("new AddedToWhitelist event received")
 			continue
 		default:
 			return errors.New("unsupported DAO event")
-		}
-
-		daoEventHandler.SetEventBody(event.EventBody)
-		daoEventHandler.SetEntityManager(c.GetEntityManager())
-		if err := daoEventHandler.Execute(); err != nil {
-			zap.S().With(zap.Error(err)).With(zap.String("event-name", event.EventName)).Info("Failed to handle DAO event")
-			return err
 		}
 	}
 

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"casper-dao-middleware/internal/crdao/dao_event_parser"
 	"casper-dao-middleware/internal/crdao/persistence"
 	"casper-dao-middleware/internal/crdao/services/event_processing"
+	"casper-dao-middleware/internal/crdao/services/settings"
 	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
@@ -68,8 +68,8 @@ type PopulateCrDAODeploysFromClarity struct {
 	clarityDB, crDAODB *sqlx.DB
 	casperClient       casper.RPCClient
 
-	daoEventParser           *dao_event_parser.DaoEventParser
-	daoContractPackageHashes dao_event_parser.DAOContractsMetadata
+	daoEventParser           *dao.DaoEventParser
+	daoContractPackageHashes dao.DAOContractsMetadata
 }
 
 func (c *PopulateCrDAODeploysFromClarity) SetUp() error {
@@ -95,22 +95,31 @@ func (c *PopulateCrDAODeploysFromClarity) SetUp() error {
 
 	c.casperClient = casper.NewRPCClient(cfg.NodeRPCURL.String())
 
-	c.daoEventParser, err = dao_event_parser.NewDaoEventParser(c.casperClient, cfg.DaoContractHashes, 100)
+	c.daoEventParser, err = dao.NewDaoEventParser(c.casperClient, cfg.DaoContractHashes, 100)
 	if err != nil {
 		return err
 	}
 
-	c.daoContractPackageHashes, err = dao_event_parser.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, c.casperClient)
+	c.daoContractPackageHashes, err = dao.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, c.casperClient)
 	return err
 }
 
 func (c *PopulateCrDAODeploysFromClarity) Execute() error {
 	daoDeploysCursor := c.createDAODeployCursor(c.clarityDB, c.cfg.DaoContractHashes)
 
+	crdaoEntityManager := persistence.NewEntityManager(c.crDAODB, c.daoContractPackageHashes)
+
+	syncDaoSetting := settings.NewSyncDAOSettings()
+	syncDaoSetting.SetCasperClient(c.casperClient)
+	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.daoContractPackageHashes.VariableRepositoryContractStorageUref)
+	syncDaoSetting.SetEntityManager(crdaoEntityManager)
+	syncDaoSetting.SetSettings(settings.DaoSettings)
+	syncDaoSetting.Execute()
+
 	processRawDeploy := event_processing.NewProcessRawDeploy()
 	processRawDeploy.SetDAOEventParser(c.daoEventParser)
 	processRawDeploy.SetCasperClient(c.casperClient)
-	processRawDeploy.SetEntityManager(persistence.NewEntityManager(c.crDAODB, c.daoContractPackageHashes))
+	processRawDeploy.SetEntityManager(crdaoEntityManager)
 	processRawDeploy.SetDAOContractPackageHashes(c.daoContractPackageHashes)
 
 	for daoDeploysCursor.Next() {

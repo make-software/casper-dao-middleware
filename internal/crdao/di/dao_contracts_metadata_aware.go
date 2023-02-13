@@ -1,15 +1,15 @@
 package di
 
-import "casper-dao-middleware/internal/crdao/dao_event_parser"
+import "casper-dao-middleware/internal/crdao/types"
 
 type DAOContractsMetadataAware struct {
-	metadata dao_event_parser.DAOContractsMetadata
+	metadata types.DAOContractsMetadata
 }
 
-func (a *DAOContractsMetadataAware) SetDAOContractsMetadata(hashes dao_event_parser.DAOContractsMetadata) {
+func (a *DAOContractsMetadataAware) SetDAOContractsMetadata(hashes types.DAOContractsMetadata) {
 	a.metadata = hashes
 }
 
-func (a *DAOContractsMetadataAware) GetDAOContractsMetadata() dao_event_parser.DAOContractsMetadata {
+func (a *DAOContractsMetadataAware) GetDAOContractsMetadata() types.DAOContractsMetadata {
 	return a.metadata
 }
