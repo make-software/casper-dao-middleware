@@ -13,9 +13,18 @@ import (
 const variableRepositoryContractStorageUrefName = "storage__repository__contract"
 
 type DAOContractsMetadata struct {
-	ReputationContractPackageHash         types.Hash
-	VoterContractPackageHash              types.Hash
+	ReputationContractPackageHash types.Hash
+	ReputationContractHash        types.Hash
+
+	// There are many voter contracts
+	SimpleVoterContractPackageHash types.Hash
+	SimpleVoterContractHash        types.Hash
+
 	VariableRepositoryContractPackageHash types.Hash
+	VariableRepositoryContractHash        types.Hash
+
+	VANFTContractPackageHash              types.Hash
+	VANFTContractHash                     types.Hash
 	VariableRepositoryContractStorageUref string
 }
 
@@ -41,10 +50,16 @@ func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]types.Hash, 
 		switch contractName {
 		case "reputation_contract":
 			result.ReputationContractPackageHash = contractPackageHash
+			result.ReputationContractHash = contractHashHex
 		case "voter_contract":
-			result.VoterContractPackageHash = contractPackageHash
+			result.SimpleVoterContractPackageHash = contractPackageHash
+			result.SimpleVoterContractHash = contractHashHex
+		case "va_nft_contract":
+			result.VANFTContractPackageHash = contractPackageHash
+			result.VANFTContractHash = contractHashHex
 		case "variable_repository_contract":
 			result.VariableRepositoryContractPackageHash = contractPackageHash
+			result.VariableRepositoryContractHash = contractHashHex
 			for _, namedKey := range stateItemRes.StoredValue.Contract.NamedKeys {
 				if namedKey.Name == variableRepositoryContractStorageUrefName {
 					result.VariableRepositoryContractStorageUref = namedKey.Key
@@ -62,10 +77,19 @@ func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]types.Hash, 
 	return result, result.Validate()
 }
 
+func (d DAOContractsMetadata) CESContracts() []types.Hash {
+	return []types.Hash{
+		d.ReputationContractHash,
+		d.VANFTContractHash,
+		d.SimpleVoterContractPackageHash,
+		d.VariableRepositoryContractHash,
+	}
+}
+
 func (d DAOContractsMetadata) Validate() error {
 	return validation.ValidateStruct(&d,
 		validation.Field(&d.ReputationContractPackageHash, validation.Required),
-		validation.Field(&d.VoterContractPackageHash, validation.Required),
+		validation.Field(&d.SimpleVoterContractHash, validation.Required),
 		validation.Field(&d.VariableRepositoryContractPackageHash, validation.Required),
 		validation.Field(&d.VariableRepositoryContractStorageUref, validation.Required),
 	)

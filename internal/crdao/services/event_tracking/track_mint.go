@@ -6,22 +6,23 @@ import (
 	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type TrackMint struct {
 	di.EntityManagerAware
 
-	contractPackage types.Hash
 	deployProcessed casper.DeployProcessed
-	eventBody       []byte
+	contractPackage types.Hash
+	cesEvent        ces.Event
 }
 
 func NewTrackMint() *TrackMint {
 	return &TrackMint{}
 }
 
-func (s *TrackMint) SetEventBody(eventBody []byte) {
-	s.eventBody = eventBody
+func (s *TrackMint) SetCESEvent(event ces.Event) {
+	s.cesEvent = event
 }
 
 func (s *TrackMint) SetDeployProcessed(deployProcessed casper.DeployProcessed) {
@@ -33,7 +34,7 @@ func (s *TrackMint) SetEventContractPackage(contractPackage types.Hash) {
 }
 
 func (s *TrackMint) Execute() error {
-	mintEvent, err := events.ParseMintEvent(s.eventBody)
+	mintEvent, err := events.ParseMint(s.cesEvent)
 	if err != nil {
 		return err
 	}

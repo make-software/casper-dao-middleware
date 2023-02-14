@@ -6,6 +6,7 @@ import (
 	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type TrackBurn struct {
@@ -13,15 +14,15 @@ type TrackBurn struct {
 
 	contractPackage types.Hash
 	deployProcessed casper.DeployProcessed
-	eventBody       []byte
+	cesEvent        ces.Event
 }
 
 func NewTrackBurn() *TrackBurn {
 	return &TrackBurn{}
 }
 
-func (s *TrackBurn) SetEventBody(eventBody []byte) {
-	s.eventBody = eventBody
+func (s *TrackBurn) SetCESEvent(event ces.Event) {
+	s.cesEvent = event
 }
 
 func (s *TrackBurn) SetDeployProcessed(deployProcessed casper.DeployProcessed) {
@@ -33,7 +34,7 @@ func (s *TrackBurn) SetEventContractPackage(contractPackage types.Hash) {
 }
 
 func (s *TrackBurn) Execute() error {
-	burnEvent, err := events.ParseBurnEvent(s.eventBody)
+	burnEvent, err := events.ParseBurn(s.cesEvent)
 	if err != nil {
 		return err
 	}

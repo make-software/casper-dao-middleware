@@ -56,24 +56,36 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 		return err
 	}
 
+	daoMetaData := c.GetDAOContractsMetadata()
+
 	syncDaoSetting := settings.NewSyncDAOSettings()
 	syncDaoSetting.SetCasperClient(c.GetCasperClient())
-	syncDaoSetting.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
+	syncDaoSetting.SetVariableRepositoryContractStorageUref(daoMetaData.VariableRepositoryContractStorageUref)
 	syncDaoSetting.SetEntityManager(c.GetEntityManager())
 	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
 	syncDaoSetting.Execute()
 
-	cesParser, err := ces.NewParser(c.GetCasperClient(), []types.Hash{c.GetDAOContractsMetadata().VoterContractPackageHash})
+	cesParser, err := ces.NewParser(c.GetCasperClient(), daoMetaData.CESContracts())
 	if err != nil {
 		zap.S().With(zap.Error(err)).Error("Failed to create CES Parser")
 		return err
 	}
 
 	processRawDeploy := NewProcessRawDeploy()
-	processRawDeploy.SetCasperClient(c.GetCasperClient())
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
 	processRawDeploy.SetCESEventParser(cesParser)
-	processRawDeploy.SetVariableRepositoryContractStorageUref(c.GetDAOContractsMetadata().VariableRepositoryContractStorageUref)
+	processRawDeploy.SetDAOContractsMetadata(c.GetDAOContractsMetadata())
+
+	res, _ := c.GetCasperClient().GetDeploy("29bf99e9dc089c11784a107e62e21a3a395c3a0ecbb26d5363401284ea83e65f")
+
+	processRawDeploy.SetDeployProcessedEvent(&casper.DeployProcessedEvent{
+		DeployProcessed: casper.DeployProcessed{
+			ExecutionResult: res.ExecutionResults[0].Result,
+		},
+	})
+	if err = processRawDeploy.Execute(); err != nil {
+		zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
+	}
 
 	stopListening := func() {
 		eventListener.Close()

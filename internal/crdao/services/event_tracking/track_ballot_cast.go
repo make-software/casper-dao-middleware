@@ -60,7 +60,6 @@ func (s *TrackBallotCast) Execute() error {
 		return err
 	}
 
-	//TODO: review logic of reputation changing
 	changes := []entities.ReputationChange{
 		// one event represent negative reputation leaving from "Reputation" contract
 		entities.NewReputationChange(

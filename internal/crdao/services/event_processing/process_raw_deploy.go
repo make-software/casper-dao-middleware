@@ -8,17 +8,16 @@ import (
 	"casper-dao-middleware/internal/crdao/di"
 	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/internal/crdao/services/event_tracking"
+	"casper-dao-middleware/internal/crdao/types"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type ProcessRawDeploy struct {
 	di.EntityManagerAware
-	di.CasperClientAware
 
-	variableRepositoryContractStorageUref string
-	cesParser                             *ces.EventParser
-
+	cesParser            *ces.EventParser
+	daoContractsMetadata types.DAOContractsMetadata
 	deployProcessedEvent *casper.DeployProcessedEvent
 }
 
@@ -30,8 +29,8 @@ func (c *ProcessRawDeploy) SetDeployProcessedEvent(event *casper.DeployProcessed
 	c.deployProcessedEvent = event
 }
 
-func (c *ProcessRawDeploy) SetVariableRepositoryContractStorageUref(uref string) {
-	c.variableRepositoryContractStorageUref = uref
+func (c *ProcessRawDeploy) SetDAOContractsMetadata(daoContractsMetadata types.DAOContractsMetadata) {
+	c.daoContractsMetadata = daoContractsMetadata
 }
 
 func (c *ProcessRawDeploy) SetCESEventParser(parser *ces.EventParser) {
@@ -64,7 +63,6 @@ func (c *ProcessRawDeploy) Execute() error {
 			}
 		case events.BallotCastName:
 			trackBallotCast := event_tracking.NewTrackBallotCast()
-			//trackBallotCast.SetDAOContractsMetadata(c.daoContractPackageHashes)
 			trackBallotCast.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
 			trackBallotCast.SetCESEvent(result.Event)
 			trackBallotCast.SetEntityManager(c.GetEntityManager())
@@ -72,9 +70,24 @@ func (c *ProcessRawDeploy) Execute() error {
 				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
 				return err
 			}
-		case "AddedToWhitelist":
-			zap.S().Debug("new AddedToWhitelist event received")
-			continue
+		case events.MintEventName:
+			trackMintEvent := event_tracking.NewTrackMint()
+			trackMintEvent.SetEventContractPackage(c.daoContractsMetadata.ReputationContractPackageHash)
+			trackMintEvent.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
+			trackMintEvent.SetCESEvent(result.Event)
+			if err := trackMintEvent.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
+				return err
+			}
+		case events.BurnEventName:
+			trackBurnEvent := event_tracking.NewTrackBurn()
+			trackBurnEvent.SetEventContractPackage(c.daoContractsMetadata.ReputationContractPackageHash)
+			trackBurnEvent.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
+			trackBurnEvent.SetCESEvent(result.Event)
+			if err := trackBurnEvent.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
+				return err
+			}
 		default:
 			return errors.New("unsupported DAO event")
 		}

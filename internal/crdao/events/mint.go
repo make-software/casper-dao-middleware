@@ -5,39 +5,33 @@ import (
 
 	dao_types "casper-dao-middleware/internal/crdao/types"
 	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const MintEventName = "Mint"
 
 type Mint struct {
 	Address dao_types.Address
-	Amount  types.U256
+	Amount  types.U512
 }
 
-func ParseMintEvent(bytes []byte) (Mint, error) {
-	key, reminder, err := types.ParseKeyFromBytes(bytes)
-	if err != nil {
-		return Mint{}, err
+func ParseMint(event ces.Event) (Mint, error) {
+	var mint Mint
+
+	val, ok := event.Data["address"]
+	if !ok || val.Type.CLTypeID != types.CLTypeIDKey {
+		return Mint{}, errors.New("invalid address value in event")
+	}
+	mint.Address = dao_types.Address{
+		AccountHash:         val.Key.AccountHash,
+		ContractPackageHash: val.Key.Hash,
 	}
 
-	event := Mint{}
-	if key.AccountHash == nil && key.Hash == nil {
-		return Mint{}, errors.New("expected Address in Mint event")
+	val, ok = event.Data["amount"]
+	if !ok || val.Type.CLTypeID != types.CLTypeIDU512 {
+		return Mint{}, errors.New("invalid amount value in event")
 	}
+	mint.Amount = *val.U512
 
-	var address dao_types.Address
-	if key.AccountHash != nil {
-		address.AccountHash = key.AccountHash
-	} else {
-		address.ContractPackageHash = key.Hash
-	}
-
-	event.Address = address
-
-	event.Amount, reminder, err = types.ParseUTypeFromBytes[types.U256](reminder)
-	if err != nil {
-		return Mint{}, err
-	}
-
-	return event, nil
+	return mint, nil
 }

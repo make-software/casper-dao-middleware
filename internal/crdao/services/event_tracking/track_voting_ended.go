@@ -2,12 +2,8 @@ package event_tracking
 
 import (
 	"casper-dao-middleware/internal/crdao/di"
-	"casper-dao-middleware/internal/crdao/entities"
-	"casper-dao-middleware/internal/crdao/events"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
-
-	"go.uber.org/zap"
 )
 
 type TrackVotingEnded struct {
@@ -35,50 +31,52 @@ func (s *TrackVotingEnded) SetEventContractPackage(contractPackage types.Hash) {
 }
 
 func (s *TrackVotingEnded) Execute() error {
-	votingEnded, err := events.ParseVotingEndedEvent(s.eventBody)
-	if err != nil {
-		return err
-	}
+	//votingEnded, err := events.ParseVotingEndedEvent(s.eventBody)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//changes := make([]entities.ReputationChange, 0, len(votingEnded.Burns)+len(votingEnded.Transfers))
+	//
+	//for addressHex, amount := range votingEnded.Burns {
+	//	address, _ := types.NewHashFromHexString(addressHex)
+	//
+	//	changes = append(changes, entities.NewReputationChange(
+	//		address,
+	//		s.contractPackage,
+	//		nil,
+	//		-amount.Into().Int64(),
+	//		s.deployProcessed.DeployHash,
+	//		entities.ReputationChangeReasonVotingBurn,
+	//		s.deployProcessed.Timestamp),
+	//	)
+	//}
+	//
+	//votingID := uint32(votingEnded.VotingID.Into().Uint64())
+	//for addressHex, amount := range votingEnded.Transfers {
+	//	address, _ := types.NewHashFromHexString(addressHex)
+	//
+	//	changes = append(changes, entities.NewReputationChange(
+	//		address,
+	//		s.contractPackage,
+	//		&votingID,
+	//		amount.Into().Int64(),
+	//		s.deployProcessed.DeployHash,
+	//		entities.ReputationChangeReasonVotingDistribution,
+	//		s.deployProcessed.Timestamp),
+	//	)
+	//}
+	//
+	//if len(changes) == 0 {
+	//	zap.S().Info("No changes in `voting_created` event")
+	//	return nil
+	//}
+	//
+	//if err := s.GetEntityManager().VotingRepository().UpdateHasEnded(votingID, true); err != nil {
+	//	return err
+	//}
+	//
+	//return s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes)
 
-	changes := make([]entities.ReputationChange, 0, len(votingEnded.Burns)+len(votingEnded.Transfers))
-
-	for addressHex, amount := range votingEnded.Burns {
-		address, _ := types.NewHashFromHexString(addressHex)
-
-		changes = append(changes, entities.NewReputationChange(
-			address,
-			s.contractPackage,
-			nil,
-			-amount.Into().Int64(),
-			s.deployProcessed.DeployHash,
-			entities.ReputationChangeReasonVotingBurn,
-			s.deployProcessed.Timestamp),
-		)
-	}
-
-	votingID := uint32(votingEnded.VotingID.Into().Uint64())
-	for addressHex, amount := range votingEnded.Transfers {
-		address, _ := types.NewHashFromHexString(addressHex)
-
-		changes = append(changes, entities.NewReputationChange(
-			address,
-			s.contractPackage,
-			&votingID,
-			amount.Into().Int64(),
-			s.deployProcessed.DeployHash,
-			entities.ReputationChangeReasonVotingDistribution,
-			s.deployProcessed.Timestamp),
-		)
-	}
-
-	if len(changes) == 0 {
-		zap.S().Info("No changes in `voting_created` event")
-		return nil
-	}
-
-	if err := s.GetEntityManager().VotingRepository().UpdateHasEnded(votingID, true); err != nil {
-		return err
-	}
-
-	return s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes)
+	return nil
 }
