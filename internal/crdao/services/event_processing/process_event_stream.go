@@ -65,7 +65,7 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
 	syncDaoSetting.Execute()
 
-	cesParser, err := ces.NewParser(c.GetCasperClient(), daoMetaData.CESContracts())
+	cesParser, err := ces.NewParser(c.GetCasperClient(), c.GetDAOContractsMetadata().CESContracts())
 	if err != nil {
 		zap.S().With(zap.Error(err)).Error("Failed to create CES Parser")
 		return err
@@ -74,18 +74,7 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	processRawDeploy := NewProcessRawDeploy()
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
 	processRawDeploy.SetCESEventParser(cesParser)
-	processRawDeploy.SetDAOContractsMetadata(c.GetDAOContractsMetadata())
-
-	res, _ := c.GetCasperClient().GetDeploy("29bf99e9dc089c11784a107e62e21a3a395c3a0ecbb26d5363401284ea83e65f")
-
-	processRawDeploy.SetDeployProcessedEvent(&casper.DeployProcessedEvent{
-		DeployProcessed: casper.DeployProcessed{
-			ExecutionResult: res.ExecutionResults[0].Result,
-		},
-	})
-	if err = processRawDeploy.Execute(); err != nil {
-		zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
-	}
+	processRawDeploy.SetDAOContractsMetadata(daoMetaData)
 
 	stopListening := func() {
 		eventListener.Close()

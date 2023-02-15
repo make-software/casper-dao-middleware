@@ -50,6 +50,7 @@ func (c *ProcessRawDeploy) Execute() error {
 		}
 	}
 
+	// TODO: split events name checking by contract
 	for _, result := range results {
 		switch result.Event.Name {
 		case events.SimpleVotingCreatedEventName:

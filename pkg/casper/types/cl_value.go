@@ -35,6 +35,7 @@ type CLValue struct {
 	Tuple2    *[2]CLValue
 	Tuple3    *[3]CLValue
 	PublicKey *PublicKey
+	Any       []byte
 }
 
 func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byte, error) {
@@ -120,8 +121,14 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 			Key:  &key,
 		}, reminder, nil
 	case CLTypeIDAny:
+		rawParsed, reminder, err := ParseBytesWithReminder(data)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
 		return CLValue{
 			Type: clType,
+			Any:  rawParsed,
 		}, reminder, nil
 	case CLTypeIDString:
 		rawParsed, reminder, err := ParseBytesWithReminder(data)

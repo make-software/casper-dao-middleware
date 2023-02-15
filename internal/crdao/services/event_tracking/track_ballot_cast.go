@@ -73,7 +73,7 @@ func (s *TrackBallotCast) Execute() error {
 		// second event represent positive reputation coming to "Voting" contract
 		entities.NewReputationChange(
 			*voter,
-			s.GetDAOContractsMetadata().VoterContractPackageHash,
+			s.GetDAOContractsMetadata().SimpleVoterContractPackageHash,
 			&ballotCast.VotingID,
 			staked,
 			s.deployProcessed.DeployHash,

@@ -73,7 +73,7 @@ func (r *ReputationChange) CalculateTotalReputationForAddress(address types.Hash
 	totalReputation := entities.TotalReputation{}
 	err := r.conn.Get(&totalReputation, query,
 		address, r.contractPackageHashes.ReputationContractPackageHash,
-		address, r.contractPackageHashes.VoterContractPackageHash)
+		address, r.contractPackageHashes.SimpleVoterContractPackageHash)
 	if err != nil {
 		return entities.TotalReputation{}, err
 	}
@@ -98,7 +98,7 @@ func (r *ReputationChange) FindAggregatedReputationChanges(params *pagination.Pa
 	if err != nil {
 		return nil, err
 	}
-	args = append(args, r.contractPackageHashes.ReputationContractPackageHash, r.contractPackageHashes.VoterContractPackageHash)
+	args = append(args, r.contractPackageHashes.ReputationContractPackageHash, r.contractPackageHashes.SimpleVoterContractPackageHash)
 	args = append(args, aggregationArgs...)
 
 	queryBuilder := query.Select(
