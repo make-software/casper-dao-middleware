@@ -50,10 +50,9 @@ func (c *ProcessRawDeploy) Execute() error {
 		}
 	}
 
-	// TODO: split events name checking by contract
 	for _, result := range results {
 		switch result.Event.Name {
-		case events.SimpleVotingCreatedEventName:
+		case events.SimpleVotingCreatedEventName, events.ReputationVotingCreatedEventName, events.RepoVotingCreated, events.KYCVotingCreated:
 			trackVotingCreated := event_tracking.NewTrackVotingCreated()
 			trackVotingCreated.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
 			trackVotingCreated.SetCESEvent(result.Event)
@@ -67,10 +66,21 @@ func (c *ProcessRawDeploy) Execute() error {
 			trackBallotCast.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
 			trackBallotCast.SetCESEvent(result.Event)
 			trackBallotCast.SetEntityManager(c.GetEntityManager())
+			trackBallotCast.SetDAOContractsMetadata(c.daoContractsMetadata)
 			if err := trackBallotCast.Execute(); err != nil {
 				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
 				return err
 			}
+		case events.Transfer:
+			trackTransfer := event_tracking.NewTrackTransfer()
+			trackTransfer.SetDAOContractsMetadata(c.daoContractsMetadata)
+			trackTransfer.SetDeployProcessed(c.deployProcessedEvent.DeployProcessed)
+			trackTransfer.SetCESEvent(result.Event)
+			if err := trackTransfer.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
+				return err
+			}
+
 		case events.MintEventName:
 			trackMintEvent := event_tracking.NewTrackMint()
 			trackMintEvent.SetEventContractPackage(c.daoContractsMetadata.ReputationContractPackageHash)

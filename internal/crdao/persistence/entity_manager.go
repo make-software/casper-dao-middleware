@@ -15,6 +15,7 @@ type EntityManager interface {
 	VoteRepository() repositories.VoteRepository
 	VotingRepository() repositories.VotingRepository
 	SettingRepository() repositories.SettingRepository
+	AccountRepository() repositories.Account
 }
 
 type entityManager struct {
@@ -22,6 +23,7 @@ type entityManager struct {
 	voteRepository        repositories.VoteRepository
 	votingRepository      repositories.VotingRepository
 	settingRepository     repositories.SettingRepository
+	accountRepo           repositories.Account
 }
 
 func NewEntityManager(db *sqlx.DB, hashes types.DAOContractsMetadata) EntityManager {
@@ -47,4 +49,8 @@ func (e entityManager) VotingRepository() repositories.VotingRepository {
 
 func (e entityManager) SettingRepository() repositories.SettingRepository {
 	return e.settingRepository
+}
+
+func (e entityManager) AccountRepository() repositories.Account {
+	return e.accountRepo
 }

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -45,20 +45,11 @@ func (e *Env) Parse() error {
 		return err
 	}
 
+	hashes := config.GetEnv("DAO_CONTRACT_HASHES")
 	e.DaoContractHashes = make(map[string]types.Hash, 0)
-	for _, contract := range strings.Split(config.GetEnv("DAO_CONTRACT_HASHES"), ",") {
-		definitions := strings.Split(contract, ":")
-		//expect contract_name:contract_hash
-		if len(definitions) != 2 {
-			return errors.New("invalid DAO_CONTRACT_HASHES format provided")
-		}
 
-		hash, err := types.NewHashFromHexString(definitions[1])
-		if err != nil {
-			return err
-		}
-
-		e.DaoContractHashes[definitions[0]] = hash
+	if err := json.Unmarshal([]byte(hashes), &e.DaoContractHashes); err != nil {
+		return err
 	}
 
 	eventID := os.Getenv(fmt.Sprintf("NEW_NODE_START_FROM_EVENT_ID_%s",

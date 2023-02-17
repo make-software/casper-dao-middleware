@@ -36,27 +36,39 @@ func NewVoting(conn *sqlx.DB) *Voting {
 	}
 }
 
-func (r *Voting) Save(vote *entities.Voting) error {
+func (r *Voting) Save(voting *entities.Voting) error {
 	queryBuilder := query.Insert("votings").
 		Columns(
 			"creator",
 			"deploy_hash",
 			"voting_id",
+			"voting_type_id",
 			"is_formal",
 			"has_ended",
+			"metadata",
+			"config_double_time_between_votings",
+			"config_total_onboarded",
+			"config_voting_clearness_delta",
+			"config_time_between_informal_and_formal_voting",
 			"voting_quorum",
 			"voting_time",
 			"timestamp",
 		).
 		Values(
-			vote.Creator,
-			vote.DeployHash,
-			vote.VotingID,
-			vote.IsFormal,
-			vote.HasEnded,
-			vote.VotingQuorum,
-			vote.VotingTime,
-			vote.Timestamp,
+			voting.Creator,
+			voting.DeployHash,
+			voting.VotingID,
+			voting.VotingTypeID,
+			voting.IsFormal,
+			voting.HasEnded,
+			voting.Metadata,
+			voting.ConfigDoubleTimeBetweenVotings,
+			voting.ConfigTotalOnboarded,
+			voting.ConfigVotingClearnessDelta,
+			voting.ConfigTimeBetweenInformalAndFormalVoting,
+			voting.VotingQuorum,
+			voting.VotingTime,
+			voting.Timestamp,
 		)
 	sql, args, err := queryBuilder.ToSql()
 	if err != nil {

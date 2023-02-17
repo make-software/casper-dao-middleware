@@ -8,7 +8,7 @@ import (
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
-const VATransfer = "Transfer"
+const Transfer = "Transfer"
 
 type VaTransfer struct {
 	From    dao_types.Address
