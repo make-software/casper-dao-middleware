@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"casper-dao-middleware/apps/api/serialization"
-	"casper-dao-middleware/internal/crdao/persistence"
-	"casper-dao-middleware/internal/crdao/services/voting"
+	"casper-dao-middleware/internal/dao/persistence"
+	"casper-dao-middleware/internal/dao/services/voting"
 	"casper-dao-middleware/pkg/errors"
 	http_params "casper-dao-middleware/pkg/http-params"
 	http_response "casper-dao-middleware/pkg/http-response"

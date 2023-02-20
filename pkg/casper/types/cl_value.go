@@ -30,7 +30,7 @@ type CLValue struct {
 	List   *[]CLValue
 	//ByteArray *FixedByteArray
 	//Result    *CLValueResult
-	//Map       *CLMap
+	Map       *CLMap
 	Tuple1    *[1]CLValue
 	Tuple2    *[2]CLValue
 	Tuple3    *[3]CLValue
@@ -150,6 +150,102 @@ func NewCLValueFromBytesWithRemainder(clType CLType, data []byte) (CLValue, []by
 			Type:   clType,
 			String: &parsed,
 		}, remainder, nil
+	case CLTypeIDMap:
+		if len(data) < 4 {
+			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
+		}
+
+		if clType.CLTypeMap == nil {
+			return CLValue{}, nil, errors.New("expected not nil ClMap")
+		}
+
+		itemNumber := binary.LittleEndian.Uint32(data)
+		var (
+			//without uint32
+			rem                = data[4:]
+			clValueK, clValueV CLValue
+			err                error
+		)
+
+		mapData := make(map[*CLValue]CLValue, itemNumber)
+		for i := 0; i < int(itemNumber); i++ {
+			clValueK, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeMap.CLTypeKey, rem)
+			if err != nil {
+				return CLValue{}, nil, err
+			}
+
+			clValueV, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeMap.CLTypeValue, rem)
+			if err != nil {
+				return CLValue{}, nil, err
+			}
+			mapData[&clValueK] = clValueV
+		}
+		return CLValue{
+			Type: clType,
+			Map: &CLMap{
+				KeyType:   clType.CLTypeMap.CLTypeKey,
+				ValueType: clType.CLTypeMap.CLTypeValue,
+				Data:      mapData,
+			},
+		}, rem, nil
+
+	case CLTypeIDTuple2:
+		if clType.CLTypeTuple2 == nil {
+			return CLValue{}, nil, errors.New("expected not nil CLTypeTuple2")
+		}
+
+		var (
+			rem                    = data
+			clValueEl1, clValueEl2 CLValue
+			err                    error
+		)
+
+		clValueEl1, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeTuple2.CLTypeElement1, rem)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
+		clValueEl2, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeTuple2.CLTypeElement2, rem)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
+		return CLValue{
+			Type:   clType,
+			Tuple2: &[2]CLValue{clValueEl1, clValueEl2},
+		}, rem, nil
+
+	case CLTypeIDTuple3:
+		if clType.CLTypeTuple3 == nil {
+			return CLValue{}, nil, errors.New("expected not nil CLTypeTuple3")
+		}
+
+		var (
+			rem                                = data
+			clValueEl1, clValueEl2, clValueEl3 CLValue
+			err                                error
+		)
+
+		clValueEl1, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeTuple3.CLTypeElement1, rem)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
+		clValueEl2, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeTuple3.CLTypeElement2, rem)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
+		clValueEl3, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeTuple3.CLTypeElement3, rem)
+		if err != nil {
+			return CLValue{}, nil, err
+		}
+
+		return CLValue{
+			Type:   clType,
+			Tuple3: &[3]CLValue{clValueEl1, clValueEl2, clValueEl3},
+		}, rem, nil
+
 	case CLTypeIDOption:
 		if remainder[0] != 0 && clType.CLTypeOption != nil {
 			var clValue CLValue

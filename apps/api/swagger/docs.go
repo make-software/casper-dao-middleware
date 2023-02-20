@@ -860,14 +860,17 @@ const docTemplate = `{
                 "deploy_hash": {
                     "type": "string"
                 },
-                "document_hash": {
-                    "type": "string"
-                },
                 "has_ended": {
                     "type": "boolean"
                 },
                 "is_formal": {
                     "type": "boolean"
+                },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "timestamp": {
                     "type": "string"
@@ -880,8 +883,28 @@ const docTemplate = `{
                 },
                 "voting_time": {
                     "type": "integer"
+                },
+                "voting_type_id": {
+                    "$ref": "#/definitions/entities.VotingTypeID"
                 }
             }
+        },
+        "entities.VotingTypeID": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "x-enum-varnames": [
+                "VotingTypeSimple",
+                "VotingTypeSlashing",
+                "VotingTypeKYC",
+                "VotingTypeRepo",
+                "VotingTypeReputation"
+            ]
         },
         "http_response.ErrorResponse": {
             "type": "object",
