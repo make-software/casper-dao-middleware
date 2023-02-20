@@ -19,13 +19,18 @@ type Event struct {
 	Name                string
 }
 
-// ParseEvent parse provided rawEvent according to event schema, return EventName and EventData
-func ParseEvent(rawEvent []byte, schemas Schemas) (string, map[string]types.CLValue, error) {
-	if len(rawEvent) < 4 {
+// ParseEventNameAndData parse provided rawEvent according to event schema, return EventName and EventData
+func ParseEventNameAndData(eventHex string, schemas Schemas) (string, map[string]types.CLValue, error) {
+	clValue, _, err := types.ParseCLValueFromBytesWithRemainder(eventHex)
+	if err != nil {
 		return "", nil, ErrInvalidEventBytes
 	}
 
-	eventNameWithPrefix, eventBody, err := types.ParseBytesWithReminder(rawEvent[4:])
+	if len(clValue.Bytes) < 4 {
+		return "", nil, ErrInvalidEventBytes
+	}
+
+	eventNameWithPrefix, eventBody, err := types.ParseBytesWithRemainder(clValue.Bytes[4:])
 	if err != nil {
 		return "", nil, err
 	}
@@ -52,13 +57,13 @@ func parseEventDataFromSchemaBytes(schema Schema, data []byte) (map[string]types
 	result := make(map[string]types.CLValue, len(schema))
 
 	var (
-		err      error
-		reminder = data
-		clValue  types.CLValue
+		err       error
+		remainder = data
+		clValue   types.CLValue
 	)
 
 	for _, item := range schema {
-		clValue, reminder, err = types.NewCLValueFromBytesWithReminder(item.Value, reminder)
+		clValue, remainder, err = types.NewCLValueFromBytesWithRemainder(item.Value, remainder)
 		if err != nil {
 			return nil, err
 		}

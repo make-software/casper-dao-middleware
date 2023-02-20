@@ -69,9 +69,10 @@ Go CES Parser provides several public types and functions:
 - [`NewSchemasFromBytes`](#NewSchemasFromBytes)
 - [`EventData`](#EventData)
 - [`Event`](#Event)
-- [`ParseEvent`](#ParseEvent)
+  - [`ParseEventNameAndData`](#ParseEventNameAndData)
 - [`ParseResult`](#ParseResult)
 - [`Schemas`](#Schemas)
+- [`Schema`](#Schema)
 
 ### `Parser`
 
@@ -121,14 +122,14 @@ returns `ces.Schemas`:
 |--------------|----------|----------------------------|
 | `rawSchemas` | `[]byte` | Raw contract schemas bytes |
 
-### `ParseEvent`
+### `ParseEventNameAndData`
 
 Function that accepts raw event bytes and contract event schemas and returns `ParseResult`:
 
-| Argument   | Type          | Description                  |            
-|------------|---------------|------------------------------|
-| `rawEvent` | `[]byte`      | Raw event bytes              |
-| `schemas`  | `ces.Schemas` | The list of contract schemas |
+| Argument  | Type          | Description                  |            
+|-----------|---------------|------------------------------|
+| `event`   | `string`      | Raw event bytes in hex       |
+| `schemas` | `ces.Schemas` | The list of contract schemas |
 
 **Example**
 

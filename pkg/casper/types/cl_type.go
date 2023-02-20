@@ -286,8 +286,8 @@ func ClTypeFromBytes(depth uint8, bytes []byte) (CLType, []byte, error) {
 	return CLType{}, nil, errors.New("invalid CLType provided")
 }
 
-// ParseBytesWithReminder looks first bytes to detect length of bytes, extract it and return reminder
-func ParseBytesWithReminder(data []byte) ([]byte, []byte, error) {
+// ParseBytesWithRemainder looks first bytes to detect length of bytes, extract it and return remainder
+func ParseBytesWithRemainder(data []byte) ([]byte, []byte, error) {
 	if len(data) < 4 {
 		return nil, nil, errors.New("invalid length value")
 	}
@@ -306,7 +306,7 @@ func ParseBytesWithReminder(data []byte) ([]byte, []byte, error) {
 	bytes := make([]byte, length)
 	copy(bytes, data[:length])
 
-	reminder := make([]byte, len(data)-int(length))
-	copy(reminder, data[length:])
-	return bytes, reminder, nil
+	remainder := make([]byte, len(data)-int(length))
+	copy(remainder, data[length:])
+	return bytes, remainder, nil
 }

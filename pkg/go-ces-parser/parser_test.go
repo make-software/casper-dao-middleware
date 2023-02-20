@@ -15,8 +15,6 @@ import (
 	"casper-dao-middleware/pkg/casper/types"
 )
 
-var schemaHex = `0800000008000000417070726f76616c03000000050000006f776e65720b080000006f70657261746f720b08000000746f6b656e5f6964150e000000417070726f76616c466f72416c6c03000000050000006f776e65720b080000006f70657261746f720d0b09000000746f6b656e5f6964730e15040000004275726e02000000050000006f776e65720b08000000746f6b656e5f6964150f0000004d65746164617461557064617465640200000008000000746f6b656e5f69641504000000646174610a090000004d6967726174696f6e00000000040000004d696e740200000009000000726563697069656e740b08000000746f6b656e5f696415080000005472616e7366657204000000050000006f776e65720b080000006f70657261746f720d0b09000000726563697069656e740b08000000746f6b656e5f6964150c0000005661726961626c657353657400000000`
-
 func TestEventParser(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -33,27 +31,87 @@ func TestEventParser(t *testing.T) {
 		casperClient: mockedClient,
 	}
 
-	mockedClient.EXPECT().GetLatestStateRootHash().Return(casper.GetStateRootHashResult{}, nil)
-	mockedClient.EXPECT().GetStateItem("", fmt.Sprintf("hash-%s", contractHashToParse.ToHex()), nil).Return(casper.StateGetItemResult{
-		StoredValue: casper.StoredValue{
-			Contract: &casper.Contract{
-				ContractPackageHash: contractPackageHash,
-				NamedKeys: []casper.NamedKey{
-					{
-						Name: eventNamedKey,
-						Key:  "uref-70d95cbeae8ce00c0ca493762cc99aed052adfcb3e279c7440f5241b1bdf27a1-007",
-					}, {
-						Name: eventSchemaNamedKey,
-						Key:  "events-Schema-named-key-uref",
-					}},
+	t.Run("Test several events parsing", func(t *testing.T) {
+		var schemaHex = `08000000100000004164646564546f57686974656c6973740100000007000000616464726573730b0e00000042616c6c6f7443616e63656c65640500000005000000766f7465720b09000000766f74696e675f6964040b000000766f74696e675f74797065030600000063686f69636503050000007374616b65080a00000042616c6c6f74436173740500000005000000766f7465720b09000000766f74696e675f6964040b000000766f74696e675f74797065030600000063686f69636503050000007374616b65080c0000004f776e65724368616e67656401000000090000006e65775f6f776e65720b1400000052656d6f76656446726f6d57686974656c6973740100000007000000616464726573730b1300000053696d706c65566f74696e67437265617465640c0000000d000000646f63756d656e745f686173680a0700000063726561746f720b050000007374616b650d0809000000766f74696e675f69640416000000636f6e6669675f696e666f726d616c5f71756f72756d041b000000636f6e6669675f696e666f726d616c5f766f74696e675f74696d650514000000636f6e6669675f666f726d616c5f71756f72756d0419000000636f6e6669675f666f726d616c5f766f74696e675f74696d650516000000636f6e6669675f746f74616c5f6f6e626f61726465640822000000636f6e6669675f646f75626c655f74696d655f6265747765656e5f766f74696e6773001d000000636f6e6669675f766f74696e675f636c6561726e6573735f64656c7461082e000000636f6e6669675f74696d655f6265747765656e5f696e666f726d616c5f616e645f666f726d616c5f766f74696e67050e000000566f74696e6743616e63656c65640300000009000000766f74696e675f6964040b000000766f74696e675f747970650308000000756e7374616b6573110b080b000000566f74696e67456e6465640d00000009000000766f74696e675f6964040b000000766f74696e675f74797065030d000000766f74696e675f726573756c74030e0000007374616b655f696e5f6661766f72080d0000007374616b655f616761696e73740816000000756e626f756e645f7374616b655f696e5f6661766f720815000000756e626f756e645f7374616b655f616761696e7374080e000000766f7465735f696e5f6661766f72040d000000766f7465735f616761696e73740408000000756e7374616b657311130b0408060000007374616b657311130b0408050000006275726e7311130b0408050000006d696e747311130b0408`
+
+		mockedClient.EXPECT().GetLatestStateRootHash().Return(casper.GetStateRootHashResult{}, nil)
+		mockedClient.EXPECT().GetStateItem("", fmt.Sprintf("hash-%s", contractHashToParse.ToHex()), nil).Return(casper.StateGetItemResult{
+			StoredValue: casper.StoredValue{
+				Contract: &casper.Contract{
+					ContractPackageHash: contractPackageHash,
+					NamedKeys: []casper.NamedKey{
+						{
+							Name: eventNamedKey,
+							Key:  "uref-d2263e86f497f42e405d5d1390aa3c1a8bfc35f3699fdc3be806a5cfe139dac9-007",
+						}, {
+							Name: eventSchemaNamedKey,
+							Key:  "events-Schema-named-key-uref",
+						}},
+				},
 			},
-		},
-	}, nil)
+		}, nil)
+
+		schemaBytes, err := hex.DecodeString(schemaHex)
+		assert.NoError(t, err)
+
+		mockedClient.EXPECT().GetStateItem("", "events-Schema-named-key-uref", nil).Return(
+			casper.StateGetItemResult{
+				StoredValue: casper.StoredValue{
+					CLValue: &casper.CLValue{
+						Bytes: schemaBytes,
+					},
+				},
+			}, nil)
+
+		contractsMetadata, err := eventParser.loadContractsMetadata([]types.Hash{contractHashToParse})
+		assert.NoError(t, err)
+
+		eventParser.contractsMetadata = contractsMetadata
+
+		var res casper.GetDeployResult
+
+		data, err := os.ReadFile("./fixtures/deploys/voting_created.json")
+		assert.NoError(t, err)
+
+		err = json.Unmarshal(data, &res)
+		assert.NoError(t, err)
+
+		parseResults, err := eventParser.ParseExecutionResults(res.ExecutionResults[0].Result)
+		assert.NoError(t, err)
+		assert.True(t, len(parseResults) == 2)
+
+		assert.Equal(t, parseResults[0].Event.Name, "BallotCast")
+		assert.Equal(t, parseResults[0].Event.ContractHash.String(), contractHashToParse.String())
+		assert.Equal(t, parseResults[0].Event.ContractPackageHash.String(), contractPackageHash.String())
+		assert.True(t, len(parseResults[0].Event.Data) > 0)
+
+		assert.Equal(t, parseResults[1].Event.Name, "SimpleVotingCreated")
+		assert.Equal(t, parseResults[1].Event.ContractHash.String(), contractHashToParse.String())
+		assert.Equal(t, parseResults[1].Event.ContractPackageHash.String(), contractPackageHash.String())
+		assert.True(t, len(parseResults[1].Event.Data) > 0)
+	})
+}
+
+func TestParseEventAndData(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	contractHashToParse, err := types.NewHashFromHexString("ea0c001d969da098fefec42b141db88c74c5682e49333ded78035540a0b4f0bc")
+	assert.NoError(t, err)
+
+	mockedClient := mocks.NewMockRPCClient(mockCtrl)
+
+	eventParser := EventParser{
+		casperClient: mockedClient,
+	}
+
+	var schemaHex = `08000000100000004164646564546f57686974656c6973740100000007000000616464726573730b0e00000042616c6c6f7443616e63656c65640500000005000000766f7465720b09000000766f74696e675f6964040b000000766f74696e675f74797065030600000063686f69636503050000007374616b65080a00000042616c6c6f74436173740500000005000000766f7465720b09000000766f74696e675f6964040b000000766f74696e675f74797065030600000063686f69636503050000007374616b65080c0000004f776e65724368616e67656401000000090000006e65775f6f776e65720b1400000052656d6f76656446726f6d57686974656c6973740100000007000000616464726573730b1300000053696d706c65566f74696e67437265617465640c0000000d000000646f63756d656e745f686173680a0700000063726561746f720b050000007374616b650d0809000000766f74696e675f69640416000000636f6e6669675f696e666f726d616c5f71756f72756d041b000000636f6e6669675f696e666f726d616c5f766f74696e675f74696d650514000000636f6e6669675f666f726d616c5f71756f72756d0419000000636f6e6669675f666f726d616c5f766f74696e675f74696d650516000000636f6e6669675f746f74616c5f6f6e626f61726465640822000000636f6e6669675f646f75626c655f74696d655f6265747765656e5f766f74696e6773001d000000636f6e6669675f766f74696e675f636c6561726e6573735f64656c7461082e000000636f6e6669675f74696d655f6265747765656e5f696e666f726d616c5f616e645f666f726d616c5f766f74696e67050e000000566f74696e6743616e63656c65640300000009000000766f74696e675f6964040b000000766f74696e675f747970650308000000756e7374616b6573110b080b000000566f74696e67456e6465640d00000009000000766f74696e675f6964040b000000766f74696e675f74797065030d000000766f74696e675f726573756c74030e0000007374616b655f696e5f6661766f72080d0000007374616b655f616761696e73740816000000756e626f756e645f7374616b655f696e5f6661766f720815000000756e626f756e645f7374616b655f616761696e7374080e000000766f7465735f696e5f6661766f72040d000000766f7465735f616761696e73740408000000756e7374616b657311130b0408060000007374616b657311130b0408050000006275726e7311130b0408050000006d696e747311130b0408`
 
 	schemaBytes, err := hex.DecodeString(schemaHex)
 	assert.NoError(t, err)
 
-	mockedClient.EXPECT().GetStateItem("events-Schema-named-key-uref", "", nil).Return(
+	mockedClient.EXPECT().GetLatestStateRootHash().Return(casper.GetStateRootHashResult{}, nil)
+	mockedClient.EXPECT().GetStateItem("", fmt.Sprintf("hash-%s", contractHashToParse.ToHex()), []string{eventSchemaNamedKey}).Return(
 		casper.StateGetItemResult{
 			StoredValue: casper.StoredValue{
 				CLValue: &casper.CLValue{
@@ -62,47 +120,16 @@ func TestEventParser(t *testing.T) {
 			},
 		}, nil)
 
-	contractInfos, err := eventParser.parseContractsInfos([]types.Hash{contractHashToParse})
+	contractSchemaBytes, err := eventParser.FetchContractSchemasBytes(contractHashToParse)
 	assert.NoError(t, err)
 
-	eventParser.contractInfos = contractInfos
+	schema, err := NewSchemasFromBytes(contractSchemaBytes)
+	assert.NoError(t, err)
 
-	t.Run("Test Mint Event", func(t *testing.T) {
-		var res casper.GetDeployResult
+	eventHex := "420000003e000000100000006576656e745f42616c6c6f74436173740056befc13a6fd62e18f361700a5e08f966901c34df8041b36ec97d54d605c23de00000000000102e8030e0320000000d2263e86f497f42e405d5d1390aa3c1a8bfc35f3699fdc3be806a5cfe139dac90100000032"
 
-		data, err := os.ReadFile("./fixtures/deploys/mint.json")
-		assert.NoError(t, err)
-
-		err = json.Unmarshal(data, &res)
-		assert.NoError(t, err)
-
-		parseResults, err := eventParser.ParseExecutionResults(res.ExecutionResults[0].Result)
-		assert.NoError(t, err)
-		assert.True(t, len(parseResults) == 1)
-
-		assert.Equal(t, parseResults[0].Event.Name, "Mint")
-		assert.Equal(t, parseResults[0].Event.ContractHash.String(), contractHashToParse.String())
-		assert.Equal(t, parseResults[0].Event.ContractPackageHash.String(), contractPackageHash.String())
-		assert.True(t, len(parseResults[0].Event.Data) > 0)
-	})
-
-	t.Run("Test Transfer Event", func(t *testing.T) {
-		var res casper.GetDeployResult
-
-		data, err := os.ReadFile("./fixtures/deploys/transfer.json")
-		assert.NoError(t, err)
-
-		err = json.Unmarshal(data, &res)
-		assert.NoError(t, err)
-
-		parseResults, err := eventParser.ParseExecutionResults(res.ExecutionResults[0].Result)
-		assert.NoError(t, err)
-		assert.True(t, len(parseResults) == 1)
-		assert.NoError(t, parseResults[0].Error)
-
-		assert.Equal(t, parseResults[0].Event.Name, "Transfer")
-		assert.Equal(t, parseResults[0].Event.ContractHash.String(), contractHashToParse.String())
-		assert.Equal(t, parseResults[0].Event.ContractPackageHash.String(), contractPackageHash.String())
-		assert.True(t, len(parseResults[0].Event.Data) > 0)
-	})
+	eventName, eventData, err := ParseEventNameAndData(eventHex, schema)
+	assert.NoError(t, err)
+	assert.Equal(t, eventName, "BallotCast")
+	assert.True(t, len(eventData) > 0)
 }

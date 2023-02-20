@@ -38,8 +38,11 @@ type CLValue struct {
 	Any       []byte
 }
 
-func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byte, error) {
-	reminder := data
+func NewCLValueFromBytesWithRemainder(clType CLType, data []byte) (CLValue, []byte, error) {
+	var (
+		remainder = data
+		err       error
+	)
 	switch clType.CLTypeID {
 	case CLTypeIDU8:
 		if len(data) < 1 {
@@ -48,7 +51,7 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 		return CLValue{
 			Type: clType,
 			U8:   &data[0],
-		}, reminder[1:], nil
+		}, remainder[1:], nil
 	case CLTypeIDBool:
 		if len(data) < 1 {
 			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
@@ -60,7 +63,7 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 		return CLValue{
 			Type: clType,
 			Bool: &res,
-		}, reminder[1:], nil
+		}, remainder[1:], nil
 	case CLTypeIDU32:
 		if len(data) < 4 {
 			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
@@ -71,7 +74,7 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 		return CLValue{
 			Type: clType,
 			U32:  &value,
-		}, reminder[4:], nil
+		}, remainder[4:], nil
 
 	case CLTypeIDU64:
 		if len(data) < 8 {
@@ -82,46 +85,51 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 		return CLValue{
 			Type: clType,
 			U64:  &value,
-		}, reminder[8:], nil
+		}, remainder[8:], nil
 	case CLTypeIDU128:
-		val, reminder, err := ParseUTypeFromBytes[U128](data)
+		var val U128
+		val, remainder, err = ParseUTypeFromBytes[U128](data)
 		if err != nil {
 			return CLValue{}, nil, err
 		}
 		return CLValue{
 			Type: clType,
 			U128: &val,
-		}, reminder, nil
+		}, remainder, nil
 	case CLTypeIDU256:
-		val, reminder, err := ParseUTypeFromBytes[U256](data)
+		var val U256
+		val, remainder, err = ParseUTypeFromBytes[U256](data)
 		if err != nil {
 			return CLValue{}, nil, err
 		}
 		return CLValue{
 			Type: clType,
 			U256: &val,
-		}, reminder, nil
+		}, remainder, nil
 	case CLTypeIDU512:
-		val, reminder, err := ParseUTypeFromBytes[U512](data)
+		var val U512
+		val, remainder, err = ParseUTypeFromBytes[U512](data)
 		if err != nil {
 			return CLValue{}, nil, err
 		}
 		return CLValue{
 			Type: clType,
 			U512: &val,
-		}, reminder, nil
+		}, remainder, nil
 
 	case CLTypeIDKey:
-		key, reminder, err := ParseKeyFromBytes(reminder)
+		var key Key
+		key, remainder, err = ParseKeyFromBytes(remainder)
 		if err != nil {
 			return CLValue{}, nil, err
 		}
 		return CLValue{
 			Type: clType,
 			Key:  &key,
-		}, reminder, nil
+		}, remainder, nil
 	case CLTypeIDAny:
-		rawParsed, reminder, err := ParseBytesWithReminder(data)
+		var rawParsed []byte
+		rawParsed, remainder, err = ParseBytesWithRemainder(data)
 		if err != nil {
 			return CLValue{}, nil, err
 		}
@@ -129,9 +137,10 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 		return CLValue{
 			Type: clType,
 			Any:  rawParsed,
-		}, reminder, nil
+		}, remainder, nil
 	case CLTypeIDString:
-		rawParsed, reminder, err := ParseBytesWithReminder(data)
+		var rawParsed []byte
+		rawParsed, remainder, err = ParseBytesWithRemainder(data)
 		if err != nil {
 			return CLValue{}, nil, err
 		}
@@ -140,38 +149,38 @@ func NewCLValueFromBytesWithReminder(clType CLType, data []byte) (CLValue, []byt
 		return CLValue{
 			Type:   clType,
 			String: &parsed,
-		}, reminder, nil
+		}, remainder, nil
 	case CLTypeIDOption:
-		if reminder[0] != 0 && clType.CLTypeOption != nil {
-			reminder = reminder[1:]
-			clValue, reminder, err := NewCLValueFromBytesWithReminder(clType.CLTypeOption.CLTypeInner, reminder)
+		if remainder[0] != 0 && clType.CLTypeOption != nil {
+			var clValue CLValue
+			clValue, remainder, err = NewCLValueFromBytesWithRemainder(clType.CLTypeOption.CLTypeInner, remainder[1:])
 			if err != nil {
 				return CLValue{}, nil, err
 			}
-			return clValue, reminder, nil
+			return clValue, remainder, nil
 		}
-		reminder = reminder[1:]
+		remainder = remainder[1:]
 
 		return CLValue{
 			Type: clType,
-		}, reminder, nil
+		}, remainder, nil
 	}
 
-	return CLValue{}, reminder, errors.New("unknown CLType provided")
+	return CLValue{}, remainder, errors.New("unknown CLType provided")
 }
 
-func ParseCLValueFromBytesWithReminder(data string) (RawCLValue, []byte, error) {
+func ParseCLValueFromBytesWithRemainder(data string) (RawCLValue, []byte, error) {
 	decoded, err := hex.DecodeString(data)
 	if err != nil {
 		return RawCLValue{}, nil, err
 	}
 
-	bytes, reminder, err := ParseBytesWithReminder(decoded)
+	bytes, remainder, err := ParseBytesWithRemainder(decoded)
 	if err != nil {
 		return RawCLValue{}, nil, err
 	}
 
-	clType, reminder, err := ClTypeFromBytes(0, reminder)
+	clType, remainder, err := ClTypeFromBytes(0, remainder)
 	if err != nil {
 		return RawCLValue{}, nil, err
 	}
@@ -179,7 +188,7 @@ func ParseCLValueFromBytesWithReminder(data string) (RawCLValue, []byte, error) 
 	return RawCLValue{
 		Type:  clType,
 		Bytes: bytes,
-	}, reminder, nil
+	}, remainder, nil
 }
 
 func newInvalidLengthErr(clTypeID CLTypeID) error {

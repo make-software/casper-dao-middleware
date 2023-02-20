@@ -3,7 +3,6 @@ package ces
 import (
 	"encoding/binary"
 	"errors"
-	"log"
 
 	"casper-dao-middleware/pkg/casper/types"
 )
@@ -25,7 +24,7 @@ func NewSchemasFromBytes(rawSchemas []byte) (Schemas, error) {
 	}
 
 	// without uint32 (schemasNumber)
-	var reminder = rawSchemas[4:]
+	var remainder = rawSchemas[4:]
 	var err error
 
 	schemas := make(map[string]Schema, schemasNumber)
@@ -33,12 +32,12 @@ func NewSchemasFromBytes(rawSchemas []byte) (Schemas, error) {
 		var schemaName []byte
 		var schema Schema
 
-		schemaName, reminder, err = types.ParseBytesWithReminder(reminder)
+		schemaName, remainder, err = types.ParseBytesWithRemainder(remainder)
 		if err != nil {
 			return nil, err
 		}
 
-		schema, reminder, err = newSchemaFromBytesWithReminder(reminder)
+		schema, remainder, err = newSchemaFromBytesWithRemainder(remainder)
 		if err != nil {
 			return nil, err
 		}
@@ -48,34 +47,33 @@ func NewSchemasFromBytes(rawSchemas []byte) (Schemas, error) {
 	return schemas, nil
 }
 
-func newSchemaFromBytesWithReminder(bytes []byte) (Schema, []byte, error) {
+func newSchemaFromBytesWithRemainder(bytes []byte) (Schema, []byte, error) {
 	itemNumber := binary.LittleEndian.Uint32(bytes)
 	if int(itemNumber) > len(bytes) {
 		return nil, nil, errors.New("invalid itemNumber value")
 	}
 
-	reminder := make([]byte, len(bytes)-4)
-	copy(reminder, bytes[4:])
+	remainder := make([]byte, len(bytes)-4)
+	copy(remainder, bytes[4:])
 
 	var err error
 	schema := make([]PropertyDefinition, 0, int(itemNumber))
 	for i := 0; i < int(itemNumber); i++ {
 		var item []byte
-		item, reminder, err = types.ParseBytesWithReminder(reminder)
+		item, remainder, err = types.ParseBytesWithRemainder(remainder)
 		if err != nil {
-			log.Println("failed to parse Schema item")
 			return nil, nil, err
 		}
 
 		var clType types.CLType
-		clType, reminder, err = types.ClTypeFromBytes(0, reminder)
+		clType, remainder, err = types.ClTypeFromBytes(0, remainder)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		schema = append(schema, newPropertyDefinition(string(item), clType))
 	}
-	return schema, reminder, nil
+	return schema, remainder, nil
 }
 
 func newPropertyDefinition(name string, value types.CLType) PropertyDefinition {
