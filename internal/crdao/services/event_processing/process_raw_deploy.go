@@ -1,8 +1,6 @@
 package event_processing
 
 import (
-	"errors"
-
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/crdao/di"
@@ -99,8 +97,6 @@ func (c *ProcessRawDeploy) Execute() error {
 				zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
 				return err
 			}
-		default:
-			return errors.New("unsupported DAO event")
 		}
 	}
 
