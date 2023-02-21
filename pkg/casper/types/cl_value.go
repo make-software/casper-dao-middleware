@@ -180,13 +180,35 @@ func NewCLValueFromBytesWithRemainder(clType CLType, data []byte) (CLValue, []by
 			}
 			mapData[&clValueK] = clValueV
 		}
+	case CLTypeIDList:
+		if len(data) < 4 {
+			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)
+		}
+
+		if clType.CLTypeList == nil {
+			return CLValue{}, nil, errors.New("expected not nil ClMap")
+		}
+
+		itemNumber := binary.LittleEndian.Uint32(data)
+		var (
+			//without uint32
+			rem          = data[4:]
+			clValueInner CLValue
+			err          error
+		)
+
+		listData := make([]CLValue, 0, itemNumber)
+		for i := 0; i < int(itemNumber); i++ {
+			clValueInner, rem, err = NewCLValueFromBytesWithRemainder(clType.CLTypeList.CLTypeInner, rem)
+			if err != nil {
+				return CLValue{}, nil, err
+			}
+
+			listData = append(listData, clValueInner)
+		}
 		return CLValue{
 			Type: clType,
-			Map: &CLMap{
-				KeyType:   clType.CLTypeMap.CLTypeKey,
-				ValueType: clType.CLTypeMap.CLTypeValue,
-				Data:      mapData,
-			},
+			List: &listData,
 		}, rem, nil
 
 	case CLTypeIDTuple2:
@@ -253,7 +275,10 @@ func NewCLValueFromBytesWithRemainder(clType CLType, data []byte) (CLValue, []by
 			if err != nil {
 				return CLValue{}, nil, err
 			}
-			return clValue, remainder, nil
+			return CLValue{
+				Type:   clType,
+				Option: &clValue,
+			}, remainder, nil
 		}
 		remainder = remainder[1:]
 

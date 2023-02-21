@@ -3,8 +3,8 @@ package persistence
 import (
 	"github.com/jmoiron/sqlx"
 
-	"casper-dao-middleware/internal/dao/config"
 	"casper-dao-middleware/internal/dao/repositories"
+	"casper-dao-middleware/internal/dao/utils"
 )
 
 //go:generate mockgen -destination=../tests/mocks/entity_manager_mock.go -package=mocks -source=./entity_manager.go EntityManager
@@ -26,7 +26,7 @@ type entityManager struct {
 	accountRepo           repositories.Account
 }
 
-func NewEntityManager(db *sqlx.DB, hashes config.DAOContractsMetadata) EntityManager {
+func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityManager {
 	return &entityManager{
 		reputationChangesRepo: repositories.NewReputationChange(db, hashes),
 		voteRepository:        repositories.NewVote(db),

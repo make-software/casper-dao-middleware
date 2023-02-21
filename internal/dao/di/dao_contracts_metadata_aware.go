@@ -1,17 +1,15 @@
 package di
 
-import (
-	"casper-dao-middleware/internal/dao/config"
-)
+import "casper-dao-middleware/internal/dao/utils"
 
 type DAOContractsMetadataAware struct {
-	metadata config.DAOContractsMetadata
+	metadata utils.DAOContractsMetadata
 }
 
-func (a *DAOContractsMetadataAware) SetDAOContractsMetadata(hashes config.DAOContractsMetadata) {
+func (a *DAOContractsMetadataAware) SetDAOContractsMetadata(hashes utils.DAOContractsMetadata) {
 	a.metadata = hashes
 }
 
-func (a *DAOContractsMetadataAware) GetDAOContractsMetadata() config.DAOContractsMetadata {
+func (a *DAOContractsMetadataAware) GetDAOContractsMetadata() utils.DAOContractsMetadata {
 	return a.metadata
 }

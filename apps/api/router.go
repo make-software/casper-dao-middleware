@@ -13,14 +13,14 @@ import (
 	"casper-dao-middleware/apps/api/config"
 	"casper-dao-middleware/apps/api/handlers"
 	"casper-dao-middleware/apps/api/swagger"
-	dao_config "casper-dao-middleware/internal/dao/config"
 	"casper-dao-middleware/internal/dao/persistence"
+	"casper-dao-middleware/internal/dao/utils"
 )
 
 func NewRouter(
 	cfg *config.Env,
 	entityManager persistence.EntityManager,
-	daoContractPackageHashes dao_config.DAOContractsMetadata,
+	daoContractsMetadata utils.DAOContractsMetadata,
 ) http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
@@ -39,7 +39,7 @@ func NewRouter(
 		w.Write([]byte("healcheck - OK"))
 	})
 
-	reputationHandler := handlers.NewReputation(entityManager, daoContractPackageHashes)
+	reputationHandler := handlers.NewReputation(entityManager, daoContractsMetadata)
 	votingHandler := handlers.NewVoting(entityManager)
 	settingHandler := handlers.NewSetting(entityManager)
 

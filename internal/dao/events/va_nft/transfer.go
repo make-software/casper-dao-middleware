@@ -1,4 +1,4 @@
-package events
+package va_nft
 
 import (
 	"errors"
@@ -8,20 +8,20 @@ import (
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
-const Transfer = "Transfer"
+const TransferEventName = "Transfer"
 
-type VaTransfer struct {
+type TransferEvent struct {
 	From    types.Address
 	To      types.Address
 	TokenID casper_types.U512
 }
 
-func ParseVaTransferEvent(event ces.Event) (VaTransfer, error) {
-	var vaTransfer VaTransfer
+func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
+	var vaTransfer TransferEvent
 
 	val, ok := event.Data["from"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
-		return VaTransfer{}, errors.New("invalid from value in event")
+		return TransferEvent{}, errors.New("invalid from value in event")
 	}
 	vaTransfer.From = types.Address{
 		AccountHash:         val.Key.AccountHash,
@@ -30,7 +30,7 @@ func ParseVaTransferEvent(event ces.Event) (VaTransfer, error) {
 
 	val, ok = event.Data["to"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
-		return VaTransfer{}, errors.New("invalid to value in event")
+		return TransferEvent{}, errors.New("invalid to value in event")
 	}
 	vaTransfer.From = types.Address{
 		AccountHash:         val.Key.AccountHash,
@@ -39,7 +39,7 @@ func ParseVaTransferEvent(event ces.Event) (VaTransfer, error) {
 
 	val, ok = event.Data["token_id"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
-		return VaTransfer{}, errors.New("invalid token_id value in event")
+		return TransferEvent{}, errors.New("invalid token_id value in event")
 	}
 	vaTransfer.TokenID = *val.U512
 
