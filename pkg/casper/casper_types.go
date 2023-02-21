@@ -1,8 +1,9 @@
 package casper
 
 import (
+	"encoding/hex"
 	"encoding/json"
-	"strings"
+	"fmt"
 	"time"
 
 	"casper-dao-middleware/pkg/casper/types"
@@ -294,9 +295,9 @@ type StoredValue struct {
 }
 
 type CLValue struct {
-	CLType interface{}     `json:"cl_type"`
-	Parsed interface{}     `json:"parsed"`
-	Bytes  json.RawMessage `json:"bytes"`
+	CLType interface{} `json:"cl_type"`
+	Parsed interface{} `json:"parsed"`
+	Bytes  []byte      `json:"bytes"`
 }
 
 type Account struct {
@@ -323,15 +324,11 @@ type ActionThresholds struct {
 }
 
 type Contract struct {
-	ContractPackageHash string       `json:"contract_package_hash"`
+	ContractPackageHash types.Hash   `json:"contract_package_hash"`
 	ContractWasmHash    string       `json:"contract_wasm_hash"`
 	ProtocolVersion     string       `json:"protocol_version"`
 	NamedKeys           []NamedKey   `json:"named_keys"`
 	Entrypoints         []Entrypoint `json:"entry_points"`
-}
-
-func (c *Contract) ContractPackageHashKey() string {
-	return strings.ReplaceAll(c.ContractPackageHash, "contract-package-wasm", "hash-")
 }
 
 type Entrypoint struct {
@@ -429,4 +426,82 @@ type DelegatorAllocation struct {
 	DelegatorPublicKey types.PublicKey `json:"delegator_public_key"`
 	ValidatorPublicKey types.PublicKey `json:"validator_public_key"`
 	Amount             uint64          `json:"amount,string"`
+}
+
+func (p *Contract) UnmarshalJSON(data []byte) error {
+	var rawContract = struct {
+		ContractPackageHash string       `json:"contract_package_hash"`
+		ContractWasmHash    string       `json:"contract_wasm_hash"`
+		ProtocolVersion     string       `json:"protocol_version"`
+		NamedKeys           []NamedKey   `json:"named_keys"`
+		Entrypoints         []Entrypoint `json:"entry_points"`
+	}{}
+	if err := json.Unmarshal(data, &rawContract); err != nil {
+		return err
+	}
+
+	contractPackageHash, err := types.NewHashFromHexStringWithPrefix(rawContract.ContractPackageHash, "contract-package-wasm")
+	if err != nil {
+		return err
+	}
+
+	p.ContractPackageHash = contractPackageHash
+	p.ContractWasmHash = rawContract.ContractWasmHash
+	p.ProtocolVersion = rawContract.ProtocolVersion
+	p.NamedKeys = rawContract.NamedKeys
+	p.Entrypoints = rawContract.Entrypoints
+	return nil
+}
+
+func (p Contract) MarshalJSON() ([]byte, error) {
+	var resp = struct {
+		ContractPackageHash string       `json:"contract_package_hash"`
+		ContractWasmHash    string       `json:"contract_wasm_hash"`
+		ProtocolVersion     string       `json:"protocol_version"`
+		NamedKeys           []NamedKey   `json:"named_keys"`
+		Entrypoints         []Entrypoint `json:"entry_points"`
+	}{
+		ContractPackageHash: fmt.Sprintf("contract-package-wasm%s", p.ContractPackageHash.ToHex()),
+		ContractWasmHash:    p.ContractWasmHash,
+		ProtocolVersion:     p.ProtocolVersion,
+		NamedKeys:           p.NamedKeys,
+		Entrypoints:         p.Entrypoints,
+	}
+
+	return json.Marshal(resp)
+}
+
+func (p *CLValue) UnmarshalJSON(data []byte) error {
+	var hexValue = struct {
+		CLType interface{} `json:"cl_type"`
+		Parsed interface{} `json:"parsed"`
+		Bytes  string      `json:"bytes"`
+	}{}
+	if err := json.Unmarshal(data, &hexValue); err != nil {
+		return err
+	}
+
+	rawBytes, err := hex.DecodeString(hexValue.Bytes)
+	if err != nil {
+		return err
+	}
+
+	p.CLType = hexValue.CLType
+	p.Parsed = hexValue.Parsed
+	p.Bytes = rawBytes
+	return nil
+}
+
+func (h CLValue) MarshalJSON() ([]byte, error) {
+	var resp = struct {
+		CLType interface{} `json:"cl_type"`
+		Parsed interface{} `json:"parsed"`
+		Bytes  string      `json:"bytes"`
+	}{
+		CLType: h.CLType,
+		Parsed: h.Parsed,
+		Bytes:  hex.EncodeToString(h.Bytes),
+	}
+
+	return json.Marshal(resp)
 }

@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"casper-dao-middleware/internal/crdao/persistence"
-	"casper-dao-middleware/internal/crdao/services/settings"
+	"casper-dao-middleware/internal/dao/persistence"
+	"casper-dao-middleware/internal/dao/services/settings"
 	http_response "casper-dao-middleware/pkg/http-response"
 	"casper-dao-middleware/pkg/pagination"
 )

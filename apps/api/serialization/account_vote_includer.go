@@ -1,9 +1,9 @@
 package serialization
 
 import (
-	"casper-dao-middleware/internal/crdao/entities"
-	"casper-dao-middleware/internal/crdao/persistence"
-	"casper-dao-middleware/internal/crdao/services/voting"
+	"casper-dao-middleware/internal/dao/entities"
+	"casper-dao-middleware/internal/dao/persistence"
+	"casper-dao-middleware/internal/dao/services/voting"
 	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 

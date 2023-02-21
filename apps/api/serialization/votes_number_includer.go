@@ -1,8 +1,8 @@
 package serialization
 
 import (
-	"casper-dao-middleware/internal/crdao/persistence"
-	"casper-dao-middleware/internal/crdao/services/voting"
+	"casper-dao-middleware/internal/dao/persistence"
+	"casper-dao-middleware/internal/dao/services/voting"
 
 	"go.uber.org/zap"
 )

@@ -842,6 +842,18 @@ const docTemplate = `{
         "entities.Voting": {
             "type": "object",
             "properties": {
+                "config_double_time_between_votings": {
+                    "type": "boolean"
+                },
+                "config_time_between_informal_and_formal_voting": {
+                    "type": "integer"
+                },
+                "config_total_onboarded": {
+                    "type": "integer"
+                },
+                "config_voting_clearness_delta": {
+                    "type": "integer"
+                },
                 "creator": {
                     "type": "string"
                 },
@@ -851,11 +863,14 @@ const docTemplate = `{
                 "has_ended": {
                     "type": "boolean"
                 },
-                "informal_voting_id": {
-                    "type": "integer"
-                },
                 "is_formal": {
                     "type": "boolean"
+                },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "timestamp": {
                     "type": "string"
@@ -868,8 +883,28 @@ const docTemplate = `{
                 },
                 "voting_time": {
                     "type": "integer"
+                },
+                "voting_type_id": {
+                    "$ref": "#/definitions/entities.VotingTypeID"
                 }
             }
+        },
+        "entities.VotingTypeID": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "x-enum-varnames": [
+                "VotingTypeSimple",
+                "VotingTypeSlashing",
+                "VotingTypeKYC",
+                "VotingTypeRepo",
+                "VotingTypeReputation"
+            ]
         },
         "http_response.ErrorResponse": {
             "type": "object",

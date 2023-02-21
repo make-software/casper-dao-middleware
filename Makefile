@@ -12,10 +12,10 @@ stop-local-infra:
 	docker compose -f infra/local/docker-compose.db.yaml --project-name casper_dao_middleware down
 
 sync-db:
-	sh -ac '. apps/handler/.env; migrate -database "mysql://$$DATABASE_URI" -path internal/crdao/resources/migrations up'
+	sh -ac '. apps/handler/.env; migrate -database "mysql://$$DATABASE_URI" -path internal/dao/resources/migrations up'
 
 sync-test-db:
-	sh -ac '. internal/crdao/tests/.env.test; migrate -database "mysql://$$TEST_DATABASE_URI" -path internal/crdao/resources/migrations up'
+	sh -ac '. internal/dao/tests/.env.test; migrate -database "mysql://$$TEST_DATABASE_URI" -path internal/dao/resources/migrations up'
 
 swagger:
 	cd ./apps/api/ && swag init --parseDependency --output swagger --overridesFile swagger/.swaggo

@@ -73,7 +73,7 @@ func ParseKeyFromBytes(bytes []byte) (Key, []byte, error) {
 		}, remainder[32:], nil
 	}
 
-	return Key{}, nil, nil
+	return Key{}, nil, errors.New("invalid keyType provided")
 }
 
 // Example: "Key::Account(<hash>)", "Key::Hash(<hash>)"
