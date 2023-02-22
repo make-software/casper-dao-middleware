@@ -56,7 +56,7 @@ func main() {
 	})
 
 	assert.OK(container.Provide(func(cfg *config.Env) (utils.DAOContractsMetadata, error) {
-		return utils.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+		return utils.NewDAOContractsMetadata(cfg.DaoContracts, casper.NewRPCClient(cfg.NodeRPCURL.String()))
 	}))
 
 	assert.OK(container.Provide(func(db *sqlx.DB, hashes utils.DAOContractsMetadata) persistence.EntityManager {

@@ -8,7 +8,6 @@ import (
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/pkg/casper"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
@@ -19,10 +18,8 @@ type ProcessEventStream struct {
 	di.EntityManagerAware
 	di.DAOContractsMetadataAware
 
-	daoContractHashes         map[string]types.Hash
-	eventStreamPath           string
-	nodeStartFromEventID      uint64
-	dictionarySetEventsBuffer uint32
+	eventStreamPath      string
+	nodeStartFromEventID uint64
 }
 
 func NewProcessEventStream() *ProcessEventStream {
@@ -31,16 +28,6 @@ func NewProcessEventStream() *ProcessEventStream {
 
 func (c *ProcessEventStream) SetNodeStartFromEventID(eventID uint64) *ProcessEventStream {
 	c.nodeStartFromEventID = eventID
-	return c
-}
-
-func (c *ProcessEventStream) SetDAOContractHashes(daoContractHashes map[string]types.Hash) *ProcessEventStream {
-	c.daoContractHashes = daoContractHashes
-	return c
-}
-
-func (c *ProcessEventStream) SetDictionarySetEventsBuffer(buffer uint32) *ProcessEventStream {
-	c.dictionarySetEventsBuffer = buffer
 	return c
 }
 

@@ -52,7 +52,7 @@ func main() {
 	})
 
 	assert.OK(container.Provide(func(cfg *config.Env) (utils.DAOContractsMetadata, error) {
-		return utils.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+		return utils.NewDAOContractsMetadata(cfg.DaoContracts, casper.NewRPCClient(cfg.NodeRPCURL.String()))
 	}))
 
 	//nolint:gocritic
@@ -70,8 +70,6 @@ func main() {
 		processEventStream.SetNodeStartFromEventID(env.NewNodeStartFromEventID)
 		processEventStream.SetEventStreamPath(env.EventStreamPath)
 		processEventStream.SetCasperClient(casperClient)
-		processEventStream.SetDAOContractHashes(env.DaoContractHashes)
-		processEventStream.SetDictionarySetEventsBuffer(env.DictionarySetEventsBuffer)
 		processEventStream.SetEntityManager(entityManager)
 		processEventStream.SetDAOContractsMetadata(metadata)
 

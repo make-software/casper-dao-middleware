@@ -123,3 +123,13 @@ func (h *Hash) Scan(value interface{}) error {
 	*h = hash
 	return nil
 }
+
+func (h *Hash) UnmarshalText(data []byte) error {
+	hash, err := NewHashFromHexString(string(data))
+	if err != nil {
+		return err
+	}
+
+	*h = hash
+	return nil
+}

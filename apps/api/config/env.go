@@ -1,12 +1,9 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
-	"strings"
 
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/config"
 	"casper-dao-middleware/pkg/http"
 
@@ -15,12 +12,13 @@ import (
 )
 
 type Env struct {
-	Addr              http.ServerAddress `env:"ADDRESS,required"`
-	LogLevel          zapcore.Level      `env:"LOG_LEVEL" envDefault:"info"`
-	DaoContractHashes map[string]types.Hash
+	Addr     http.ServerAddress `env:"ADDRESS,required"`
+	LogLevel zapcore.Level      `env:"LOG_LEVEL" envDefault:"info"`
 
 	NodeRPCURL *url.URL
-	DBConfig   config.DBConfig
+
+	DBConfig     config.DBConfig
+	DaoContracts config.DaoContracts
 }
 
 func (e *Env) Parse() error {
@@ -33,22 +31,6 @@ func (e *Env) Parse() error {
 		config.GetEnv("NODE_RPC_PORT")))
 	if err != nil {
 		return err
-	}
-
-	e.DaoContractHashes = make(map[string]types.Hash, 0)
-	for _, contract := range strings.Split(config.GetEnv("DAO_CONTRACT_HASHES"), ",") {
-		//expect contract_name:contract_hash
-		definitions := strings.Split(contract, ":")
-
-		hash, err := types.NewHashFromHexString(definitions[1])
-		if err != nil {
-			return err
-		}
-
-		if len(definitions) != 2 {
-			return errors.New("invalid DAO_CONTRACT_HASHES format provided")
-		}
-		e.DaoContractHashes[definitions[0]] = hash
 	}
 
 	return nil
