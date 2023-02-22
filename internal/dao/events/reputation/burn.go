@@ -1,4 +1,4 @@
-package events
+package reputation
 
 import (
 	"errors"
@@ -8,30 +8,30 @@ import (
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
-const MintEventName = "Mint"
+const BurnEventName = "Burn"
 
-type Mint struct {
+type Burn struct {
 	Address types.Address
 	Amount  casper_types.U512
 }
 
-func ParseMint(event ces.Event) (Mint, error) {
-	var mint Mint
+func ParseBurn(event ces.Event) (Burn, error) {
+	var burn Burn
 
 	val, ok := event.Data["address"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
-		return Mint{}, errors.New("invalid address value in event")
+		return Burn{}, errors.New("invalid address value in event")
 	}
-	mint.Address = types.Address{
+	burn.Address = types.Address{
 		AccountHash:         val.Key.AccountHash,
 		ContractPackageHash: val.Key.Hash,
 	}
 
 	val, ok = event.Data["amount"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
-		return Mint{}, errors.New("invalid amount value in event")
+		return Burn{}, errors.New("invalid amount value in event")
 	}
-	mint.Amount = *val.U512
+	burn.Amount = *val.U512
 
-	return mint, nil
+	return burn, nil
 }

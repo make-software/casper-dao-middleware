@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"casper-dao-middleware/internal/dao/config"
 	"casper-dao-middleware/internal/dao/entities"
+	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
@@ -27,10 +27,10 @@ type ReputationChange struct {
 	conn          *sqlx.DB
 	indexedFields map[string]struct{}
 
-	contractPackageHashes config.DAOContractsMetadata
+	contractPackageHashes utils.DAOContractsMetadata
 }
 
-func NewReputationChange(conn *sqlx.DB, hashes config.DAOContractsMetadata) *ReputationChange {
+func NewReputationChange(conn *sqlx.DB, hashes utils.DAOContractsMetadata) *ReputationChange {
 	return &ReputationChange{
 		conn: conn,
 		indexedFields: map[string]struct{}{

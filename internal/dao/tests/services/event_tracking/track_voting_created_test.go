@@ -16,7 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"casper-dao-middleware/internal/dao/config"
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/event_processing"
@@ -35,7 +34,7 @@ type TrackVotingCreatedTestSuit struct {
 	casperClient  casper.RPCClient
 	entityManager persistence.EntityManager
 
-	daoContractsMetadata config.DAOContractsMetadata
+	daoContractsMetadata utils.DAOContractsMetadata
 }
 
 func (suite *TrackVotingCreatedTestSuit) SetupSuite() {
@@ -48,7 +47,7 @@ func (suite *TrackVotingCreatedTestSuit) SetupSuite() {
 	simpleVoterContractHash, err := types.NewHashFromHexString("04c6b0a1fa97c5fde9017a9d84513da5c709faef0fd6cd3efddd4ab5040bbc90")
 	assert.NoError(suite.T(), err)
 
-	suite.daoContractsMetadata = config.DAOContractsMetadata{
+	suite.daoContractsMetadata = utils.DAOContractsMetadata{
 		ReputationContractPackageHash:  reputationContractHash,
 		SimpleVoterContractPackageHash: simpleVoterContractHash,
 	}

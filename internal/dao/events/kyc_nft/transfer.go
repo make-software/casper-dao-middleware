@@ -1,4 +1,4 @@
-package events
+package kyc_nft
 
 import (
 	"errors"
@@ -8,20 +8,20 @@ import (
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
-const KYCTransfer = "Transfer"
+const TransferEventName = "Transfer"
 
-type KycTransfer struct {
+type TransferEvent struct {
 	From    types.Address
 	To      types.Address
 	TokenID casper_types.U512
 }
 
-func ParseKYCTransferEvent(event ces.Event) (KycTransfer, error) {
-	var kycTransfer KycTransfer
+func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
+	var kycTransfer TransferEvent
 
 	val, ok := event.Data["from"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
-		return KycTransfer{}, errors.New("invalid from value in event")
+		return TransferEvent{}, errors.New("invalid from value in event")
 	}
 	kycTransfer.From = types.Address{
 		AccountHash:         val.Key.AccountHash,
@@ -30,7 +30,7 @@ func ParseKYCTransferEvent(event ces.Event) (KycTransfer, error) {
 
 	val, ok = event.Data["to"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
-		return KycTransfer{}, errors.New("invalid to value in event")
+		return TransferEvent{}, errors.New("invalid to value in event")
 	}
 	kycTransfer.From = types.Address{
 		AccountHash:         val.Key.AccountHash,
@@ -39,7 +39,7 @@ func ParseKYCTransferEvent(event ces.Event) (KycTransfer, error) {
 
 	val, ok = event.Data["token_id"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
-		return KycTransfer{}, errors.New("invalid token_id value in event")
+		return TransferEvent{}, errors.New("invalid token_id value in event")
 	}
 	kycTransfer.TokenID = *val.U512
 

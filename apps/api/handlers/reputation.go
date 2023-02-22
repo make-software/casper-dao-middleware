@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"casper-dao-middleware/internal/dao/config"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/reputation"
+	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/errors"
 	"casper-dao-middleware/pkg/http-params"
 	"casper-dao-middleware/pkg/http-response"
@@ -14,10 +14,10 @@ import (
 
 type Reputation struct {
 	entityManager            persistence.EntityManager
-	daoContractPackageHashes config.DAOContractsMetadata
+	daoContractPackageHashes utils.DAOContractsMetadata
 }
 
-func NewReputation(entityManager persistence.EntityManager, packageHashes config.DAOContractsMetadata) *Reputation {
+func NewReputation(entityManager persistence.EntityManager, packageHashes utils.DAOContractsMetadata) *Reputation {
 	return &Reputation{
 		entityManager:            entityManager,
 		daoContractPackageHashes: packageHashes,

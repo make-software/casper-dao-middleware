@@ -1,14 +1,12 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
 
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/config"
 
 	"github.com/caarlos0/env/v6"
@@ -19,12 +17,13 @@ type Env struct {
 	LogLevel                  zapcore.Level `env:"LOG_LEVEL" envDefault:"info"`
 	EventStreamPath           string        `env:"EVENT_STREAM_PATH,required"`
 	DictionarySetEventsBuffer uint32        `env:"DICTIONARY_SET_EVENTS_READ_BACK_BUFFER" envDefault:"100"`
-	DaoContractHashes         map[string]types.Hash
 	NewNodeStartFromEventID   uint64
 
 	NodeSSEURL *url.URL
 	NodeRPCURL *url.URL
-	DBConfig   config.DBConfig
+
+	DBConfig     config.DBConfig
+	DaoContracts config.DaoContracts
 }
 
 func (e *Env) Parse() error {
@@ -42,13 +41,6 @@ func (e *Env) Parse() error {
 	e.NodeSSEURL, err = url.Parse(fmt.Sprintf("http://%s:%s", config.GetEnv("NODE_ADDRESS"),
 		config.GetEnv("NODE_PORT")))
 	if err != nil {
-		return err
-	}
-
-	hashes := config.GetEnv("DAO_CONTRACT_HASHES")
-	e.DaoContractHashes = make(map[string]types.Hash, 0)
-
-	if err := json.Unmarshal([]byte(hashes), &e.DaoContractHashes); err != nil {
 		return err
 	}
 

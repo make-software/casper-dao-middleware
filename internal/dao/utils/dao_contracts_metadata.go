@@ -1,4 +1,4 @@
-package config
+package utils
 
 import (
 	"errors"
@@ -6,8 +6,7 @@ import (
 
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
-
-	"github.com/go-ozzo/ozzo-validation"
+	"casper-dao-middleware/pkg/config"
 )
 
 const variableRepositoryContractStorageUrefName = "storage__repository__contract"
@@ -42,14 +41,14 @@ type DAOContractsMetadata struct {
 	KycNFTContractHash        types.Hash
 }
 
-func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]types.Hash, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
+func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
 	result := DAOContractsMetadata{}
 	stateRootHash, err := casperClient.GetStateRootHashByHash("")
 	if err != nil {
 		return DAOContractsMetadata{}, err
 	}
 
-	for contractName, contractHashHex := range contractHashes {
+	for contractName, contractHashHex := range contractHashes.ToMap() {
 		stateItemRes, err := casperClient.GetStateItem(stateRootHash.StateRootHash, fmt.Sprintf("hash-%s", contractHashHex), []string{})
 		if err != nil {
 			return DAOContractsMetadata{}, err
@@ -103,7 +102,7 @@ func NewDAOContractsMetadataFromHashesMap(contractHashes map[string]types.Hash, 
 
 	}
 
-	return result, result.Validate()
+	return result, nil
 }
 
 func (d DAOContractsMetadata) ContractHashes() []types.Hash {
@@ -118,19 +117,4 @@ func (d DAOContractsMetadata) ContractHashes() []types.Hash {
 		d.RepoVoterContractHash,
 		d.VariableRepositoryContractHash,
 	}
-}
-
-func (d DAOContractsMetadata) Validate() error {
-	return validation.ValidateStruct(&d,
-		validation.Field(&d.ReputationContractHash, validation.Required),
-		validation.Field(&d.SimpleVoterContractHash, validation.Required),
-		validation.Field(&d.RepoVoterContractHash, validation.Required),
-		validation.Field(&d.ReputationVoterContractHash, validation.Required),
-		validation.Field(&d.SlashingVoterContractHash, validation.Required),
-		validation.Field(&d.KycVoterContractHash, validation.Required),
-		validation.Field(&d.VANFTContractHash, validation.Required),
-		validation.Field(&d.KycNFTContractHash, validation.Required),
-		validation.Field(&d.VariableRepositoryContractHash, validation.Required),
-		validation.Field(&d.VariableRepositoryContractStorageUref, validation.Required),
-	)
 }

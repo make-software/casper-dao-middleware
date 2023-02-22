@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"casper-dao-middleware/apps/handler/config"
-	dao_config "casper-dao-middleware/internal/dao/config"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/event_processing"
+	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/assert"
 	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/casper"
@@ -51,12 +51,12 @@ func main() {
 		boot.CloseMySQL(dbConn)
 	})
 
-	assert.OK(container.Provide(func(cfg *config.Env) (dao_config.DAOContractsMetadata, error) {
-		return dao_config.NewDAOContractsMetadataFromHashesMap(cfg.DaoContractHashes, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+	assert.OK(container.Provide(func(cfg *config.Env) (utils.DAOContractsMetadata, error) {
+		return utils.NewDAOContractsMetadata(cfg.DaoContracts, casper.NewRPCClient(cfg.NodeRPCURL.String()))
 	}))
 
 	//nolint:gocritic
-	assert.OK(container.Provide(func(db *sqlx.DB, hashes dao_config.DAOContractsMetadata) persistence.EntityManager {
+	assert.OK(container.Provide(func(db *sqlx.DB, hashes utils.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
 	}))
 
@@ -64,14 +64,12 @@ func main() {
 		return casper.NewRPCClient(cfg.NodeRPCURL.String())
 	}))
 
-	assert.OK(container.Invoke(func(env *config.Env, entityManager persistence.EntityManager, casperClient casper.RPCClient, metadata dao_config.DAOContractsMetadata) error {
+	assert.OK(container.Invoke(func(env *config.Env, entityManager persistence.EntityManager, casperClient casper.RPCClient, metadata utils.DAOContractsMetadata) error {
 		processEventStream := event_processing.NewProcessEventStream()
 		processEventStream.SetBaseStreamURL(env.NodeSSEURL)
 		processEventStream.SetNodeStartFromEventID(env.NewNodeStartFromEventID)
 		processEventStream.SetEventStreamPath(env.EventStreamPath)
 		processEventStream.SetCasperClient(casperClient)
-		processEventStream.SetDAOContractHashes(env.DaoContractHashes)
-		processEventStream.SetDictionarySetEventsBuffer(env.DictionarySetEventsBuffer)
 		processEventStream.SetEntityManager(entityManager)
 		processEventStream.SetDAOContractsMetadata(metadata)
 

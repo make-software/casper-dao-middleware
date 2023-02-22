@@ -109,6 +109,58 @@ func NewRecordValueFromBytesWithReminder(rawBytes []byte) (RecordValue, []byte, 
 	}, reminder[numBytes:], nil
 }
 
+func NewRecordValueFromBytes(rawBytes []byte) (RecordValue, error) {
+	numBytes := len(rawBytes)
+
+	// length 33 represent Key CLValue
+	if numBytes == 33 {
+		key, _, err := types.ParseKeyFromBytes(rawBytes)
+		if err != nil {
+			return RecordValue{}, err
+		}
+
+		var address Address
+		if key.AccountHash != nil {
+			address.AccountHash = key.AccountHash
+		} else {
+			address.ContractPackageHash = key.Hash
+		}
+
+		return RecordValue{
+			Address: &address,
+		}, nil
+	}
+
+	// numBytes == 8 could be or pure u64 or U256/U512 coded in 8 bytes
+	// but U256/U512 bytes representation is not equal to u64
+	// so if the numBytes == 8 and U256/U512 it should be the following bytes representation:
+	// 8 0 0 0  ==> numBytes + 7  ==> numBytes of internal data + internal data(7 bytes)
+	// U256/U512 =  8 0 0 0 7 1 1 1 1 1 1 1
+	// u64 =  8 0 0 0 1 1 1 1 1 1 1 1
+	if numBytes == 8 && rawBytes[0] != 7 {
+		val := binary.LittleEndian.Uint64(rawBytes)
+		return RecordValue{
+			U64Value: &val,
+		}, nil
+	}
+
+	if numBytes == 1 {
+		boolVal := rawBytes[0] == 1
+		return RecordValue{
+			BoolValue: &boolVal,
+		}, nil
+	}
+
+	val, _, err := types.ParseUTypeFromBytes[types.U256](rawBytes)
+	if err != nil {
+		return RecordValue{}, err
+	}
+
+	return RecordValue{
+		UValue: &val,
+	}, nil
+}
+
 func (r RecordValue) String() string {
 	switch {
 	case r.UValue != nil:
