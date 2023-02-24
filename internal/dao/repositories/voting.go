@@ -1,11 +1,12 @@
 package repositories
 
 import (
+	sq "github.com/Masterminds/squirrel"
+
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
 
-	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -16,7 +17,9 @@ type VotingRepository interface {
 	Save(changes *entities.Voting) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Voting, error)
-	UpdateHasEnded(votingID uint32, hasEnded bool) error
+	GetByVotingID(votingID uint32) (*entities.Voting, error)
+	Update(voting *entities.Voting) error
+	UpdateIsCanceled(votingID uint32, isCanceled bool) error
 }
 
 type Voting struct {
@@ -35,40 +38,46 @@ func NewVoting(conn *sqlx.DB) *Voting {
 		},
 	}
 }
-
 func (r *Voting) Save(voting *entities.Voting) error {
 	queryBuilder := query.Insert("votings").
+		Options("IGNORE").
 		Columns(
 			"creator",
 			"deploy_hash",
 			"voting_id",
 			"voting_type_id",
-			"is_formal",
-			"has_ended",
+			"informal_voting_quorum",
+			"informal_voting_starts_at",
+			"informal_voting_ends_at",
+			"formal_voting_quorum",
+			"formal_voting_starts_at",
+			"formal_voting_ends_at",
 			"metadata",
-			"config_double_time_between_votings",
+			"is_canceled",
+			"informal_voting_result",
+			"formal_voting_result",
 			"config_total_onboarded",
 			"config_voting_clearness_delta",
 			"config_time_between_informal_and_formal_voting",
-			"voting_quorum",
-			"voting_time",
-			"timestamp",
 		).
 		Values(
 			voting.Creator,
 			voting.DeployHash,
 			voting.VotingID,
 			voting.VotingTypeID,
-			voting.IsFormal,
-			voting.HasEnded,
+			voting.InformalVotingQuorum,
+			voting.InformalVotingStartsAt,
+			voting.InformalVotingEndsAt,
+			voting.FormalVotingQuorum,
+			voting.FormalVotingStartsAt,
+			voting.FormalVotingEndsAt,
 			voting.Metadata,
-			voting.ConfigDoubleTimeBetweenVotings,
+			voting.IsCanceled,
+			voting.InformalVotingResult,
+			voting.FormalVotingResult,
 			voting.ConfigTotalOnboarded,
 			voting.ConfigVotingClearnessDelta,
 			voting.ConfigTimeBetweenInformalAndFormalVoting,
-			voting.VotingQuorum,
-			voting.VotingTime,
-			voting.Timestamp,
 		)
 	sql, args, err := queryBuilder.ToSql()
 	if err != nil {
@@ -122,10 +131,58 @@ func (r *Voting) Find(params *pagination.Params, filters map[string]interface{})
 	return votings, nil
 }
 
-func (r *Voting) UpdateHasEnded(votingID uint32, hasEnded bool) error {
+func (r *Voting) GetByVotingID(votingID uint32) (*entities.Voting, error) {
+	queryBuilder := query.Select("*").
+		From("votings").
+		Where(sq.Eq{
+			"voting_id": votingID,
+		})
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var voting entities.Voting
+	if err := r.conn.Get(&voting, sql, args...); err != nil {
+		return nil, err
+	}
+
+	return &voting, nil
+}
+
+func (r *Voting) Update(voting *entities.Voting) error {
 	queryBuilder := query.Update("votings").
-		Set("has_ended", hasEnded).
-		Where(sq.Eq{"voting_id": votingID})
+		SetMap(map[string]interface{}{
+			"formal_voting_starts_at": voting.FormalVotingStartsAt,
+			"formal_voting_ends_at":   voting.FormalVotingEndsAt,
+			"informal_voting_result":  voting.InformalVotingResult,
+			"formal_voting_result":    voting.FormalVotingResult,
+		})
+
+	queryBuilder = queryBuilder.
+		Where(sq.Eq{
+			"voting_id": voting.VotingID,
+		})
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.conn.Exec(sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Voting) UpdateIsCanceled(votingID uint32, isCanceled bool) error {
+	queryBuilder := query.Update("votings").
+		Set("is_canceled", isCanceled).
+		Where(sq.Eq{
+			"voting_id": votingID,
+		})
 
 	sql, args, err := queryBuilder.ToSql()
 	if err != nil {

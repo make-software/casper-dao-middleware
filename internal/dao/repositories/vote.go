@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"casper-dao-middleware/internal/dao/entities"
+	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
 
@@ -17,6 +18,7 @@ type VoteRepository interface {
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Vote, error)
 	CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32, error)
+	UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error
 }
 
 type Vote struct {
@@ -36,12 +38,14 @@ func NewVote(conn *sqlx.DB) *Vote {
 
 func (r *Vote) Save(vote *entities.Vote) error {
 	queryBuilder := query.Insert("votes").
+		Options("IGNORE").
 		Columns(
 			"deploy_hash",
 			"voting_id",
 			"address",
 			"amount",
 			"is_in_favour",
+			"is_canceled",
 			"timestamp",
 		).
 		Values(
@@ -50,6 +54,7 @@ func (r *Vote) Save(vote *entities.Vote) error {
 			vote.Address,
 			vote.Amount,
 			vote.IsInFavor,
+			vote.IsCanceled,
 			vote.Timestamp,
 		)
 	sql, args, err := queryBuilder.ToSql()
@@ -130,4 +135,21 @@ func (r *Vote) CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32
 	}
 
 	return result, nil
+}
+
+func (r *Vote) UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error {
+	queryBuilder := query.Update("votes").
+		Set("is_canceled", isCanceled).
+		Where(sq.Eq{
+			"voting_id": votingID,
+			"address":   address,
+		})
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.conn.Exec(sql, args...)
+	return err
 }

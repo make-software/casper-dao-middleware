@@ -11,8 +11,8 @@ import (
 const TransferEventName = "Transfer"
 
 type TransferEvent struct {
-	From    types.Address
-	To      types.Address
+	From    *types.Address
+	To      *types.Address
 	TokenID casper_types.U512
 }
 
@@ -20,21 +20,37 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 	var kycTransfer TransferEvent
 
 	val, ok := event.Data["from"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
 		return TransferEvent{}, errors.New("invalid from value in event")
 	}
-	kycTransfer.From = types.Address{
-		AccountHash:         val.Key.AccountHash,
-		ContractPackageHash: val.Key.Hash,
+
+	if val.Option != nil {
+		if val.Option.Type.CLTypeID != casper_types.CLTypeIDKey {
+			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
+		}
+
+		from, err := types.NewAddressFromCLValue(*val.Option)
+		if err != nil {
+			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
+		}
+		kycTransfer.From = &from
 	}
 
 	val, ok = event.Data["to"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
 		return TransferEvent{}, errors.New("invalid to value in event")
 	}
-	kycTransfer.From = types.Address{
-		AccountHash:         val.Key.AccountHash,
-		ContractPackageHash: val.Key.Hash,
+
+	if val.Option != nil {
+		if val.Option.Type.CLTypeID != casper_types.CLTypeIDKey {
+			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
+		}
+
+		to, err := types.NewAddressFromCLValue(*val.Option)
+		if err != nil {
+			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
+		}
+		kycTransfer.To = &to
 	}
 
 	val, ok = event.Data["token_id"]

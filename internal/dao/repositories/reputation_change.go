@@ -51,7 +51,7 @@ func (r *ReputationChange) SaveBatch(changes []entities.ReputationChange) error 
 		"timestamp",
 	}
 
-	insertQuery := `INSERT INTO reputation_changes (` + strings.Join(columns, ",") + `) 
+	insertQuery := `INSERT IGNORE INTO reputation_changes (` + strings.Join(columns, ",") + `) 
 		VALUES (:` + strings.Join(columns, ",:") + `)`
 
 	_, err := r.conn.NamedExec(insertQuery, changes)

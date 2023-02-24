@@ -8,6 +8,7 @@ const (
 	ReputationChangeReasonVote               ReputationChangeReason = 3
 	ReputationChangeReasonVotingDistribution ReputationChangeReason = 4
 	ReputationChangeReasonVotingBurn         ReputationChangeReason = 5
+	ReputationChangeReasonVotingUnstake      ReputationChangeReason = 6
 )
 
 type DeployExecutionType struct {

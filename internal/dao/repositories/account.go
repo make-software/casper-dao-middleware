@@ -11,7 +11,8 @@ import (
 //
 //go:generate mockgen -destination=../tests/mocks/account_repo_mock.go -package=mocks -source=./account.go AccountRepository
 type Account interface {
-	Upsert(account entities.Account) error
+	UpsertIsKYC(account entities.Account) error
+	UpsertIsVA(account entities.Account) error
 }
 
 type account struct {
@@ -28,7 +29,7 @@ func NewAccount(conn *sqlx.DB) Account {
 	}
 }
 
-func (r *account) Upsert(account entities.Account) error {
+func (r *account) UpsertIsKYC(account entities.Account) error {
 	queryBuilder := query.Insert("accounts").
 		Columns(
 			"hash",
@@ -42,7 +43,36 @@ func (r *account) Upsert(account entities.Account) error {
 			account.IsVA,
 			account.Timestamp,
 		).
-		Suffix("ON DUPLICATE KEY UPDATE is_kyc = values(is_kyc), is_va = values(is_va)")
+		Suffix("ON DUPLICATE KEY UPDATE is_kyc = values(is_kyc)")
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.conn.Exec(sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *account) UpsertIsVA(account entities.Account) error {
+	queryBuilder := query.Insert("accounts").
+		Columns(
+			"hash",
+			"is_kyc",
+			"is_va",
+			"timestamp",
+		).
+		Values(
+			account.Hash,
+			account.IsKyc,
+			account.IsVA,
+			account.Timestamp,
+		).
+		Suffix("ON DUPLICATE KEY UPDATE is_va = values(is_va)")
 
 	sql, args, err := queryBuilder.ToSql()
 	if err != nil {

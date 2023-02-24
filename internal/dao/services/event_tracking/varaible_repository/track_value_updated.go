@@ -1,4 +1,4 @@
-package event_tracking
+package varaible_repository
 
 import (
 	"time"
@@ -8,29 +8,16 @@ import (
 	"casper-dao-middleware/internal/dao/events/variable_repository"
 )
 
-type TrackVariableRepositoryContract struct {
+type TrackValueUpdated struct {
 	di.EntityManagerAware
 	di.CESEventAware
-	di.DeployProcessedEventAware
-	di.DAOContractsMetadataAware
 }
 
-func NewTrackVariableRepositoryContract() *TrackVariableRepositoryContract {
-	return &TrackVariableRepositoryContract{}
+func NewTrackValueUpdated() *TrackValueUpdated {
+	return &TrackValueUpdated{}
 }
 
-func (s *TrackVariableRepositoryContract) Execute() error {
-	cesEvent := s.GetCESEvent()
-
-	switch cesEvent.Name {
-	case variable_repository.ValueUpdatedEventName:
-		return s.trackValueUpdated()
-	}
-
-	return nil
-}
-
-func (s *TrackVariableRepositoryContract) trackValueUpdated() error {
+func (s *TrackValueUpdated) Execute() error {
 	valueUpdated, err := variable_repository.ParseValueUpdatedEvent(s.GetCESEvent())
 	if err != nil {
 		return err

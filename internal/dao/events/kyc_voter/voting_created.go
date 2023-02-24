@@ -14,7 +14,7 @@ type VotingCreatedEvent struct {
 	SubjectAddress                           types.Address
 	DocumentHash                             string
 	Creator                                  types.Address
-	Stake                                    casper_types.U512
+	Stake                                    *casper_types.U512
 	VotingID                                 uint32
 	ConfigInformalQuorum                     uint32
 	ConfigInformalVotingTime                 uint64
@@ -27,31 +27,42 @@ type VotingCreatedEvent struct {
 }
 
 func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
-	var votingCreated VotingCreatedEvent
+	var (
+		votingCreated VotingCreatedEvent
+		err           error
+	)
 
 	val, ok := event.Data["subject_address"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok {
 		return VotingCreatedEvent{}, errors.New("invalid subject_address value in event")
 	}
-	votingCreated.SubjectAddress = types.Address{
-		AccountHash:         val.Key.AccountHash,
-		ContractPackageHash: val.Key.Hash,
+
+	votingCreated.SubjectAddress, err = types.NewAddressFromCLValue(val)
+	if err != nil {
+		return VotingCreatedEvent{}, err
 	}
 
 	val, ok = event.Data["creator"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok {
 		return VotingCreatedEvent{}, errors.New("invalid creator value in event")
 	}
-	votingCreated.Creator = types.Address{
-		AccountHash:         val.Key.AccountHash,
-		ContractPackageHash: val.Key.Hash,
+	votingCreated.Creator, err = types.NewAddressFromCLValue(val)
+	if err != nil {
+		return VotingCreatedEvent{}, err
 	}
 
 	val, ok = event.Data["stake"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
 		return VotingCreatedEvent{}, errors.New("invalid stake value in event")
 	}
-	votingCreated.Stake = *val.U512
+
+	if val.Option != nil {
+		if val.Option.Type.CLTypeID != casper_types.CLTypeIDU512 {
+			return VotingCreatedEvent{}, errors.New("invalid value inside option of `stake` value")
+		}
+
+		votingCreated.Stake = val.U512
+	}
 
 	val, ok = event.Data["voting_id"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {

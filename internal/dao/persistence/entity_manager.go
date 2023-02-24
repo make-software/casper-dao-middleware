@@ -32,6 +32,7 @@ func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityMana
 		voteRepository:        repositories.NewVote(db),
 		votingRepository:      repositories.NewVoting(db),
 		settingRepository:     repositories.NewSetting(db),
+		accountRepo:           repositories.NewAccount(db),
 	}
 }
 
