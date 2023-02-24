@@ -110,7 +110,7 @@ func (c *ProcessRawDeploy) Execute() error {
 			trackVariableRepositoryContract.SetEntityManager(c.GetEntityManager())
 			trackVariableRepositoryContract.SetDAOContractsMetadata(daoContractsMetadata)
 			trackVariableRepositoryContract.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
-			//err = trackVariableRepositoryContract.Execute()
+			err = trackVariableRepositoryContract.Execute()
 		default:
 			return errors.New("unsupported DAO contract")
 		}

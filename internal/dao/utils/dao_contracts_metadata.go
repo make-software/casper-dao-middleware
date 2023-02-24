@@ -95,9 +95,9 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 				}
 			}
 
-			//if result.VariableRepositoryContractStorageUref == "" {
-			//	return DAOContractsMetadata{}, errors.New("error: missing variable repository contract storage uref in contract")
-			//}
+			if result.VariableRepositoryContractStorageUref == "" {
+				return DAOContractsMetadata{}, errors.New("error: missing variable repository contract storage uref in contract")
+			}
 		}
 
 	}
