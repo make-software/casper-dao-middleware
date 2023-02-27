@@ -31,7 +31,7 @@ func (s *TrackMint) Execute() error {
 			nil,
 			mintEvent.Amount.Into().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
-			entities.ReputationChangeReasonMint,
+			entities.ReputationChangeReasonMinted,
 			deployProcessedEvent.DeployProcessed.Timestamp),
 	}
 

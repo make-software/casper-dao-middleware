@@ -38,7 +38,7 @@ func (s *TrackVotingCanceled) Execute() error {
 				&votingCanceled.VotingID,
 				unstaked,
 				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonVotingUnstake,
+				entities.ReputationChangeReasonVotingUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
 			),
 			entities.NewReputationChange(
@@ -47,7 +47,7 @@ func (s *TrackVotingCanceled) Execute() error {
 				&votingCanceled.VotingID,
 				-unstaked,
 				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonVotingUnstake,
+				entities.ReputationChangeReasonVotingUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
 			),
 		)

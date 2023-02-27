@@ -70,7 +70,7 @@ func (s *TrackVotingEnded) Execute() error {
 				&votingEnded.VotingID,
 				unstaked,
 				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonVotingUnstake,
+				entities.ReputationChangeReasonVotingUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
 			),
 			entities.NewReputationChange(
@@ -79,7 +79,7 @@ func (s *TrackVotingEnded) Execute() error {
 				&votingEnded.VotingID,
 				-unstaked,
 				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonVotingUnstake,
+				entities.ReputationChangeReasonVotingUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
 			),
 		)
@@ -94,7 +94,7 @@ func (s *TrackVotingEnded) Execute() error {
 			nil,
 			val.Into().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
-			entities.ReputationChangeReasonVotingDistribution,
+			entities.ReputationChangeReasonVotingGained,
 			deployProcessedEvent.DeployProcessed.Timestamp),
 		)
 	}
@@ -108,7 +108,7 @@ func (s *TrackVotingEnded) Execute() error {
 			nil,
 			-val.Into().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
-			entities.ReputationChangeReasonVotingBurn,
+			entities.ReputationChangeReasonVotingLost,
 			deployProcessedEvent.DeployProcessed.Timestamp),
 		)
 	}

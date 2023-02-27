@@ -51,7 +51,7 @@ func (s *TrackBallotCast) Execute() error {
 			&ballotCast.VotingID,
 			-staked,
 			deployProcessedEvent.DeployProcessed.DeployHash,
-			entities.ReputationChangeReasonVote,
+			entities.ReputationChangeReasonStaked,
 			deployProcessedEvent.DeployProcessed.Timestamp),
 		// second event represent positive reputation coming to "Voting" contract
 		entities.NewReputationChange(
@@ -60,7 +60,7 @@ func (s *TrackBallotCast) Execute() error {
 			&ballotCast.VotingID,
 			staked,
 			deployProcessedEvent.DeployProcessed.DeployHash,
-			entities.ReputationChangeReasonVote,
+			entities.ReputationChangeReasonStaked,
 			deployProcessedEvent.DeployProcessed.Timestamp),
 	}
 

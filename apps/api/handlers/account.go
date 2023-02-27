@@ -6,7 +6,7 @@ import (
 	"casper-dao-middleware/apps/api/serialization"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/account"
-	"casper-dao-middleware/internal/dao/services/voting"
+	"casper-dao-middleware/internal/dao/services/votes"
 	"casper-dao-middleware/pkg/errors"
 	http_params "casper-dao-middleware/pkg/http-params"
 	http_response "casper-dao-middleware/pkg/http-response"
@@ -60,7 +60,7 @@ func (h *Account) HandleGetAccountVotes(w http.ResponseWriter, r *http.Request) 
 
 	paginationParams := pagination.NewParamsFromRequest(r)
 
-	getVotes := voting.NewGetVotes()
+	getVotes := votes.NewGetVotes()
 	getVotes.SetAddress(addressHash)
 	getVotes.SetEntityManager(h.entityManager)
 	getVotes.SetPaginationParams(paginationParams)

@@ -31,7 +31,7 @@ func (s *TrackBurn) Execute() error {
 			nil,
 			burnEvent.Amount.Into().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
-			entities.ReputationChangeReasonBurn,
+			entities.ReputationChangeReasonBurned,
 			deployProcessedEvent.DeployProcessed.Timestamp),
 	}
 

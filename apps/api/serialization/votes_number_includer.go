@@ -1,10 +1,10 @@
 package serialization
 
 import (
-	"casper-dao-middleware/internal/dao/persistence"
-	"casper-dao-middleware/internal/dao/services/voting"
-
 	"go.uber.org/zap"
+
+	"casper-dao-middleware/internal/dao/persistence"
+	"casper-dao-middleware/internal/dao/services/votes"
 )
 
 type VotesNumberIncluder struct {
@@ -32,7 +32,7 @@ func (s *VotesNumberIncluder) Include(jsonMapKey string) {
 		votingIDs = append(votingIDs, mapJSONValue)
 	}
 
-	getVotesNumber := voting.NewGetVotesNumber()
+	getVotesNumber := votes.NewGetVotesNumber()
 	getVotesNumber.SetEntityManager(s.entityManager)
 	getVotesNumber.SetVotingIDs(votingIDs)
 	votesNumberResult, err := getVotesNumber.Execute()
