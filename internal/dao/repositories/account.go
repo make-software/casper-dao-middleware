@@ -1,9 +1,15 @@
 package repositories
 
 import (
+	"database/sql"
+
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
 	"casper-dao-middleware/internal/dao/entities"
+	"casper-dao-middleware/pkg/casper/types"
+	"casper-dao-middleware/pkg/errors"
+	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
 )
 
@@ -13,6 +19,9 @@ import (
 type Account interface {
 	UpsertIsKYC(account entities.Account) error
 	UpsertIsVA(account entities.Account) error
+	Count(filters map[string]interface{}) (uint64, error)
+	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Account, error)
+	FindByHash(hash types.Hash) (*entities.Account, error)
 }
 
 type account struct {
@@ -85,4 +94,69 @@ func (r *account) UpsertIsVA(account entities.Account) error {
 	}
 
 	return nil
+}
+
+func (r *account) Count(filters map[string]interface{}) (uint64, error) {
+	queryBuilder := query.Select("COUNT(*)").
+		From("accounts").
+		FilterBy(filters, r.indexedFields)
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	var count uint64
+
+	row := r.conn.QueryRow(sql, args...)
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+
+}
+
+func (r *account) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Account, error) {
+	queryBuilder := query.Select("*").
+		From("accounts").
+		FilterBy(filters, r.indexedFields).
+		Paginate(params, r.indexedFields)
+
+	sqlQuery, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make([]*entities.Account, 0)
+	if err := r.conn.Select(&accounts, sqlQuery, args...); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError("not found account info by hash")
+		}
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
+func (r *account) FindByHash(hash types.Hash) (*entities.Account, error) {
+	queryBuilder := query.Select("*").
+		From("accounts").
+		Where(sq.Eq{
+			"hash": hash,
+		})
+
+	sqlQuery, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	account := entities.Account{}
+	if err := r.conn.Get(&account, sqlQuery, args...); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError("not found account info by hash")
+		}
+		return nil, err
+	}
+
+	return &account, nil
 }

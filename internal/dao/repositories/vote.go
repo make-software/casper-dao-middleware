@@ -10,10 +10,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// VoteRepository DB table interface
+// Vote DB table interface
 //
-//go:generate mockgen -destination=../tests/mocks/vote_repo_mock.go -package=mocks -source=./vote.go VoteRepository
-type VoteRepository interface {
+//go:generate mockgen -destination=../tests/mocks/vote_repo_mock.go -package=mocks -source=./vote.go Vote
+type Vote interface {
 	Save(changes *entities.Vote) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Vote, error)
@@ -21,13 +21,13 @@ type VoteRepository interface {
 	UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error
 }
 
-type Vote struct {
+type vote struct {
 	conn          *sqlx.DB
 	indexedFields map[string]struct{}
 }
 
-func NewVote(conn *sqlx.DB) *Vote {
-	return &Vote{
+func NewVote(conn *sqlx.DB) *vote {
+	return &vote{
 		conn: conn,
 		indexedFields: map[string]struct{}{
 			"address":   {},
@@ -36,7 +36,7 @@ func NewVote(conn *sqlx.DB) *Vote {
 	}
 }
 
-func (r *Vote) Save(vote *entities.Vote) error {
+func (r *vote) Save(vote *entities.Vote) error {
 	queryBuilder := query.Insert("votes").
 		Options("IGNORE").
 		Columns(
@@ -70,7 +70,7 @@ func (r *Vote) Save(vote *entities.Vote) error {
 	return nil
 }
 
-func (r *Vote) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Vote, error) {
+func (r *vote) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Vote, error) {
 	queryBuilder := query.Select("*").
 		From("votes").
 		FilterBy(filters, r.indexedFields).
@@ -89,7 +89,7 @@ func (r *Vote) Find(params *pagination.Params, filters map[string]interface{}) (
 	return infos, nil
 }
 
-func (r *Vote) Count(filters map[string]interface{}) (uint64, error) {
+func (r *vote) Count(filters map[string]interface{}) (uint64, error) {
 	queryBuilder := query.Select("COUNT(*)").
 		From("votes").
 		FilterBy(filters, r.indexedFields)
@@ -108,7 +108,7 @@ func (r *Vote) Count(filters map[string]interface{}) (uint64, error) {
 	return count, nil
 }
 
-func (r *Vote) CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32, error) {
+func (r *vote) CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32, error) {
 	queryBuilder := query.Select("voting_id, COUNT(*)").
 		From("votes").
 		Where(sq.Eq{"voting_id": votingIDs}).
@@ -137,7 +137,7 @@ func (r *Vote) CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32
 	return result, nil
 }
 
-func (r *Vote) UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error {
+func (r *vote) UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error {
 	queryBuilder := query.Update("votes").
 		Set("is_canceled", isCanceled).
 		Where(sq.Eq{

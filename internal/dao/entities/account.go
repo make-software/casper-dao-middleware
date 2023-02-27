@@ -7,8 +7,8 @@ import (
 )
 
 type Account struct {
-	Hash      types.Hash `json:"creator" db:"creator"`
-	IsKyc     bool       `json:"is_kyc" db:"is_formal"`
+	Hash      types.Hash `json:"hash" db:"hash"`
+	IsKyc     bool       `json:"is_kyc" db:"is_kyc"`
 	IsVA      bool       `json:"is_va" db:"is_va"`
 	Timestamp time.Time  `json:"timestamp" db:"timestamp"`
 }

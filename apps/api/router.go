@@ -42,10 +42,13 @@ func NewRouter(
 	reputationHandler := handlers.NewReputation(entityManager, daoContractsMetadata)
 	votingHandler := handlers.NewVoting(entityManager)
 	settingHandler := handlers.NewSetting(entityManager)
+	accountHandler := handlers.NewAccount(entityManager)
 
 	router.Get("/accounts/{address}/total-reputation", reputationHandler.HandleGetTotalReputation)
 	router.Get("/accounts/{address}/aggregated-reputation-changes", reputationHandler.HandleGetAggregatedReputationChange)
-	router.Get("/accounts/{address}/votes", votingHandler.HandleGetAccountVotes)
+	router.Get("/accounts/{address}/votes", accountHandler.HandleGetAccountVotes)
+	router.Get("/accounts", accountHandler.HandleGetAccounts)
+	router.Get("/accounts/{address}", accountHandler.HandleGetAccountsByAddress)
 
 	router.Get("/votings", votingHandler.HandleGetVotings)
 	router.Get("/votings/{voting_id}/votes", votingHandler.HandleGetVotingVotes)

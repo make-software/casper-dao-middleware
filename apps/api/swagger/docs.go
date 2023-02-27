@@ -19,6 +19,196 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/accounts": {
+            "get": {
+                "tags": [
+                    "Vote"
+                ],
+                "summary": "Return paginated list of accounts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "10",
+                        "description": "Number of items per page",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.PaginatedResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entities.Account"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{address}": {
+            "get": {
+                "tags": [
+                    "Vote"
+                ],
+                "summary": "Return account by its address",
+                "parameters": [
+                    {
+                        "maxLength": 66,
+                        "type": "string",
+                        "description": "Hash or PublicKey",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entities.Account"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/accounts/{address}/aggregated-reputation-changes": {
             "get": {
                 "tags": [
@@ -504,18 +694,6 @@ const docTemplate = `{
                 "summary": "Return paginated list of votings",
                 "parameters": [
                     {
-                        "type": "boolean",
-                        "description": "HasEnded flag (boolean)",
-                        "name": "has_ended",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "IsFormal flag (boolean)",
-                        "name": "is_formal",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "description": "Optional fields' schema (votes_number{}, account_vote(hash))",
                         "name": "includes",
@@ -768,6 +946,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entities.Account": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "is_kyc": {
+                    "type": "boolean"
+                },
+                "is_va": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
         "entities.AggregatedReputationChange": {
             "type": "object",
             "properties": {
@@ -828,6 +1023,9 @@ const docTemplate = `{
                 "deploy_hash": {
                     "type": "string"
                 },
+                "is_canceled": {
+                    "type": "boolean"
+                },
                 "is_in_favour": {
                     "type": "boolean"
                 },
@@ -842,9 +1040,6 @@ const docTemplate = `{
         "entities.Voting": {
             "type": "object",
             "properties": {
-                "config_double_time_between_votings": {
-                    "type": "boolean"
-                },
                 "config_time_between_informal_and_formal_voting": {
                     "type": "integer"
                 },
@@ -860,10 +1055,34 @@ const docTemplate = `{
                 "deploy_hash": {
                     "type": "string"
                 },
-                "has_ended": {
-                    "type": "boolean"
+                "formal_voting_ends_at": {
+                    "type": "string"
                 },
-                "is_formal": {
+                "formal_voting_quorum": {
+                    "type": "integer"
+                },
+                "formal_voting_result": {
+                    "type": "integer"
+                },
+                "formal_voting_starts_at": {
+                    "type": "string"
+                },
+                "formal_voting_time": {
+                    "type": "integer"
+                },
+                "informal_voting_ends_at": {
+                    "type": "string"
+                },
+                "informal_voting_quorum": {
+                    "type": "integer"
+                },
+                "informal_voting_result": {
+                    "type": "integer"
+                },
+                "informal_voting_starts_at": {
+                    "type": "string"
+                },
+                "is_canceled": {
                     "type": "boolean"
                 },
                 "metadata": {
@@ -872,16 +1091,7 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "timestamp": {
-                    "type": "string"
-                },
                 "voting_id": {
-                    "type": "integer"
-                },
-                "voting_quorum": {
-                    "type": "integer"
-                },
-                "voting_time": {
                     "type": "integer"
                 },
                 "voting_type_id": {

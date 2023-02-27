@@ -81,7 +81,7 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 			}
 
 			if rawEventData.EventType != casper.DeployProcessedEventType {
-				zap.S().Info("Skip not supported event type, expect DeployProcessedEvent")
+				zap.S().Debugln("Skip not supported event type, expect DeployProcessedEvent")
 				continue
 			}
 

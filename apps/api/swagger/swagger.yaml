@@ -1,4 +1,15 @@
 definitions:
+  entities.Account:
+    properties:
+      hash:
+        type: string
+      is_kyc:
+        type: boolean
+      is_va:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
   entities.AggregatedReputationChange:
     properties:
       address:
@@ -38,6 +49,8 @@ definitions:
         type: integer
       deploy_hash:
         type: string
+      is_canceled:
+        type: boolean
       is_in_favour:
         type: boolean
       timestamp:
@@ -47,8 +60,6 @@ definitions:
     type: object
   entities.Voting:
     properties:
-      config_double_time_between_votings:
-        type: boolean
       config_time_between_informal_and_formal_voting:
         type: integer
       config_total_onboarded:
@@ -59,21 +70,31 @@ definitions:
         type: string
       deploy_hash:
         type: string
-      has_ended:
-        type: boolean
-      is_formal:
+      formal_voting_ends_at:
+        type: string
+      formal_voting_quorum:
+        type: integer
+      formal_voting_result:
+        type: integer
+      formal_voting_starts_at:
+        type: string
+      formal_voting_time:
+        type: integer
+      informal_voting_ends_at:
+        type: string
+      informal_voting_quorum:
+        type: integer
+      informal_voting_result:
+        type: integer
+      informal_voting_starts_at:
+        type: string
+      is_canceled:
         type: boolean
       metadata:
         items:
           type: integer
         type: array
-      timestamp:
-        type: string
       voting_id:
-        type: integer
-      voting_quorum:
-        type: integer
-      voting_time:
         type: integer
       voting_type_id:
         $ref: '#/definitions/entities.VotingTypeID'
@@ -123,6 +144,108 @@ info:
   title: Casper-CRDao API
   version: 0.0.1
 paths:
+  /accounts:
+    get:
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Account'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of accounts
+      tags:
+      - Vote
+  /accounts/{address}:
+    get:
+      parameters:
+      - description: Hash or PublicKey
+        in: path
+        maxLength: 66
+        name: address
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Account'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return account by its address
+      tags:
+      - Vote
   /accounts/{address}/aggregated-reputation-changes:
     get:
       parameters:
@@ -400,14 +523,6 @@ paths:
   /votings:
     get:
       parameters:
-      - description: HasEnded flag (boolean)
-        in: query
-        name: has_ended
-        type: boolean
-      - description: IsFormal flag (boolean)
-        in: query
-        name: is_formal
-        type: boolean
       - description: Optional fields' schema (votes_number{}, account_vote(hash))
         in: query
         name: includes

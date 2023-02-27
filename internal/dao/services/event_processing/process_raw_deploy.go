@@ -119,6 +119,7 @@ func (c *ProcessRawDeploy) Execute() error {
 			zap.S().With(zap.Error(err)).With(zap.String("event-name", result.Event.Name)).Info("Failed to handle DAO event")
 			return err
 		}
+		zap.S().With("event", result.Event.Name).Info("Successfully tracked event")
 	}
 
 	return nil

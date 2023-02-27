@@ -10,10 +10,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// VotingRepository DB table interface
+// Voting DB table interface
 //
-//go:generate mockgen -destination=../tests/mocks/voting_repo_mock.go -package=mocks -source=./voting.go VotingRepository
-type VotingRepository interface {
+//go:generate mockgen -destination=../tests/mocks/voting_repo_mock.go -package=mocks -source=./voting.go Voting
+type Voting interface {
 	Save(changes *entities.Voting) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Voting, error)
@@ -22,13 +22,13 @@ type VotingRepository interface {
 	UpdateIsCanceled(votingID uint32, isCanceled bool) error
 }
 
-type Voting struct {
+type voting struct {
 	conn          *sqlx.DB
 	indexedFields map[string]struct{}
 }
 
-func NewVoting(conn *sqlx.DB) *Voting {
-	return &Voting{
+func NewVoting(conn *sqlx.DB) *voting {
+	return &voting{
 		conn: conn,
 		indexedFields: map[string]struct{}{
 			"voting_id": {},
@@ -38,7 +38,7 @@ func NewVoting(conn *sqlx.DB) *Voting {
 		},
 	}
 }
-func (r *Voting) Save(voting *entities.Voting) error {
+func (r *voting) Save(voting *entities.Voting) error {
 	queryBuilder := query.Insert("votings").
 		Options("IGNORE").
 		Columns(
@@ -92,7 +92,7 @@ func (r *Voting) Save(voting *entities.Voting) error {
 	return nil
 }
 
-func (r *Voting) Count(filters map[string]interface{}) (uint64, error) {
+func (r *voting) Count(filters map[string]interface{}) (uint64, error) {
 	queryBuilder := query.Select("COUNT(*)").
 		From("votings").
 		FilterBy(filters, r.indexedFields)
@@ -112,7 +112,7 @@ func (r *Voting) Count(filters map[string]interface{}) (uint64, error) {
 
 }
 
-func (r *Voting) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Voting, error) {
+func (r *voting) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Voting, error) {
 	queryBuilder := query.Select("*").
 		From("votings").
 		FilterBy(filters, r.indexedFields).
@@ -131,7 +131,7 @@ func (r *Voting) Find(params *pagination.Params, filters map[string]interface{})
 	return votings, nil
 }
 
-func (r *Voting) GetByVotingID(votingID uint32) (*entities.Voting, error) {
+func (r *voting) GetByVotingID(votingID uint32) (*entities.Voting, error) {
 	queryBuilder := query.Select("*").
 		From("votings").
 		Where(sq.Eq{
@@ -151,7 +151,7 @@ func (r *Voting) GetByVotingID(votingID uint32) (*entities.Voting, error) {
 	return &voting, nil
 }
 
-func (r *Voting) Update(voting *entities.Voting) error {
+func (r *voting) Update(voting *entities.Voting) error {
 	queryBuilder := query.Update("votings").
 		SetMap(map[string]interface{}{
 			"formal_voting_starts_at": voting.FormalVotingStartsAt,
@@ -177,7 +177,7 @@ func (r *Voting) Update(voting *entities.Voting) error {
 	return nil
 }
 
-func (r *Voting) UpdateIsCanceled(votingID uint32, isCanceled bool) error {
+func (r *voting) UpdateIsCanceled(votingID uint32, isCanceled bool) error {
 	queryBuilder := query.Update("votings").
 		Set("is_canceled", isCanceled).
 		Where(sq.Eq{

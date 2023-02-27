@@ -8,22 +8,22 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// SettingRepository DB table interface
+// Setting DB table interface
 //
-//go:generate mockgen -destination=../tests/mocks/setting_repo_mock.go -package=mocks -source=./setting.go SettingRepository
-type SettingRepository interface {
+//go:generate mockgen -destination=../tests/mocks/setting_repo_mock.go -package=mocks -source=./setting.go Setting
+type Setting interface {
 	Upsert(setting entities.Setting) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Setting, error)
 }
 
-type Setting struct {
+type setting struct {
 	conn          *sqlx.DB
 	indexedFields map[string]struct{}
 }
 
-func NewSetting(conn *sqlx.DB) *Setting {
-	return &Setting{
+func NewSetting(conn *sqlx.DB) *setting {
+	return &setting{
 		conn: conn,
 		indexedFields: map[string]struct{}{
 			"name": {},
@@ -31,7 +31,7 @@ func NewSetting(conn *sqlx.DB) *Setting {
 	}
 }
 
-func (r *Setting) Upsert(setting entities.Setting) error {
+func (r *setting) Upsert(setting entities.Setting) error {
 	queryBuilder := query.Insert("settings").
 		Columns(
 			"name",
@@ -60,7 +60,7 @@ func (r *Setting) Upsert(setting entities.Setting) error {
 	return nil
 }
 
-func (r *Setting) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Setting, error) {
+func (r *setting) Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Setting, error) {
 	queryBuilder := query.Select("*").
 		From("settings").
 		FilterBy(filters, r.indexedFields).
@@ -79,7 +79,7 @@ func (r *Setting) Find(params *pagination.Params, filters map[string]interface{}
 	return settings, nil
 }
 
-func (r *Setting) Count(filters map[string]interface{}) (uint64, error) {
+func (r *setting) Count(filters map[string]interface{}) (uint64, error) {
 	queryBuilder := query.Select("COUNT(*)").
 		From("settings").
 		FilterBy(filters, r.indexedFields)

@@ -11,18 +11,18 @@ import (
 
 // EntityManager main persistence interface
 type EntityManager interface {
-	ReputationChangeRepository() repositories.ReputationChangeRepository
-	VoteRepository() repositories.VoteRepository
-	VotingRepository() repositories.VotingRepository
-	SettingRepository() repositories.SettingRepository
+	ReputationChangeRepository() repositories.ReputationChange
+	VoteRepository() repositories.Vote
+	VotingRepository() repositories.Voting
+	SettingRepository() repositories.Setting
 	AccountRepository() repositories.Account
 }
 
 type entityManager struct {
-	reputationChangesRepo repositories.ReputationChangeRepository
-	voteRepository        repositories.VoteRepository
-	votingRepository      repositories.VotingRepository
-	settingRepository     repositories.SettingRepository
+	reputationChangesRepo repositories.ReputationChange
+	voteRepository        repositories.Vote
+	votingRepository      repositories.Voting
+	settingRepository     repositories.Setting
 	accountRepo           repositories.Account
 }
 
@@ -36,19 +36,19 @@ func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityMana
 	}
 }
 
-func (e entityManager) ReputationChangeRepository() repositories.ReputationChangeRepository {
+func (e entityManager) ReputationChangeRepository() repositories.ReputationChange {
 	return e.reputationChangesRepo
 }
 
-func (e entityManager) VoteRepository() repositories.VoteRepository {
+func (e entityManager) VoteRepository() repositories.Vote {
 	return e.voteRepository
 }
 
-func (e entityManager) VotingRepository() repositories.VotingRepository {
+func (e entityManager) VotingRepository() repositories.Voting {
 	return e.votingRepository
 }
 
-func (e entityManager) SettingRepository() repositories.SettingRepository {
+func (e entityManager) SettingRepository() repositories.Setting {
 	return e.settingRepository
 }
 

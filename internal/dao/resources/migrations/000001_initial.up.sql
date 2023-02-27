@@ -63,7 +63,6 @@ create table votings
     config_total_onboarded                         int unsigned not null,
     config_voting_clearness_delta                  int unsigned not null,
     config_time_between_informal_and_formal_voting int unsigned not null,
-    config_double_time_between_votings             tinyint unsigned not null,
 
     primary key (creator, voting_id, deploy_hash)
 ) ENGINE = InnoDB
