@@ -70,7 +70,7 @@ func (s *TrackVotingEnded) Execute() error {
 				&votingEnded.VotingID,
 				unstaked,
 				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonVotingUnstaked,
+				entities.ReputationChangeReasonUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
 			),
 			entities.NewReputationChange(
@@ -79,7 +79,7 @@ func (s *TrackVotingEnded) Execute() error {
 				&votingEnded.VotingID,
 				-unstaked,
 				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonVotingUnstaked,
+				entities.ReputationChangeReasonUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
 			),
 		)
