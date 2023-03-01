@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 package event_tracking
 
 import (
@@ -19,7 +16,7 @@ import (
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/event_processing"
-	"casper-dao-middleware/pkg/boot"
+	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/mocks"
 	"casper-dao-middleware/pkg/casper/types"
@@ -38,7 +35,7 @@ type TrackVotingCreatedTestSuit struct {
 }
 
 func (suite *TrackVotingCreatedTestSuit) SetupSuite() {
-	suite.db = boot.SetUpTestDB()
+	//suite.db = boot.SetUpTestDB()
 
 	suite.mockCtrl = gomock.NewController(suite.T())
 	reputationContractHash, err := types.NewHashFromHexString("47f30c5dc923b3ddc0d812b6ac5020bcdabdd42f0c1f99c178d6b7869cdf3251")
@@ -56,14 +53,14 @@ func (suite *TrackVotingCreatedTestSuit) SetupSuite() {
 }
 
 func (suite *TrackVotingCreatedTestSuit) SetupTest() {
-	_, err := suite.db.Exec(`TRUNCATE TABLE votings`)
-	suite.NoError(err)
-
-	_, err = suite.db.Exec(`TRUNCATE TABLE reputation_changes`)
-	suite.NoError(err)
-
-	_, err = suite.db.Exec(`TRUNCATE TABLE votes`)
-	suite.NoError(err)
+	//_, err := suite.db.Exec(`TRUNCATE TABLE votings`)
+	//suite.NoError(err)
+	//
+	//_, err = suite.db.Exec(`TRUNCATE TABLE reputation_changes`)
+	//suite.NoError(err)
+	//
+	//_, err = suite.db.Exec(`TRUNCATE TABLE votes`)
+	//suite.NoError(err)
 }
 
 func (suite *TrackVotingCreatedTestSuit) TearDownTest() {

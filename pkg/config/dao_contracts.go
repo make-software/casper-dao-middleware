@@ -17,13 +17,13 @@ type DaoContracts struct {
 func (d DaoContracts) ToMap() map[string]types.Hash {
 	return map[string]types.Hash{
 		"reputation_contract":          d.ReputationContractHash,
-		"simple_voter_contract":        d.ReputationContractHash,
-		"repo_voter_contract":          d.ReputationContractHash,
-		"kyc_voter_contract":           d.ReputationContractHash,
-		"reputation_voter_contract":    d.ReputationContractHash,
-		"slashing_voter_contract":      d.ReputationContractHash,
-		"va_nft_contract":              d.ReputationContractHash,
-		"kyc_nft_contract":             d.ReputationContractHash,
-		"variable_repository_contract": d.ReputationContractHash,
+		"simple_voter_contract":        d.SimpleVoterContractHash,
+		"repo_voter_contract":          d.RepoVoterContractHash,
+		"kyc_voter_contract":           d.KycVoterContractHash,
+		"reputation_voter_contract":    d.ReputationVoterContractHash,
+		"slashing_voter_contract":      d.SlashingVoterContractHash,
+		"va_nft_contract":              d.VANFTContractHash,
+		"kyc_nft_contract":             d.KycNFTContractHash,
+		"variable_repository_contract": d.VariableRepositoryContractHash,
 	}
 }

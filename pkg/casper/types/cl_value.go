@@ -180,6 +180,14 @@ func NewCLValueFromBytesWithRemainder(clType CLType, data []byte) (CLValue, []by
 			}
 			mapData[&clValueK] = clValueV
 		}
+		return CLValue{
+			Type: clType,
+			Map: &CLMap{
+				KeyType:   clType.CLTypeMap.CLTypeKey,
+				ValueType: clType.CLTypeMap.CLTypeValue,
+				Data:      mapData,
+			},
+		}, rem, nil
 	case CLTypeIDList:
 		if len(data) < 4 {
 			return CLValue{}, nil, newInvalidLengthErr(clType.CLTypeID)

@@ -13,25 +13,25 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// ReputationChangeRepository DB table interface
+// ReputationChange DB table interface
 //
-//go:generate mockgen -destination=../tests/mocks/reputation_change_repo_mock.go -package=mocks -source=./reputation_change.go ReputationChangeRepository
-type ReputationChangeRepository interface {
+//go:generate mockgen -destination=../tests/mocks/reputation_change_repo_mock.go -package=mocks -source=./reputation_change.go ReputationChange
+type ReputationChange interface {
 	SaveBatch(changes []entities.ReputationChange) error
 	CalculateTotalReputationForAddress(address types.Hash) (entities.TotalReputation, error)
 	FindAggregatedReputationChanges(params *pagination.Params, filters map[string]interface{}) ([]entities.AggregatedReputationChange, error)
 	CountAggregatedReputationChanges(filters map[string]interface{}) (uint64, error)
 }
 
-type ReputationChange struct {
+type reputationChange struct {
 	conn          *sqlx.DB
 	indexedFields map[string]struct{}
 
 	contractPackageHashes utils.DAOContractsMetadata
 }
 
-func NewReputationChange(conn *sqlx.DB, hashes utils.DAOContractsMetadata) *ReputationChange {
-	return &ReputationChange{
+func NewReputationChange(conn *sqlx.DB, hashes utils.DAOContractsMetadata) *reputationChange {
+	return &reputationChange{
 		conn: conn,
 		indexedFields: map[string]struct{}{
 			"address": {},
@@ -40,7 +40,7 @@ func NewReputationChange(conn *sqlx.DB, hashes utils.DAOContractsMetadata) *Repu
 	}
 }
 
-func (r *ReputationChange) SaveBatch(changes []entities.ReputationChange) error {
+func (r *reputationChange) SaveBatch(changes []entities.ReputationChange) error {
 	columns := []string{
 		"address",
 		"contract_package_hash",
@@ -51,7 +51,7 @@ func (r *ReputationChange) SaveBatch(changes []entities.ReputationChange) error 
 		"timestamp",
 	}
 
-	insertQuery := `INSERT INTO reputation_changes (` + strings.Join(columns, ",") + `) 
+	insertQuery := `INSERT IGNORE INTO reputation_changes (` + strings.Join(columns, ",") + `) 
 		VALUES (:` + strings.Join(columns, ",:") + `)`
 
 	_, err := r.conn.NamedExec(insertQuery, changes)
@@ -62,18 +62,25 @@ func (r *ReputationChange) SaveBatch(changes []entities.ReputationChange) error 
 	return nil
 }
 
-func (r *ReputationChange) CalculateTotalReputationForAddress(address types.Hash) (entities.TotalReputation, error) {
+func (r *reputationChange) CalculateTotalReputationForAddress(address types.Hash) (entities.TotalReputation, error) {
 	query := `
 	SELECT 
 	    (SELECT SUM(amount) FROM reputation_changes WHERE address = ? and contract_package_hash = ?) as available_amount, 
-	    (SELECT SUM(amount)  FROM reputation_changes WHERE address = ? and contract_package_hash = ?) as staked_amount  
+	    (SELECT SUM(amount)  FROM reputation_changes WHERE address = ? and contract_package_hash in (?, ?, ?, ?, ?)) as staked_amount  
 	FROM reputation_changes;
 `
 
+	args := []interface{}{address, r.contractPackageHashes.ReputationContractPackageHash, address}
+	args = append(args, []interface{}{
+		r.contractPackageHashes.SimpleVoterContractPackageHash,
+		r.contractPackageHashes.KycVoterContractPackageHash,
+		r.contractPackageHashes.RepoVoterContractPackageHash,
+		r.contractPackageHashes.ReputationVoterContractPackageHash,
+		r.contractPackageHashes.SlashingVoterContractPackageHash,
+	}...)
+
 	totalReputation := entities.TotalReputation{}
-	err := r.conn.Get(&totalReputation, query,
-		address, r.contractPackageHashes.ReputationContractPackageHash,
-		address, r.contractPackageHashes.SimpleVoterContractPackageHash)
+	err := r.conn.Get(&totalReputation, query, args...)
 	if err != nil {
 		return entities.TotalReputation{}, err
 	}
@@ -81,7 +88,7 @@ func (r *ReputationChange) CalculateTotalReputationForAddress(address types.Hash
 	return totalReputation, nil
 }
 
-func (r *ReputationChange) FindAggregatedReputationChanges(params *pagination.Params, filters map[string]interface{}) ([]entities.AggregatedReputationChange, error) {
+func (r *reputationChange) FindAggregatedReputationChanges(params *pagination.Params, filters map[string]interface{}) ([]entities.AggregatedReputationChange, error) {
 	args := make([]interface{}, 0)
 	aggregatedBuilder := query.Select(
 		`address, 
@@ -124,7 +131,7 @@ func (r *ReputationChange) FindAggregatedReputationChanges(params *pagination.Pa
 	return aggregatedChanges, nil
 }
 
-func (r *ReputationChange) CountAggregatedReputationChanges(filters map[string]interface{}) (uint64, error) {
+func (r *reputationChange) CountAggregatedReputationChanges(filters map[string]interface{}) (uint64, error) {
 	args := make([]interface{}, 0)
 	aggregatedBuilder := query.Select("voting_id").
 		From("reputation_changes").

@@ -3,7 +3,7 @@ package serialization
 import (
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/persistence"
-	"casper-dao-middleware/internal/dao/services/voting"
+	"casper-dao-middleware/internal/dao/services/votes"
 	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 
@@ -46,7 +46,7 @@ func (s *AccountVoteIncluder) Include(args []string, jsonMapKey string) {
 		votingIDs = append(votingIDs, mapJSONValue)
 	}
 
-	getVotes := voting.NewGetVotes()
+	getVotes := votes.NewGetVotes()
 	getVotes.SetEntityManager(s.entityManager)
 	getVotes.SetVotingIDs(votingIDs)
 	getVotes.SetAddress(&addressHash)

@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -114,12 +113,7 @@ func (c *SyncDAOSetting) Execute() error {
 		return errors.New("expected initialized CLValue")
 	}
 
-	decoded := make([]byte, len(result.StoredValue.CLValue.Bytes))
-	if _, err := hex.Decode(decoded, bytes.Trim(result.StoredValue.CLValue.Bytes, "\"")); err != nil {
-		return err
-	}
-
-	record, err := types.NewRecordFromBytes(decoded)
+	record, err := types.NewRecordFromBytes(result.StoredValue.CLValue.Bytes)
 	if err != nil {
 		return err
 	}

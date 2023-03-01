@@ -12,41 +12,49 @@ type Voting struct {
 	DeployHash                               types.Hash      `json:"deploy_hash" db:"deploy_hash"`
 	VotingID                                 uint32          `json:"voting_id" db:"voting_id"`
 	VotingTypeID                             VotingTypeID    `json:"voting_type_id" db:"voting_type_id"`
-	IsFormal                                 bool            `json:"is_formal" db:"is_formal"`
-	HasEnded                                 bool            `json:"has_ended" db:"has_ended"`
-	VotingQuorum                             uint32          `json:"voting_quorum" db:"voting_quorum"`
-	VotingTime                               uint64          `json:"voting_time" db:"voting_time"`
+	InformalVotingQuorum                     uint32          `json:"informal_voting_quorum" db:"informal_voting_quorum"`
+	InformalVotingStartsAt                   time.Time       `json:"informal_voting_starts_at" db:"informal_voting_starts_at"`
+	InformalVotingEndsAt                     time.Time       `json:"informal_voting_ends_at" db:"informal_voting_ends_at"`
+	FormalVotingQuorum                       uint32          `json:"formal_voting_quorum" db:"formal_voting_quorum"`
+	FormalVotingTime                         uint64          `json:"formal_voting_time" db:"formal_voting_time"`
+	FormalVotingStartsAt                     *time.Time      `json:"formal_voting_starts_at" db:"formal_voting_starts_at"`
+	FormalVotingEndsAt                       *time.Time      `json:"formal_voting_ends_at" db:"formal_voting_ends_at"`
 	Metadata                                 json.RawMessage `json:"metadata" db:"metadata"`
+	IsCanceled                               bool            `json:"is_canceled" db:"is_canceled"`
+	InformalVotingResult                     *uint8          `json:"informal_voting_result" db:"informal_voting_result"`
+	FormalVotingResult                       *uint8          `json:"formal_voting_result" db:"formal_voting_result"`
 	ConfigTotalOnboarded                     uint64          `json:"config_total_onboarded" db:"config_total_onboarded"`
-	ConfigDoubleTimeBetweenVotings           bool            `json:"config_double_time_between_votings" db:"config_double_time_between_votings"`
 	ConfigVotingClearnessDelta               uint64          `json:"config_voting_clearness_delta" db:"config_voting_clearness_delta"`
 	ConfigTimeBetweenInformalAndFormalVoting uint64          `json:"config_time_between_informal_and_formal_voting" db:"config_time_between_informal_and_formal_voting"`
-	Timestamp                                time.Time       `json:"timestamp" db:"timestamp"`
 }
 
 func NewVoting(
 	creator, deployHash types.Hash,
-	votingID, votingQuorum uint32,
-	votingTime uint64,
+	votingID uint32,
 	votingTypeID VotingTypeID,
 	metadata json.RawMessage,
-	isFormal, configDoubleTimeBetweenVotings bool,
+	informalVotingQuorum uint32,
+	informalVotingStartsAt, informalVotingEndsAt time.Time,
+	formalVotingQuorum uint32,
+	formalVotingTime uint64,
+	formalVotingStartsAt, formalVotingEndsAt *time.Time,
 	configTotalOnboarded, configVotingClearnessDelta, configTimeBetweenInformalAndFormalVoting uint64,
-	timestamp time.Time,
+
 ) Voting {
 	return Voting{
 		Creator:                                  creator,
 		DeployHash:                               deployHash,
 		VotingID:                                 votingID,
 		VotingTypeID:                             votingTypeID,
-		IsFormal:                                 isFormal,
-		VotingQuorum:                             votingQuorum,
-		VotingTime:                               votingTime,
-		Timestamp:                                timestamp,
-		HasEnded:                                 false,
+		InformalVotingQuorum:                     informalVotingQuorum,
+		FormalVotingQuorum:                       formalVotingQuorum,
+		FormalVotingTime:                         formalVotingTime,
 		Metadata:                                 metadata,
-		ConfigDoubleTimeBetweenVotings:           configDoubleTimeBetweenVotings,
 		ConfigTotalOnboarded:                     configTotalOnboarded,
+		InformalVotingStartsAt:                   informalVotingStartsAt,
+		InformalVotingEndsAt:                     informalVotingEndsAt,
+		FormalVotingStartsAt:                     formalVotingStartsAt,
+		FormalVotingEndsAt:                       formalVotingEndsAt,
 		ConfigVotingClearnessDelta:               configVotingClearnessDelta,
 		ConfigTimeBetweenInformalAndFormalVoting: configTimeBetweenInformalAndFormalVoting,
 	}

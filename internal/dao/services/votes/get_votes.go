@@ -1,4 +1,4 @@
-package voting
+package votes
 
 import (
 	"casper-dao-middleware/internal/dao/di"

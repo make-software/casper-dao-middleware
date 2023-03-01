@@ -8,7 +8,7 @@ import (
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
-const BallotCastEventName = "BallotCastEvent"
+const BallotCastEventName = "BallotCast"
 
 type BallotCastEvent struct {
 	Voter      types.Address
@@ -26,9 +26,9 @@ func ParseBallotCastEvent(event ces.Event) (BallotCastEvent, error) {
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
 		return BallotCastEvent{}, errors.New("invalid voter value in event")
 	}
-	ballotCast.Voter = types.Address{
-		AccountHash:         val.Key.AccountHash,
-		ContractPackageHash: val.Key.Hash,
+	ballotCast.Voter, err = types.NewAddressFromCLValue(val)
+	if err != nil {
+		return BallotCastEvent{}, err
 	}
 
 	val, ok = event.Data["voting_id"]

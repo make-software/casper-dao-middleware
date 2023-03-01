@@ -13,7 +13,7 @@ const VotingCreatedEventName = "SimpleVotingCreated"
 type VotingCreatedEvent struct {
 	Creator                                  types.Address
 	DocumentHash                             string
-	Stake                                    casper_types.U512
+	Stake                                    *casper_types.U512
 	VotingID                                 uint32
 	ConfigInformalQuorum                     uint32
 	ConfigInformalVotingTime                 uint64
@@ -27,14 +27,15 @@ type VotingCreatedEvent struct {
 
 func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 	var votingCreated VotingCreatedEvent
+	var err error
 
 	val, ok := event.Data["creator"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
 		return VotingCreatedEvent{}, errors.New("invalid creator value in event")
 	}
-	votingCreated.Creator = types.Address{
-		AccountHash:         val.Key.AccountHash,
-		ContractPackageHash: val.Key.Hash,
+	votingCreated.Creator, err = types.NewAddressFromCLValue(val)
+	if err != nil {
+		return VotingCreatedEvent{}, err
 	}
 
 	val, ok = event.Data["document_hash"]
@@ -44,10 +45,17 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 	votingCreated.DocumentHash = *val.String
 
 	val, ok = event.Data["stake"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
 		return VotingCreatedEvent{}, errors.New("invalid stake value in event")
 	}
-	votingCreated.Stake = *val.U512
+
+	if val.Option != nil {
+		if val.Option.Type.CLTypeID != casper_types.CLTypeIDU512 {
+			return VotingCreatedEvent{}, errors.New("invalid value inside option of `stake` value")
+		}
+
+		votingCreated.Stake = val.U512
+	}
 
 	val, ok = event.Data["voting_id"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {

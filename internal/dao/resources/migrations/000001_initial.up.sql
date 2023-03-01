@@ -11,6 +11,7 @@ values (1, 'mint'),
        (3, 'vote'),
        (4, 'voting_distribution'),
        (5, 'voting_burn'),
+       (6, 'unstake')
 ;
 
 create table voting_types
@@ -49,16 +50,19 @@ create table votings
     deploy_hash                                    binary(32) not null,
     voting_id                                      int unsigned not null,
     voting_type_id                                 tinyint unsigned not null,
-    is_formal                                      tinyint unsigned not null,
-    has_ended                                      tinyint unsigned not null,
+    informal_voting_quorum                         int unsigned not null,
+    informal_voting_starts_at                      datetime not null,
+    informal_voting_ends_at                        datetime not null,
+    formal_voting_quorum                           int unsigned not null,
+    formal_voting_starts_at                        datetime null,
+    formal_voting_ends_at                          datetime null,
     metadata                                       json     not null,
-    config_double_time_between_votings             tinyint unsigned not null,
-    voting_quorum                                  int unsigned not null,
-    voting_time                                    int unsigned not null,
+    is_canceled                                    tinyint unsigned not null,
+    informal_voting_result                         tinyint unsigned null,
+    formal_voting_result                           tinyint unsigned null,
     config_total_onboarded                         int unsigned not null,
     config_voting_clearness_delta                  int unsigned not null,
     config_time_between_informal_and_formal_voting int unsigned not null,
-    timestamp                                      datetime not null,
 
     primary key (creator, voting_id, deploy_hash)
 ) ENGINE = InnoDB
@@ -72,6 +76,7 @@ create table votes
     address      binary(32) not null,
     amount       int unsigned not null,
     is_in_favour tinyint unsigned not null,
+    is_canceled  tinyint unsigned not null,
     timestamp    datetime not null,
 
     primary key (address, voting_id, deploy_hash)
