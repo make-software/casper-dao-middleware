@@ -39,6 +39,12 @@ type DAOContractsMetadata struct {
 
 	KycNFTContractPackageHash types.Hash
 	KycNFTContractHash        types.Hash
+
+	OnboardingRequestContractPackageHash types.Hash
+	OnboardingRequestContractHash        types.Hash
+
+	AdminContractPackageHash types.Hash
+	AdminContractHash        types.Hash
 }
 
 func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
@@ -85,6 +91,12 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 		case "kyc_nft_contract":
 			result.KycNFTContractPackageHash = contractPackageHash
 			result.KycNFTContractHash = contractHashHex
+		case "onboarding_request_contract":
+			result.OnboardingRequestContractPackageHash = contractPackageHash
+			result.OnboardingRequestContractHash = contractHashHex
+		case "admin_contract":
+			result.AdminContractPackageHash = contractPackageHash
+			result.AdminContractHash = contractHashHex
 		case "variable_repository_contract":
 			result.VariableRepositoryContractPackageHash = contractPackageHash
 			result.VariableRepositoryContractHash = contractHashHex

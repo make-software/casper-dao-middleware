@@ -8,6 +8,8 @@ const (
 	VotingTypeKYC
 	VotingTypeRepo
 	VotingTypeReputation
+	VotingTypeOnboarding
+	VotingTypeAdmin
 )
 
 type VotingType struct {

@@ -6,8 +6,10 @@ import (
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/di"
+	"casper-dao-middleware/internal/dao/services/event_tracking/admin"
 	"casper-dao-middleware/internal/dao/services/event_tracking/kyc_nft"
 	"casper-dao-middleware/internal/dao/services/event_tracking/kyc_voter"
+	"casper-dao-middleware/internal/dao/services/event_tracking/onboarding_request"
 	"casper-dao-middleware/internal/dao/services/event_tracking/repo_voter"
 	"casper-dao-middleware/internal/dao/services/event_tracking/reputation"
 	"casper-dao-middleware/internal/dao/services/event_tracking/reputation_voter"
@@ -111,6 +113,20 @@ func (c *ProcessRawDeploy) Execute() error {
 			trackVariableRepositoryContract.SetDAOContractsMetadata(daoContractsMetadata)
 			trackVariableRepositoryContract.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
 			err = trackVariableRepositoryContract.Execute()
+		case daoContractsMetadata.OnboardingRequestContractPackageHash.ToHex():
+			trackOnboardingRequestContract := onboarding_request.NewTrackContract()
+			trackOnboardingRequestContract.SetCESEvent(result.Event)
+			trackOnboardingRequestContract.SetEntityManager(c.GetEntityManager())
+			trackOnboardingRequestContract.SetDAOContractsMetadata(daoContractsMetadata)
+			trackOnboardingRequestContract.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
+			err = trackOnboardingRequestContract.Execute()
+		case daoContractsMetadata.AdminContractPackageHash.ToHex():
+			trackAdminContract := admin.NewTrackContract()
+			trackAdminContract.SetCESEvent(result.Event)
+			trackAdminContract.SetEntityManager(c.GetEntityManager())
+			trackAdminContract.SetDAOContractsMetadata(daoContractsMetadata)
+			trackAdminContract.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
+			err = trackAdminContract.Execute()
 		default:
 			return errors.New("unsupported DAO contract")
 		}
