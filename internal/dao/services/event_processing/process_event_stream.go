@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
@@ -44,12 +43,12 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 
 	daoMetadata := c.GetDAOContractsMetadata()
 
-	syncDaoSetting := settings.NewSyncDAOSettings()
-	syncDaoSetting.SetCasperClient(c.GetCasperClient())
-	syncDaoSetting.SetVariableRepositoryContractStorageUref(daoMetadata.VariableRepositoryContractStorageUref)
-	syncDaoSetting.SetEntityManager(c.GetEntityManager())
-	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
-	syncDaoSetting.Execute()
+	//syncDaoSetting := settings.NewSyncDAOSettings()
+	//syncDaoSetting.SetCasperClient(c.GetCasperClient())
+	//syncDaoSetting.SetVariableRepositoryContractStorageUref(daoMetadata.VariableRepositoryContractStorageUref)
+	//syncDaoSetting.SetEntityManager(c.GetEntityManager())
+	//syncDaoSetting.SetSettings(settings.VariableRepoSettings)
+	//syncDaoSetting.Execute()
 
 	cesParser, err := ces.NewParser(c.GetCasperClient(), daoMetadata.ContractHashes())
 	if err != nil {
@@ -92,7 +91,7 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 			}
 
 			if deployProcessedEvent.DeployProcessed.ExecutionResult.Success == nil {
-				zap.S().With(zap.Error(err)).Info("Failed to parse rawEvent as DeployProcessedEvent")
+				zap.S().With(zap.Error(err)).Info("Expected only successfully deploys to process")
 				continue
 			}
 
