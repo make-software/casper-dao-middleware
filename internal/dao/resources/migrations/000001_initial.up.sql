@@ -26,7 +26,9 @@ values (1, 'simple'),
        (2, 'slashing'),
        (3, 'kyc'),
        (4, 'repo'),
-       (5, 'reputation');
+       (5, 'reputation'),
+       (6, 'onboarding'),
+       (7, 'admin');
 
 
 create table reputation_changes

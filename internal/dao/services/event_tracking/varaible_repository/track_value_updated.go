@@ -23,12 +23,13 @@ func (s *TrackValueUpdated) Execute() error {
 		return err
 	}
 
-	var activationTime time.Time
+	var activationTime *time.Time
 
 	if valueUpdated.ActivationTime != nil {
-		activationTime = time.Unix(int64(*valueUpdated.ActivationTime), 0)
+		newTime := time.Unix(int64(*valueUpdated.ActivationTime), 0)
+		activationTime = &newTime
 	}
 
-	setting := entities.NewSetting(valueUpdated.Key, valueUpdated.Value.String(), nil, &activationTime)
+	setting := entities.NewSetting(valueUpdated.Key, valueUpdated.Value.String(), nil, activationTime)
 	return s.GetEntityManager().SettingRepository().Upsert(setting)
 }
