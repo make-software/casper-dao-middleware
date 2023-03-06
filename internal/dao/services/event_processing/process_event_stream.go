@@ -92,7 +92,8 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 			}
 
 			if deployProcessedEvent.DeployProcessed.ExecutionResult.Success == nil {
-				zap.S().With(zap.Error(err)).Info("Failed to parse rawEvent as DeployProcessedEvent")
+				zap.S().With(zap.String("hash", deployProcessedEvent.DeployProcessed.DeployHash.String())).
+					Info("Not successful deploy, ignore")
 				continue
 			}
 
