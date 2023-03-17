@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -82,13 +83,18 @@ func (r *reputationChange) CalculateLiquidStakeReputationForAddress(address type
 }
 
 func (r *reputationChange) CalculateAggregatedLiquidStakeReputationForAddresses(addresses []types.Hash) ([]entities.LiquidStakeReputation, error) {
-	query := `
+	addressesParams := make([]string, 0, len(addresses))
+	for range addresses {
+		addressesParams = append(addressesParams, "?")
+	}
+
+	query := fmt.Sprintf(`
 	SELECT 
 	    (SELECT SUM(amount) FROM reputation_changes WHERE contract_package_hash = ?) as liquid_amount, 
 	    (SELECT SUM(amount)  FROM reputation_changes WHERE contract_package_hash != ?) as staked_amount,
 	    address
-	FROM reputation_changes WHERE address in (?) GROUP BY address;
-`
+	FROM reputation_changes WHERE address in (%s) GROUP BY address;
+`, strings.Join(addressesParams, ","))
 
 	args := []interface{}{
 		r.contractPackageHashes.ReputationContractPackageHash,
