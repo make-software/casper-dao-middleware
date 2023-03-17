@@ -1,4 +1,4 @@
-package repo_voter
+package base
 
 import (
 	"errors"

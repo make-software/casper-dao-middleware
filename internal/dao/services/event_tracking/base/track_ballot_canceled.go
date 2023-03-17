@@ -1,8 +1,8 @@
-package admin
+package base
 
 import (
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/internal/dao/events/admin"
+	"casper-dao-middleware/internal/dao/events/base"
 )
 
 type TrackBallotCanceled struct {
@@ -15,7 +15,7 @@ func NewTrackBallotCanceled() *TrackBallotCanceled {
 }
 
 func (s *TrackBallotCanceled) Execute() error {
-	ballotCanceled, err := admin.ParseBallotCanceledEvent(s.GetCESEvent())
+	ballotCanceled, err := base.ParseBallotCanceledEvent(s.GetCESEvent())
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package simple_voter
+package base
 
 import (
 	"errors"

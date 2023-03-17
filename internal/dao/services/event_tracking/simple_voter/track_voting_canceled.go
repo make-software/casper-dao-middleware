@@ -1,17 +1,12 @@
 package simple_voter
 
 import (
-	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/internal/dao/entities"
-	"casper-dao-middleware/internal/dao/events/simple_voter"
-	casper_types "casper-dao-middleware/pkg/casper/types"
+	base_events "casper-dao-middleware/internal/dao/events/base"
+	"casper-dao-middleware/internal/dao/services/event_tracking/base"
 )
 
 type TrackVotingCanceled struct {
-	di.EntityManagerAware
-	di.CESEventAware
-	di.DeployProcessedEventAware
-	di.DAOContractsMetadataAware
+	base.TrackVotingCanceled
 }
 
 func NewTrackVotingCanceled() *TrackVotingCanceled {
@@ -19,43 +14,22 @@ func NewTrackVotingCanceled() *TrackVotingCanceled {
 }
 
 func (s *TrackVotingCanceled) Execute() error {
-	votingCanceled, err := simple_voter.ParseVotingCanceledEvent(s.GetCESEvent())
+	votingCanceled, err := base_events.ParseVotingCanceledEvent(s.GetCESEvent())
 	if err != nil {
 		return err
 	}
 
-	deployProcessedEvent := s.GetDeployProcessedEvent()
-	changes := make([]entities.ReputationChange, 0, len(votingCanceled.Unstakes)*2)
-	for key, val := range votingCanceled.Unstakes {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
-		unstaked := val.Into().Int64()
-		changes = append(changes,
-			// reverse operation to BallotCast, one positive reputation change to ReputationContractPackageHash
-			// and negative from VoterContractPackageHash
-			entities.NewReputationChange(
-				address,
-				s.GetDAOContractsMetadata().ReputationContractPackageHash,
-				&votingCanceled.VotingID,
-				unstaked,
-				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonUnstaked,
-				deployProcessedEvent.DeployProcessed.Timestamp,
-			),
-			entities.NewReputationChange(
-				address,
-				s.GetDAOContractsMetadata().SimpleVoterContractPackageHash,
-				&votingCanceled.VotingID,
-				-unstaked,
-				deployProcessedEvent.DeployProcessed.DeployHash,
-				entities.ReputationChangeReasonUnstaked,
-				deployProcessedEvent.DeployProcessed.Timestamp,
-			),
-		)
-	}
-
-	if err := s.GetEntityManager().VotingRepository().UpdateIsCanceled(votingCanceled.VotingID, true); err != nil {
+	if err := s.UpdateVotingIsCancel(votingCanceled); err != nil {
 		return err
 	}
 
-	return s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes)
+	if err := s.CollectReputationChanges(votingCanceled, s.GetDAOContractsMetadata().SimpleVoterContractPackageHash); err != nil {
+		return err
+	}
+
+	if err := s.AggregateReputationTotals(votingCanceled); err != nil {
+		return err
+	}
+
+	return nil
 }

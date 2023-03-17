@@ -35,5 +35,37 @@ func (s *TrackMint) Execute() error {
 			deployProcessedEvent.DeployProcessed.Timestamp),
 	}
 
-	return s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes)
+	if err := s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes); err != nil {
+		return err
+	}
+
+	liquidStakeReputation, err := s.GetEntityManager().
+		ReputationChangeRepository().
+		CalculateLiquidStakeReputationForAddress(*mintEvent.Address.ToHash())
+	if err != nil {
+		return err
+	}
+
+	var liquidReputation uint64
+	if liquidStakeReputation.LiquidAmount != nil {
+		liquidReputation = *liquidStakeReputation.LiquidAmount
+	}
+
+	var stakedReputation uint64
+	if liquidStakeReputation.StakedAmount != nil {
+		stakedReputation = *liquidStakeReputation.StakedAmount
+	}
+
+	reputationTotal := entities.NewReputationTotal(
+		*mintEvent.Address.ToHash(),
+		nil,
+		liquidReputation,
+		stakedReputation,
+		0,
+		0,
+		deployProcessedEvent.DeployProcessed.DeployHash,
+		entities.ReputationChangeReasonMinted,
+		deployProcessedEvent.DeployProcessed.Timestamp)
+
+	return s.GetEntityManager().ReputationTotalRepository().SaveBatch([]entities.ReputationTotal{reputationTotal})
 }

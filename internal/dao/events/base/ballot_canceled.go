@@ -1,4 +1,4 @@
-package onboarding_request
+package base
 
 import (
 	"errors"

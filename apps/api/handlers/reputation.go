@@ -4,12 +4,8 @@ import (
 	"net/http"
 
 	"casper-dao-middleware/internal/dao/persistence"
-	"casper-dao-middleware/internal/dao/services/reputation"
 	"casper-dao-middleware/internal/dao/utils"
-	"casper-dao-middleware/pkg/errors"
-	"casper-dao-middleware/pkg/http-params"
 	"casper-dao-middleware/pkg/http-response"
-	"casper-dao-middleware/pkg/pagination"
 )
 
 type Reputation struct {
@@ -37,22 +33,23 @@ func NewReputation(entityManager persistence.EntityManager, packageHashes utils.
 //
 //	@tags		Reputation
 func (h *Reputation) HandleGetTotalReputation(w http.ResponseWriter, r *http.Request) {
-	addressHash, err := http_params.ParseOptionalHash("address", r)
-	if err != nil {
-		accountPubKey, err := http_params.ParseOptionalPublicKey("address", r)
-		if err != nil {
-			http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
-			return
-		}
-		addressHash = accountPubKey.AccountHash()
-	}
+	//_, err := http_params.ParseOptionalHash("address", r)
+	//if err != nil {
+	//	accountPubKey, err := http_params.ParseOptionalPublicKey("address", r)
+	//	if err != nil {
+	//		http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
+	//		return
+	//	}
+	//	addressHash = accountPubKey.AccountHash()
+	//}
 
-	getTotalReputation := reputation.NewGetTotalReputation()
-	getTotalReputation.SetAddressHash(*addressHash)
-	getTotalReputation.SetEntityManager(h.entityManager)
-	getTotalReputation.SetDAOContractsMetadata(h.daoContractPackageHashes)
-
-	http_response.FromFunction(getTotalReputation.Execute, w, r)
+	//getTotalReputation := reputation.NewGetTotalReputation()
+	//getTotalReputation.SetAddressHash(*addressHash)
+	//getTotalReputation.SetEntityManager(h.entityManager)
+	//getTotalReputation.SetDAOContractsMetadata(h.daoContractPackageHashes)
+	//
+	//http_response.FromFunction(getTotalReputation.Execute, w, r)
+	http_response.WriteJSON(w, http.StatusOK, nil)
 }
 
 // HandleGetAggregatedReputationChange
@@ -72,24 +69,25 @@ func (h *Reputation) HandleGetTotalReputation(w http.ResponseWriter, r *http.Req
 //
 //	@tags		Reputation
 func (h *Reputation) HandleGetAggregatedReputationChange(w http.ResponseWriter, r *http.Request) {
-	addressHash, err := http_params.ParseOptionalHash("address", r)
-	if err != nil {
-		accountPubKey, err := http_params.ParseOptionalPublicKey("address", r)
-		if err != nil {
-			http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
-			return
-		}
-		addressHash = accountPubKey.AccountHash()
-	}
+	//addressHash, err := http_params.ParseOptionalHash("address", r)
+	//if err != nil {
+	//	accountPubKey, err := http_params.ParseOptionalPublicKey("address", r)
+	//	if err != nil {
+	//		http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
+	//		return
+	//	}
+	//	addressHash = accountPubKey.AccountHash()
+	//}
+	//
+	//paginationParams := pagination.NewParamsFromRequest(r)
+	//
+	//getAggregatedReputation := reputation.NewGetAggregatedReputationChanges()
+	//getAggregatedReputation.SetAddressHash(*addressHash)
+	//getAggregatedReputation.SetEntityManager(h.entityManager)
+	//getAggregatedReputation.SetPaginationParams(paginationParams)
+	//getAggregatedReputation.SetDAOContractsMetadata(h.daoContractPackageHashes)
+	//
+	//http_response.FromFunction(getAggregatedReputation.Execute, w, r)
 
-	paginationParams := pagination.NewParamsFromRequest(r)
-
-	getAggregatedReputation := reputation.NewGetAggregatedReputationChanges()
-	getAggregatedReputation.SetAddressHash(*addressHash)
-	getAggregatedReputation.SetEntityManager(h.entityManager)
-	getAggregatedReputation.SetPaginationParams(paginationParams)
-	getAggregatedReputation.SetDAOContractsMetadata(h.daoContractPackageHashes)
-
-	http_response.FromFunction(getAggregatedReputation.Execute, w, r)
-
+	http_response.WriteJSON(w, http.StatusOK, nil)
 }

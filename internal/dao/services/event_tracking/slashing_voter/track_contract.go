@@ -6,7 +6,9 @@ import (
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/di"
+	base_events "casper-dao-middleware/internal/dao/events/base"
 	"casper-dao-middleware/internal/dao/events/slashing_voter"
+	"casper-dao-middleware/internal/dao/services/event_tracking/base"
 )
 
 type TrackContract struct {
@@ -35,7 +37,7 @@ func (s *TrackContract) Execute() error {
 				With(zap.String("contract", doaContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
 			return err
 		}
-	case slashing_voter.VotingEndedEventName:
+	case base_events.VotingEndedEventName:
 		trackVotingEnded := NewTrackVotingEnded()
 		trackVotingEnded.SetCESEvent(cesEvent)
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
@@ -46,7 +48,7 @@ func (s *TrackContract) Execute() error {
 				With(zap.String("contract", doaContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
 			return err
 		}
-	case slashing_voter.VotingCanceledEventName:
+	case base_events.VotingCanceledEventName:
 		trackVotingCanceled := NewTrackVotingCanceled()
 		trackVotingCanceled.SetCESEvent(cesEvent)
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
@@ -57,7 +59,7 @@ func (s *TrackContract) Execute() error {
 				With(zap.String("contract", doaContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
 			return err
 		}
-	case slashing_voter.BallotCastEventName:
+	case base_events.BallotCastEventName:
 		trackBallotCast := NewTrackBallotCast()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
@@ -68,8 +70,8 @@ func (s *TrackContract) Execute() error {
 				With(zap.String("contract", doaContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
 			return err
 		}
-	case slashing_voter.BallotCanceledEventName:
-		trackBallotCanceled := NewTrackBallotCanceled()
+	case base_events.BallotCanceledEventName:
+		trackBallotCanceled := base.NewTrackBallotCanceled()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {

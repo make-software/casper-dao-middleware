@@ -2,7 +2,6 @@ package reputation
 
 import (
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/pkg/casper/types"
 )
 
@@ -21,6 +20,6 @@ func (c *GetTotalReputation) SetAddressHash(hash types.Hash) {
 	c.addressHash = hash
 }
 
-func (c *GetTotalReputation) Execute() (entities.TotalReputation, error) {
-	return c.GetEntityManager().ReputationChangeRepository().CalculateTotalReputationForAddress(c.addressHash)
-}
+//func (c *GetTotalReputation) Execute() (entities.LiquidStateReputation, error) {
+//	return c.GetEntityManager().ReputationChangeRepository().CalculateLiquidStakeReputationForAddress(c.addressHash)
+//}

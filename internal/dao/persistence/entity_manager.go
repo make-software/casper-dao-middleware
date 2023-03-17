@@ -12,6 +12,7 @@ import (
 // EntityManager main persistence interface
 type EntityManager interface {
 	ReputationChangeRepository() repositories.ReputationChange
+	ReputationTotalRepository() repositories.ReputationTotal
 	VoteRepository() repositories.Vote
 	VotingRepository() repositories.Voting
 	SettingRepository() repositories.Setting
@@ -20,6 +21,7 @@ type EntityManager interface {
 
 type entityManager struct {
 	reputationChangesRepo repositories.ReputationChange
+	reputationTotalRepo   repositories.ReputationTotal
 	voteRepository        repositories.Vote
 	votingRepository      repositories.Voting
 	settingRepository     repositories.Setting
@@ -29,6 +31,7 @@ type entityManager struct {
 func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityManager {
 	return &entityManager{
 		reputationChangesRepo: repositories.NewReputationChange(db, hashes),
+		reputationTotalRepo:   repositories.NewReputationTotal(db),
 		voteRepository:        repositories.NewVote(db),
 		votingRepository:      repositories.NewVoting(db),
 		settingRepository:     repositories.NewSetting(db),
@@ -54,4 +57,8 @@ func (e entityManager) SettingRepository() repositories.Setting {
 
 func (e entityManager) AccountRepository() repositories.Account {
 	return e.accountRepo
+}
+
+func (e entityManager) ReputationTotalRepository() repositories.ReputationTotal {
+	return e.reputationTotalRepo
 }
