@@ -44,8 +44,7 @@ func NewRouter(
 	settingHandler := handlers.NewSetting(entityManager)
 	accountHandler := handlers.NewAccount(entityManager)
 
-	router.Get("/accounts/{address}/total-reputation", reputationHandler.HandleGetTotalReputation)
-	router.Get("/accounts/{address}/aggregated-reputation-changes", reputationHandler.HandleGetAggregatedReputationChange)
+	router.Get("/accounts/{address}/total-reputation-snapshots", reputationHandler.HandleGetTotalReputationSnapshots)
 	router.Get("/accounts/{address}/votes", accountHandler.HandleGetAccountVotes)
 	router.Get("/accounts", accountHandler.HandleGetAccounts)
 	router.Get("/accounts/{address}", accountHandler.HandleGetAccountsByAddress)

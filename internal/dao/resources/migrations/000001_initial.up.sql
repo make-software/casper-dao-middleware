@@ -46,7 +46,7 @@ create table reputation_changes
   default CHARSET = utf8;
 
 
-create table reputation_totals
+create table total_reputation_snapshots
 (
     address                  binary(32) not null,
     total_liquid_reputation  bigint not null,

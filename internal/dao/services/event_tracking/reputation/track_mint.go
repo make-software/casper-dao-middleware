@@ -56,7 +56,7 @@ func (s *TrackMint) Execute() error {
 		stakedReputation = *liquidStakeReputation.StakedAmount
 	}
 
-	reputationTotal := entities.NewReputationTotal(
+	reputationTotal := entities.NewTotalReputationSnapshot(
 		*mintEvent.Address.ToHash(),
 		nil,
 		liquidReputation,
@@ -67,5 +67,5 @@ func (s *TrackMint) Execute() error {
 		entities.ReputationChangeReasonMinted,
 		deployProcessedEvent.DeployProcessed.Timestamp)
 
-	return s.GetEntityManager().ReputationTotalRepository().SaveBatch([]entities.ReputationTotal{reputationTotal})
+	return s.GetEntityManager().TotalReputationSnapshotRepository().SaveBatch([]entities.TotalReputationSnapshot{reputationTotal})
 }

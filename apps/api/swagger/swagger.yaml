@@ -10,23 +10,22 @@ definitions:
       timestamp:
         type: string
     type: object
-  entities.AggregatedReputationChange:
-    properties:
-      address:
-        type: string
-      earned_amount:
-        type: integer
-      lost_amount:
-        type: integer
-      released_amount:
-        type: integer
-      staked_amount:
-        type: integer
-      timestamp:
-        type: string
-      voting_id:
-        type: integer
-    type: object
+  entities.ReputationChangeReason:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    type: integer
+    x-enum-varnames:
+    - ReputationChangeReasonMinted
+    - ReputationChangeReasonBurned
+    - ReputationChangeReasonStaked
+    - ReputationChangeReasonVotingGained
+    - ReputationChangeReasonVotingLost
+    - ReputationChangeReasonUnstaked
   entities.Setting:
     properties:
       name:
@@ -34,11 +33,25 @@ definitions:
       value:
         type: string
     type: object
-  entities.TotalReputation:
+  entities.TotalReputationSnapshot:
     properties:
-      available_amount:
+      address:
+        type: string
+      deploy_hash:
+        type: string
+      reason:
+        $ref: '#/definitions/entities.ReputationChangeReason'
+      timestamp:
+        type: string
+      total_liquid_reputation:
         type: integer
-      staked_amount:
+      total_staked_reputation:
+        type: integer
+      voting_earned_reputation:
+        type: integer
+      voting_id:
+        type: integer
+      voting_lost_reputation:
         type: integer
     type: object
   entities.Vote:
@@ -106,6 +119,8 @@ definitions:
     - 3
     - 4
     - 5
+    - 6
+    - 7
     type: integer
     x-enum-varnames:
     - VotingTypeSimple
@@ -113,6 +128,8 @@ definitions:
     - VotingTypeKYC
     - VotingTypeRepo
     - VotingTypeReputation
+    - VotingTypeOnboarding
+    - VotingTypeAdmin
   http_response.ErrorResponse:
     properties:
       error:
@@ -246,35 +263,9 @@ paths:
       summary: Return account by its address
       tags:
       - Vote
-  /accounts/{address}/aggregated-reputation-changes:
+  /accounts/{address}/total-reputation-snapshots:
     get:
       parameters:
-      - default: 1
-        description: Page number
-        in: query
-        name: page
-        type: integer
-      - default: "10"
-        description: Number of items per page
-        in: query
-        name: page_size
-        type: string
-      - default: ASC
-        description: Sorting direction
-        enum:
-        - ASC
-        - DESC
-        in: query
-        name: order_direction
-        type: string
-      - collectionFormat: csv
-        default: date
-        description: Comma-separated list of sorting fields (address)
-        in: query
-        items:
-          type: string
-        name: order_by
-        type: array
       - description: Hash or PublicKey
         in: path
         maxLength: 66
@@ -289,9 +280,7 @@ paths:
             - $ref: '#/definitions/http_response.PaginatedResponse'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/entities.AggregatedReputationChange'
-                  type: array
+                  $ref: '#/definitions/entities.TotalReputationSnapshot'
               type: object
         "400":
           description: Bad Request
@@ -320,56 +309,7 @@ paths:
                 error:
                   $ref: '#/definitions/http_response.ErrorResult'
               type: object
-      summary: user AggregatedReputationChange
-      tags:
-      - Reputation
-  /accounts/{address}/total-reputation:
-    get:
-      parameters:
-      - description: Hash or PublicKey
-        in: path
-        maxLength: 66
-        name: address
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/http_response.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/entities.TotalReputation'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/http_response.ErrorResponse'
-            - properties:
-                error:
-                  $ref: '#/definitions/http_response.ErrorResult'
-              type: object
-        "404":
-          description: Not Found
-          schema:
-            allOf:
-            - $ref: '#/definitions/http_response.ErrorResponse'
-            - properties:
-                error:
-                  $ref: '#/definitions/http_response.ErrorResult'
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/http_response.ErrorResponse'
-            - properties:
-                error:
-                  $ref: '#/definitions/http_response.ErrorResult'
-              type: object
-      summary: Calculate address TotalReputation
+      summary: Return paginated list of total-reputation-snapshots for account
       tags:
       - Reputation
   /accounts/{address}/votes:
