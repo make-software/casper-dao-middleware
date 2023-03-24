@@ -1,4 +1,4 @@
-package vote
+package votes
 
 import (
 	"casper-dao-middleware/internal/dao/di"
@@ -8,18 +8,18 @@ import (
 	casper_types "casper-dao-middleware/pkg/casper/types"
 )
 
-type TrackBallotCast struct {
+type TrackVote struct {
 	di.EntityManagerAware
 	di.CESEventAware
 	di.DeployProcessedEventAware
 	di.DAOContractsMetadataAware
 }
 
-func NewTrackBallotCast() *TrackBallotCast {
-	return &TrackBallotCast{}
+func NewTrackVote() *TrackVote {
+	return &TrackVote{}
 }
 
-func (s *TrackBallotCast) Execute() error {
+func (s *TrackVote) Execute() error {
 	ballotCast, err := base.ParseBallotCastEvent(s.GetCESEvent())
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func (s *TrackBallotCast) Execute() error {
 	return nil
 }
 
-func (s *TrackBallotCast) saveVote(ballotCast base.BallotCastEvent) error {
+func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 	staked := ballotCast.Stake.Into().Int64()
 
 	var isInFavor bool
@@ -60,7 +60,7 @@ func (s *TrackBallotCast) saveVote(ballotCast base.BallotCastEvent) error {
 	return s.GetEntityManager().VoteRepository().Save(vote)
 }
 
-func (s *TrackBallotCast) collectReputationChanges(ballotCast base.BallotCastEvent, voterContractPackageHash casper_types.Hash) error {
+func (s *TrackVote) collectReputationChanges(ballotCast base.BallotCastEvent, voterContractPackageHash casper_types.Hash) error {
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	staked := ballotCast.Stake.Into().Int64()
 
@@ -88,7 +88,7 @@ func (s *TrackBallotCast) collectReputationChanges(ballotCast base.BallotCastEve
 	return s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes)
 }
 
-func (s *TrackBallotCast) aggregateReputationTotals(ballotCast base.BallotCastEvent) error {
+func (s *TrackVote) aggregateReputationTotals(ballotCast base.BallotCastEvent) error {
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 
 	liquidStakeReputation, err := s.GetEntityManager().

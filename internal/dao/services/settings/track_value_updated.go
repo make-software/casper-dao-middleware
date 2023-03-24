@@ -1,4 +1,4 @@
-package setting
+package settings
 
 import (
 	"time"
@@ -8,16 +8,16 @@ import (
 	"casper-dao-middleware/internal/dao/events/variable_repository"
 )
 
-type TrackValueUpdated struct {
+type TrackUpdatedSetting struct {
 	di.EntityManagerAware
 	di.CESEventAware
 }
 
-func NewTrackValueUpdated() *TrackValueUpdated {
-	return &TrackValueUpdated{}
+func NewTrackUpdatedSetting() *TrackUpdatedSetting {
+	return &TrackUpdatedSetting{}
 }
 
-func (s *TrackValueUpdated) Execute() error {
+func (s *TrackUpdatedSetting) Execute() error {
 	valueUpdated, err := variable_repository.ParseValueUpdatedEvent(s.GetCESEvent())
 	if err != nil {
 		return err

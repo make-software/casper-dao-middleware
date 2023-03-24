@@ -1,20 +1,20 @@
-package vote
+package votes
 
 import (
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/events/base"
 )
 
-type TrackBallotCanceled struct {
+type TrackCanceledVote struct {
 	di.EntityManagerAware
 	di.CESEventAware
 }
 
-func NewTrackBallotCanceled() *TrackBallotCanceled {
-	return &TrackBallotCanceled{}
+func NewTrackCanceledVote() *TrackCanceledVote {
+	return &TrackCanceledVote{}
 }
 
-func (s *TrackBallotCanceled) Execute() error {
+func (s *TrackCanceledVote) Execute() error {
 	ballotCanceled, err := base.ParseBallotCanceledEvent(s.GetCESEvent())
 	if err != nil {
 		return err

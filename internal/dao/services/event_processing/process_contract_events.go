@@ -1,10 +1,18 @@
-package event_tracking
+package event_processing
 
 import (
 	"errors"
 	"fmt"
 
 	"go.uber.org/zap"
+
+	"casper-dao-middleware/internal/dao/services/settings"
+	"casper-dao-middleware/internal/dao/services/votes"
+
+	"casper-dao-middleware/internal/dao/services/voting"
+
+	"casper-dao-middleware/internal/dao/services/account"
+	"casper-dao-middleware/internal/dao/services/reputation"
 
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/events/admin"
@@ -19,26 +27,21 @@ import (
 	"casper-dao-middleware/internal/dao/events/slashing_voter"
 	"casper-dao-middleware/internal/dao/events/va_nft"
 	"casper-dao-middleware/internal/dao/events/variable_repository"
-	"casper-dao-middleware/internal/dao/services/event_tracking/account"
-	"casper-dao-middleware/internal/dao/services/event_tracking/reputation"
-	"casper-dao-middleware/internal/dao/services/event_tracking/setting"
-	"casper-dao-middleware/internal/dao/services/event_tracking/vote"
-	"casper-dao-middleware/internal/dao/services/event_tracking/voting"
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
-type TrackContract struct {
+type ProcessContractEvents struct {
 	di.EntityManagerAware
 	di.CESEventAware
 	di.DeployProcessedEventAware
 	di.DAOContractsMetadataAware
 }
 
-func NewTrackContract() *TrackContract {
-	return &TrackContract{}
+func NewProcessContractEvents() *ProcessContractEvents {
+	return &ProcessContractEvents{}
 }
 
-func (s *TrackContract) Execute() error {
+func (s *ProcessContractEvents) Execute() error {
 	cesEvent := s.GetCESEvent()
 	doaContractMetadata := s.GetDAOContractsMetadata()
 
@@ -70,7 +73,7 @@ func (s *TrackContract) Execute() error {
 	}
 }
 
-func (s *TrackContract) trackKycNFTContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackKycNFTContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -93,7 +96,7 @@ func (s *TrackContract) trackKycNFTContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackVANFTContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackVANFTContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -116,7 +119,7 @@ func (s *TrackContract) trackVANFTContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackReputationContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackReputationContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -152,7 +155,7 @@ func (s *TrackContract) trackReputationContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackRepoVoterContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackRepoVoterContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -192,7 +195,7 @@ func (s *TrackContract) trackRepoVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -203,7 +206,7 @@ func (s *TrackContract) trackRepoVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -218,7 +221,7 @@ func (s *TrackContract) trackRepoVoterContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackReputationVoterContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackReputationVoterContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -258,7 +261,7 @@ func (s *TrackContract) trackReputationVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -269,7 +272,7 @@ func (s *TrackContract) trackReputationVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -284,7 +287,7 @@ func (s *TrackContract) trackReputationVoterContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackSimpleVoterContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -324,7 +327,7 @@ func (s *TrackContract) trackSimpleVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -335,7 +338,7 @@ func (s *TrackContract) trackSimpleVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -350,7 +353,7 @@ func (s *TrackContract) trackSimpleVoterContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackSlashingVoterContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackSlashingVoterContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -390,7 +393,7 @@ func (s *TrackContract) trackSlashingVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -401,7 +404,7 @@ func (s *TrackContract) trackSlashingVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -416,7 +419,7 @@ func (s *TrackContract) trackSlashingVoterContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackKycVoterContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackKycVoterContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -456,7 +459,7 @@ func (s *TrackContract) trackKycVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -467,7 +470,7 @@ func (s *TrackContract) trackKycVoterContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -482,7 +485,7 @@ func (s *TrackContract) trackKycVoterContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackOnboardingRequestContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackOnboardingRequestContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -522,7 +525,7 @@ func (s *TrackContract) trackOnboardingRequestContract(cesEvent ces.Event) error
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -533,7 +536,7 @@ func (s *TrackContract) trackOnboardingRequestContract(cesEvent ces.Event) error
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -549,7 +552,7 @@ func (s *TrackContract) trackOnboardingRequestContract(cesEvent ces.Event) error
 	return nil
 }
 
-func (s *TrackContract) trackAdminContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackAdminContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -589,7 +592,7 @@ func (s *TrackContract) trackAdminContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCastEventName:
-		trackBallotCast := vote.NewTrackBallotCast()
+		trackBallotCast := votes.NewTrackVote()
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
@@ -600,7 +603,7 @@ func (s *TrackContract) trackAdminContract(cesEvent ces.Event) error {
 			return err
 		}
 	case base_events.BallotCanceledEventName:
-		trackBallotCanceled := vote.NewTrackBallotCanceled()
+		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
 		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
 		if err := trackBallotCanceled.Execute(); err != nil {
@@ -615,7 +618,7 @@ func (s *TrackContract) trackAdminContract(cesEvent ces.Event) error {
 	return nil
 }
 
-func (s *TrackContract) trackVariableRepositoryContract(cesEvent ces.Event) error {
+func (s *ProcessContractEvents) trackVariableRepositoryContract(cesEvent ces.Event) error {
 	daoContractMetadata := s.GetDAOContractsMetadata()
 
 	zap.S().With(zap.String("event", cesEvent.Name)).
@@ -623,7 +626,7 @@ func (s *TrackContract) trackVariableRepositoryContract(cesEvent ces.Event) erro
 
 	switch cesEvent.Name {
 	case variable_repository.ValueUpdatedEventName:
-		trackValueUpdated := setting.NewTrackValueUpdated()
+		trackValueUpdated := settings.NewTrackUpdatedSetting()
 		trackValueUpdated.SetCESEvent(cesEvent)
 		trackValueUpdated.SetEntityManager(s.GetEntityManager())
 		if err := trackValueUpdated.Execute(); err != nil {

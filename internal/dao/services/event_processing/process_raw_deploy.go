@@ -4,7 +4,6 @@ import (
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/internal/dao/services/event_tracking"
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
@@ -40,14 +39,14 @@ func (c *ProcessRawDeploy) Execute() error {
 		}
 	}
 
-	trackContract := event_tracking.NewTrackContract()
-	trackContract.SetDAOContractsMetadata(daoContractsMetadata)
-	trackContract.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
-	trackContract.SetEntityManager(c.GetEntityManager())
+	processContractEvents := NewProcessContractEvents()
+	processContractEvents.SetDAOContractsMetadata(daoContractsMetadata)
+	processContractEvents.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
+	processContractEvents.SetEntityManager(c.GetEntityManager())
 
 	for _, result := range results {
-		trackContract.SetCESEvent(result.Event)
-		if err := trackContract.Execute(); err != nil {
+		processContractEvents.SetCESEvent(result.Event)
+		if err := processContractEvents.Execute(); err != nil {
 			return err
 		}
 
