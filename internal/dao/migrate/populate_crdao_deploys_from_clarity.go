@@ -131,7 +131,7 @@ func (c *PopulateCrDAODeploysFromClarity) Execute() error {
 			},
 		})
 		if err := processRawDeploy.Execute(); err != nil {
-			return fmt.Errorf("failed to process rawDeploy %s", err.Error())
+			log.Printf("failed to process rawDeploy %s\n", err.Error())
 		}
 		log.Println("Process DAO Deploy ", deploy.Deploy.Hash.ToHex())
 	}
@@ -150,7 +150,7 @@ func (c *PopulateCrDAODeploysFromClarity) createDAODeployCursor(clarityDB *sqlx.
 	contracts := make([]interface{}, 0, len(daoContracts))
 	for _, contractHash := range daoContracts {
 		contractParams = append(contractParams, `unhex(?)`)
-		contracts = append(contracts, contractHash)
+		contracts = append(contracts, contractHash.ToHex())
 	}
 	query := fmt.Sprintf(`
 		select deploy_hash from extended_deploys 
