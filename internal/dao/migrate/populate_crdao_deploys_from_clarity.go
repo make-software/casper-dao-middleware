@@ -154,7 +154,7 @@ func (c *PopulateCrDAODeploysFromClarity) createDAODeployCursor(clarityDB *sqlx.
 	}
 	query := fmt.Sprintf(`
 		select deploy_hash from extended_deploys 
-        where contract_hash in (%s) order by timestamp desc;`, strings.Join(contractParams, ","))
+        where contract_hash in (%s) order by timestamp;`, strings.Join(contractParams, ","))
 	daoDeploysCursor, err := clarityDB.Queryx(query, contracts...)
 	if err != nil {
 		log.Fatalln(err)

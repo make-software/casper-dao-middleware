@@ -48,7 +48,7 @@ func (h *Reputation) HandleGetTotalReputationSnapshots(w http.ResponseWriter, r 
 	}
 
 	paginationParams := pagination.NewParamsFromRequest(r)
-	paginationParams.SetDefaultOrder("timestamp", pagination.OrderDirectionDESC)
+	paginationParams.SetDefaultOrder("timestamp", pagination.OrderDirectionASC)
 
 	getTotalReputation := reputation.NewGetTotalReputationSnapshots()
 	getTotalReputation.SetAddress(addressHash)

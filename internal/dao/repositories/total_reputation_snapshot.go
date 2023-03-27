@@ -28,7 +28,8 @@ func NewTotalReputationSnapshot(conn *sqlx.DB) TotalReputationSnapshot {
 	return &totalReputationSnapshot{
 		conn: conn,
 		indexedFields: map[string]struct{}{
-			"address": {},
+			"address":   {},
+			"timestamp": {},
 		},
 	}
 }
