@@ -209,49 +209,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/accounts/{address}/aggregated-reputation-changes": {
+        "/accounts/{address}/total-reputation-snapshots": {
             "get": {
                 "tags": [
                     "Reputation"
                 ],
-                "summary": "user AggregatedReputationChange",
+                "summary": "Return paginated list of total-reputation-snapshots for account",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "default": "10",
-                        "description": "Number of items per page",
-                        "name": "page_size",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "ASC",
-                            "DESC"
-                        ],
-                        "type": "string",
-                        "default": "ASC",
-                        "description": "Sorting direction",
-                        "name": "order_direction",
-                        "in": "query"
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "default": "date",
-                        "description": "Comma-separated list of sorting fields (address)",
-                        "name": "order_by",
-                        "in": "query"
-                    },
                     {
                         "maxLength": 66,
                         "type": "string",
@@ -273,102 +237,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/entities.AggregatedReputationChange"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http_response.ErrorResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/http_response.ErrorResult"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http_response.ErrorResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/http_response.ErrorResult"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http_response.ErrorResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/http_response.ErrorResult"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/accounts/{address}/total-reputation": {
-            "get": {
-                "tags": [
-                    "Reputation"
-                ],
-                "summary": "Calculate address TotalReputation",
-                "parameters": [
-                    {
-                        "maxLength": 66,
-                        "type": "string",
-                        "description": "Hash or PublicKey",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/http_response.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/entities.TotalReputation"
+                                            "$ref": "#/definitions/entities.TotalReputationSnapshot"
                                         }
                                     }
                                 }
@@ -963,31 +832,24 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.AggregatedReputationChange": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "earned_amount": {
-                    "type": "integer"
-                },
-                "lost_amount": {
-                    "type": "integer"
-                },
-                "released_amount": {
-                    "type": "integer"
-                },
-                "staked_amount": {
-                    "type": "integer"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "voting_id": {
-                    "type": "integer"
-                }
-            }
+        "entities.ReputationChangeReason": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+            ],
+            "x-enum-varnames": [
+                "ReputationChangeReasonMinted",
+                "ReputationChangeReasonBurned",
+                "ReputationChangeReasonStaked",
+                "ReputationChangeReasonVotingGained",
+                "ReputationChangeReasonVotingLost",
+                "ReputationChangeReasonUnstaked"
+            ]
         },
         "entities.Setting": {
             "type": "object",
@@ -1000,13 +862,34 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.TotalReputation": {
+        "entities.TotalReputationSnapshot": {
             "type": "object",
             "properties": {
-                "available_amount": {
+                "address": {
+                    "type": "string"
+                },
+                "deploy_hash": {
+                    "type": "string"
+                },
+                "reason": {
+                    "$ref": "#/definitions/entities.ReputationChangeReason"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "total_liquid_reputation": {
                     "type": "integer"
                 },
-                "staked_amount": {
+                "total_staked_reputation": {
+                    "type": "integer"
+                },
+                "voting_earned_reputation": {
+                    "type": "integer"
+                },
+                "voting_id": {
+                    "type": "integer"
+                },
+                "voting_lost_reputation": {
                     "type": "integer"
                 }
             }
@@ -1106,14 +989,18 @@ const docTemplate = `{
                 2,
                 3,
                 4,
-                5
+                5,
+                6,
+                7
             ],
             "x-enum-varnames": [
                 "VotingTypeSimple",
                 "VotingTypeSlashing",
                 "VotingTypeKYC",
                 "VotingTypeRepo",
-                "VotingTypeReputation"
+                "VotingTypeReputation",
+                "VotingTypeOnboarding",
+                "VotingTypeAdmin"
             ]
         },
         "http_response.ErrorResponse": {

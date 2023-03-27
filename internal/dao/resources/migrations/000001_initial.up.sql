@@ -46,6 +46,22 @@ create table reputation_changes
   default CHARSET = utf8;
 
 
+create table total_reputation_snapshots
+(
+    address                  binary(32) not null,
+    total_liquid_reputation  bigint not null,
+    total_staked_reputation  bigint null,
+    voting_lost_reputation   bigint null,
+    voting_earned_reputation bigint null,
+    voting_id                int unsigned null,
+    deploy_hash              binary(32) not null,
+    reason                   tinyint unsigned not null,
+    timestamp             datetime not null,
+
+    primary key (deploy_hash)
+) ENGINE = InnoDB
+  default CHARSET = utf8;
+
 create table votings
 (
     creator                                        binary(32) not null,

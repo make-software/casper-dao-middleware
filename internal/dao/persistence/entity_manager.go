@@ -12,6 +12,7 @@ import (
 // EntityManager main persistence interface
 type EntityManager interface {
 	ReputationChangeRepository() repositories.ReputationChange
+	TotalReputationSnapshotRepository() repositories.TotalReputationSnapshot
 	VoteRepository() repositories.Vote
 	VotingRepository() repositories.Voting
 	SettingRepository() repositories.Setting
@@ -19,20 +20,22 @@ type EntityManager interface {
 }
 
 type entityManager struct {
-	reputationChangesRepo repositories.ReputationChange
-	voteRepository        repositories.Vote
-	votingRepository      repositories.Voting
-	settingRepository     repositories.Setting
-	accountRepo           repositories.Account
+	reputationChangesRepo       repositories.ReputationChange
+	totalReputationSnapshotRepo repositories.TotalReputationSnapshot
+	voteRepository              repositories.Vote
+	votingRepository            repositories.Voting
+	settingRepository           repositories.Setting
+	accountRepo                 repositories.Account
 }
 
 func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityManager {
 	return &entityManager{
-		reputationChangesRepo: repositories.NewReputationChange(db, hashes),
-		voteRepository:        repositories.NewVote(db),
-		votingRepository:      repositories.NewVoting(db),
-		settingRepository:     repositories.NewSetting(db),
-		accountRepo:           repositories.NewAccount(db),
+		reputationChangesRepo:       repositories.NewReputationChange(db, hashes),
+		totalReputationSnapshotRepo: repositories.NewTotalReputationSnapshot(db),
+		voteRepository:              repositories.NewVote(db),
+		votingRepository:            repositories.NewVoting(db),
+		settingRepository:           repositories.NewSetting(db),
+		accountRepo:                 repositories.NewAccount(db),
 	}
 }
 
@@ -54,4 +57,8 @@ func (e entityManager) SettingRepository() repositories.Setting {
 
 func (e entityManager) AccountRepository() repositories.Account {
 	return e.accountRepo
+}
+
+func (e entityManager) TotalReputationSnapshotRepository() repositories.TotalReputationSnapshot {
+	return e.totalReputationSnapshotRepo
 }
