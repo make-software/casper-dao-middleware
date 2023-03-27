@@ -53,10 +53,16 @@ func NewParamsFromRequest(r *http.Request) *Params {
 	case pageSize <= 0:
 		pageSize = 10
 	}
+
+	var orderBy []string
+	if orderByParam := r.URL.Query().Get("order_by"); orderByParam != "" {
+		orderBy = strings.Split(r.URL.Query().Get("order_by"), ",")
+	}
+
 	return &Params{
 		Page:           uint32(page),
 		PageSize:       uint64(pageSize),
 		OrderDirection: NewOrderDirection(r.URL.Query().Get("order_direction")),
-		OrderBy:        strings.Split(r.URL.Query().Get("order_by"), ","),
+		OrderBy:        orderBy,
 	}
 }

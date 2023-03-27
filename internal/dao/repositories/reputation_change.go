@@ -62,7 +62,7 @@ func (r *reputationChange) SaveBatch(changes []entities.ReputationChange) error 
 func (r *reputationChange) CalculateLiquidStakeReputationForAddress(address types.Hash) (entities.LiquidStakeReputation, error) {
 	query := `
 	SELECT 
-	    (SELECT SUM(amount) FROM reputation_changes WHERE contract_package_hash = ?) as liquid_amount, 
+	    (SELECT ABS(SUM(amount)) FROM reputation_changes WHERE contract_package_hash = ?) as liquid_amount, 
 	    (SELECT SUM(amount)  FROM reputation_changes WHERE contract_package_hash != ?) as staked_amount  
 	FROM reputation_changes WHERE address = ?;
 `
