@@ -45,6 +45,9 @@ type DAOContractsMetadata struct {
 
 	AdminContractPackageHash types.Hash
 	AdminContractHash        types.Hash
+
+	BidEscrowContractPackageHash types.Hash
+	BidEscrowContractHash        types.Hash
 }
 
 func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
@@ -97,6 +100,9 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 		case "admin_contract":
 			result.AdminContractPackageHash = contractPackageHash
 			result.AdminContractHash = contractHashHex
+		case "bid_escrow":
+			result.BidEscrowContractPackageHash = contractPackageHash
+			result.BidEscrowContractHash = contractHashHex
 		case "variable_repository_contract":
 			result.VariableRepositoryContractPackageHash = contractPackageHash
 			result.VariableRepositoryContractHash = contractHashHex
@@ -119,14 +125,15 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 
 func (d DAOContractsMetadata) ContractHashes() []types.Hash {
 	return []types.Hash{
-		d.ReputationContractHash,
-		d.VANFTContractHash,
-		d.KycNFTContractHash,
-		d.SimpleVoterContractHash,
-		d.KycVoterContractHash,
-		d.SlashingVoterContractHash,
-		d.ReputationVoterContractHash,
-		d.RepoVoterContractHash,
-		d.VariableRepositoryContractHash,
+		//d.ReputationContractHash,
+		//d.VANFTContractHash,
+		//d.KycNFTContractHash,
+		//d.SimpleVoterContractHash,
+		//d.KycVoterContractHash,
+		//d.SlashingVoterContractHash,
+		//d.ReputationVoterContractHash,
+		//d.RepoVoterContractHash,
+		//d.VariableRepositoryContractHash,
+		d.BidEscrowContractHash,
 	}
 }

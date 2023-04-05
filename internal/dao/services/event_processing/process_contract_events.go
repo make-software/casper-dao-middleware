@@ -6,6 +6,8 @@ import (
 
 	"go.uber.org/zap"
 
+	"casper-dao-middleware/internal/dao/events/bid_escrow"
+	"casper-dao-middleware/internal/dao/services/job_offer"
 	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/internal/dao/services/votes"
 
@@ -68,6 +70,8 @@ func (s *ProcessContractEvents) Execute() error {
 		return s.trackOnboardingRequestContract(cesEvent)
 	case doaContractMetadata.AdminContractPackageHash.ToHex():
 		return s.trackAdminContract(cesEvent)
+	case doaContractMetadata.BidEscrowContractPackageHash.ToHex():
+		return s.trackBidEscrowRepositoryContract(cesEvent)
 	default:
 		return errors.New("unsupported DAO contract")
 	}
@@ -332,11 +336,11 @@ func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) err
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
-		if err := trackBallotCast.Execute(); err != nil {
-			zap.S().With(zap.String("event", cesEvent.Name)).
-				With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
-			return err
-		}
+		//if err := trackBallotCast.Execute(); err != nil {
+		//	zap.S().With(zap.String("event", cesEvent.Name)).
+		//		With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
+		//	return err
+		//}
 	case base_events.BallotCanceledEventName:
 		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
@@ -632,6 +636,31 @@ func (s *ProcessContractEvents) trackVariableRepositoryContract(cesEvent ces.Eve
 		if err := trackValueUpdated.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.VariableRepositoryContractHash.String())).Info("failed to track event")
+			return err
+		}
+
+	default:
+		return fmt.Errorf("unsupported contract event - %s", cesEvent.Name)
+	}
+
+	return nil
+}
+
+func (s *ProcessContractEvents) trackBidEscrowRepositoryContract(cesEvent ces.Event) error {
+	daoContractMetadata := s.GetDAOContractsMetadata()
+
+	zap.S().With(zap.String("event", cesEvent.Name)).
+		With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("New BidEscrow Contract event")
+
+	switch cesEvent.Name {
+	case bid_escrow.JobOfferCreatedEventName:
+		trackJobOffer := job_offer.NewTrackJobOfferCreated()
+		trackJobOffer.SetCESEvent(cesEvent)
+		trackJobOffer.SetEntityManager(s.GetEntityManager())
+		trackJobOffer.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackJobOffer.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
 			return err
 		}
 
