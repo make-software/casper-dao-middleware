@@ -31,10 +31,14 @@ func (s *TrackBidSubmitted) Execute() error {
 
 	var reputationStake *uint64
 	if bidSubmitted.ReputationStake != nil {
+		//TODO: we need to track ReputationChanges in that case
 		stake := bidSubmitted.ReputationStake.Into().Uint64()
 		reputationStake = &stake
 	} else {
-		//TODO: update job offer auction type
+		// if the reputation stake is missing it means the bid contains stake in cspr which is possible only in External auction
+		if err := s.GetEntityManager().JobOfferRepository().UpdateAuctionType(bidSubmitted.JobOfferID, entities.AuctionTypeExternal); err != nil {
+			return err
+		}
 	}
 
 	var csprStake *uint64

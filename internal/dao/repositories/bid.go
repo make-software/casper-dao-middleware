@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
 	"casper-dao-middleware/internal/dao/entities"
@@ -15,6 +16,7 @@ type Bid interface {
 	Save(bid *entities.Bid) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Bid, error)
+	UpdateIsPickedBy(bidID uint32, isPickedBy bool) error
 }
 
 type bid struct {
@@ -92,7 +94,7 @@ func (r *bid) Find(params *pagination.Params, filters map[string]interface{}) ([
 
 func (r *bid) Count(filters map[string]interface{}) (uint64, error) {
 	queryBuilder := query.Select("COUNT(*)").
-		From("bid").
+		From("bids").
 		FilterBy(filters, r.indexedFields)
 
 	sql, args, err := queryBuilder.ToSql()
@@ -107,4 +109,27 @@ func (r *bid) Count(filters map[string]interface{}) (uint64, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (r *bid) UpdateIsPickedBy(bidID uint32, isPickedBy bool) error {
+	queryBuilder := query.Update("bids").
+		SetMap(map[string]interface{}{
+			"picked_by_job_poster": isPickedBy,
+		})
+
+	queryBuilder = queryBuilder.
+		Where(sq.Eq{
+			"bid_id": bidID,
+		})
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.conn.Exec(sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -9,6 +9,7 @@ import (
 	"casper-dao-middleware/internal/dao/events/bid_escrow"
 	"casper-dao-middleware/internal/dao/services/bid"
 	"casper-dao-middleware/internal/dao/services/job_offer"
+	"casper-dao-middleware/internal/dao/services/jobs"
 	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/internal/dao/services/votes"
 
@@ -670,6 +671,56 @@ func (s *ProcessContractEvents) trackBidEscrowRepositoryContract(cesEvent ces.Ev
 		trackSubmittedBid.SetEntityManager(s.GetEntityManager())
 		trackSubmittedBid.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		if err := trackSubmittedBid.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.JobCreatedEventName:
+		trackJobCreated := jobs.NewTrackJobCreated()
+		trackJobCreated.SetCESEvent(cesEvent)
+		trackJobCreated.SetEntityManager(s.GetEntityManager())
+		trackJobCreated.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackJobCreated.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.JobSubmittedEventName:
+		trackJobSubmitted := jobs.NewTrackJobSubmitted()
+		trackJobSubmitted.SetCESEvent(cesEvent)
+		trackJobSubmitted.SetEntityManager(s.GetEntityManager())
+		trackJobSubmitted.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackJobSubmitted.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.JobCancelledEventName:
+		trackJobCancelled := jobs.NewTrackJobCancelled()
+		trackJobCancelled.SetCESEvent(cesEvent)
+		trackJobCancelled.SetEntityManager(s.GetEntityManager())
+		trackJobCancelled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackJobCancelled.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.JobRejectedEventName:
+		trackJobRejected := jobs.NewTrackJobRejected()
+		trackJobRejected.SetCESEvent(cesEvent)
+		trackJobRejected.SetEntityManager(s.GetEntityManager())
+		trackJobRejected.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackJobRejected.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.JobDoneEventName:
+		trackJobDone := jobs.NewTrackJobDone()
+		trackJobDone.SetCESEvent(cesEvent)
+		trackJobDone.SetEntityManager(s.GetEntityManager())
+		trackJobDone.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackJobDone.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
 			return err

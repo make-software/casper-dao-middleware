@@ -17,6 +17,7 @@ type EntityManager interface {
 	VotingRepository() repositories.Voting
 	JobOfferRepository() repositories.JobOffer
 	BidRepository() repositories.Bid
+	JobRepository() repositories.Job
 	SettingRepository() repositories.Setting
 	AccountRepository() repositories.Account
 }
@@ -30,6 +31,7 @@ type entityManager struct {
 	accountRepo                 repositories.Account
 	jobOfferRepo                repositories.JobOffer
 	bidRepo                     repositories.Bid
+	jobRepo                     repositories.Job
 }
 
 func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityManager {
@@ -42,6 +44,7 @@ func NewEntityManager(db *sqlx.DB, hashes utils.DAOContractsMetadata) EntityMana
 		accountRepo:                 repositories.NewAccount(db),
 		jobOfferRepo:                repositories.NewJobOffer(db),
 		bidRepo:                     repositories.NewBid(db),
+		jobRepo:                     repositories.NewJob(db),
 	}
 }
 
@@ -75,4 +78,8 @@ func (e entityManager) JobOfferRepository() repositories.JobOffer {
 
 func (e entityManager) BidRepository() repositories.Bid {
 	return e.bidRepo
+}
+
+func (e entityManager) JobRepository() repositories.Job {
+	return e.jobRepo
 }

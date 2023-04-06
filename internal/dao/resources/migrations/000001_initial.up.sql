@@ -138,3 +138,21 @@ create table job_offers
     primary key (job_offer_id, deploy_hash)
 ) ENGINE = InnoDB
   default CHARSET = utf8;
+
+create table bids
+(
+    job_offer_id         int unsigned not null,
+    bid_id               int unsigned not null,
+    Worker               binary(32) not null,
+    deploy_hash          binary(32) not null,
+    onboard              tinyint unsigned not null,
+    proposed_time_frame  int unsigned not null,
+    proposed_payment     int unsigned not null,
+    picked_by_job_poster tinyint unsigned not null,
+    reputation_stake     int unsigned null,
+    cspr_stake           int unsigned null,
+    timestamp            datetime not null,
+
+    primary key (job_offer_id, deploy_hash)
+) ENGINE = InnoDB
+  default CHARSET = utf8;

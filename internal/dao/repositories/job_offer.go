@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
 	"casper-dao-middleware/internal/dao/entities"
@@ -15,6 +16,7 @@ type JobOffer interface {
 	Save(jobOffer *entities.JobOffer) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.JobOffer, error)
+	UpdateAuctionType(jobOfferID uint32, auctionType entities.AuctionType) error
 }
 
 type jobOffer struct {
@@ -37,7 +39,6 @@ func (r *jobOffer) Save(jobOffer *entities.JobOffer) error {
 			"job_poster",
 			"deploy_hash",
 			"max_budget",
-			"status",
 			"auction_type",
 			"expected_time_frame",
 			"timestamp",
@@ -47,7 +48,6 @@ func (r *jobOffer) Save(jobOffer *entities.JobOffer) error {
 			jobOffer.JobPoster,
 			jobOffer.DeployHash,
 			jobOffer.MaxBudget,
-			jobOffer.Status,
 			jobOffer.AuctionType,
 			jobOffer.ExpectedTimeFrame,
 			jobOffer.Timestamp,
@@ -101,4 +101,27 @@ func (r *jobOffer) Count(filters map[string]interface{}) (uint64, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (r *jobOffer) UpdateAuctionType(jobOfferID uint32, auctionType entities.AuctionType) error {
+	queryBuilder := query.Update("job_offers").
+		SetMap(map[string]interface{}{
+			"auction_type": auctionType,
+		})
+
+	queryBuilder = queryBuilder.
+		Where(sq.Eq{
+			"job_offer_id": jobOfferID,
+		})
+
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.conn.Exec(sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
 }
