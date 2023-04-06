@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/events/bid_escrow"
+	"casper-dao-middleware/internal/dao/services/bid"
 	"casper-dao-middleware/internal/dao/services/job_offer"
 	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/internal/dao/services/votes"
@@ -659,6 +660,16 @@ func (s *ProcessContractEvents) trackBidEscrowRepositoryContract(cesEvent ces.Ev
 		trackJobOffer.SetEntityManager(s.GetEntityManager())
 		trackJobOffer.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		if err := trackJobOffer.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.BidSubmittedEventName:
+		trackSubmittedBid := bid.NewTrackBidSubmitted()
+		trackSubmittedBid.SetCESEvent(cesEvent)
+		trackSubmittedBid.SetEntityManager(s.GetEntityManager())
+		trackSubmittedBid.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackSubmittedBid.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
 			return err
