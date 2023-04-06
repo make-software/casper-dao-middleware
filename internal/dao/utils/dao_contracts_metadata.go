@@ -125,15 +125,15 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 
 func (d DAOContractsMetadata) ContractHashes() []types.Hash {
 	return []types.Hash{
-		//d.ReputationContractHash,
-		//d.VANFTContractHash,
-		//d.KycNFTContractHash,
-		//d.SimpleVoterContractHash,
-		//d.KycVoterContractHash,
-		//d.SlashingVoterContractHash,
-		//d.ReputationVoterContractHash,
-		//d.RepoVoterContractHash,
-		//d.VariableRepositoryContractHash,
+		d.ReputationContractHash,
+		d.VANFTContractHash,
+		d.KycNFTContractHash,
+		d.SimpleVoterContractHash,
+		d.KycVoterContractHash,
+		d.SlashingVoterContractHash,
+		d.ReputationVoterContractHash,
+		d.RepoVoterContractHash,
+		d.VariableRepositoryContractHash,
 		d.BidEscrowContractHash,
 	}
 }

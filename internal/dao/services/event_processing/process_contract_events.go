@@ -336,11 +336,11 @@ func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) err
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
-		//if err := trackBallotCast.Execute(); err != nil {
-		//	zap.S().With(zap.String("event", cesEvent.Name)).
-		//		With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
-		//	return err
-		//}
+		if err := trackBallotCast.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
+			return err
+		}
 	case base_events.BallotCanceledEventName:
 		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)
