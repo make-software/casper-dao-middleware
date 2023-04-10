@@ -55,6 +55,8 @@ func NewRouter(
 
 	router.Get("/settings", settingHandler.HandleGetSettings)
 	router.Get("/job_offers", jobOffersHandler.HandleGetJobOffers)
+	router.Get("/job_offers/{job_offer_id}/bids", jobOffersHandler.HandleGetJobOfferBids)
+	router.Get("/bids/{bid_id}/job", jobOffersHandler.HandleGetBidJob)
 
 	swaggerHost := string(cfg.Addr)
 	if envHost := os.Getenv("SWAGGER_HOST"); envHost != "" {

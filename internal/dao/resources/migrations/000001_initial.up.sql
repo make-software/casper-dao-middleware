@@ -130,7 +130,6 @@ create table job_offers
     job_poster          binary(32) not null,
     deploy_hash         binary(32) not null,
     max_budget          bigint unsigned not null,
-    status              tinyint unsigned not null,
     auction_type        tinyint unsigned not null,
     expected_time_frame int unsigned not null,
     timestamp           datetime not null,
@@ -143,7 +142,7 @@ create table bids
 (
     job_offer_id         int unsigned not null,
     bid_id               int unsigned not null,
-    Worker               binary(32) not null,
+    worker               binary(32) not null,
     deploy_hash          binary(32) not null,
     onboard              tinyint unsigned not null,
     proposed_time_frame  int unsigned not null,
@@ -154,5 +153,22 @@ create table bids
     timestamp            datetime not null,
 
     primary key (job_offer_id, deploy_hash)
+) ENGINE = InnoDB
+  default CHARSET = utf8;
+
+
+create table jobs
+(
+    bid_id      int unsigned     not null,
+    job_poster  binary(32)       not null,
+    worker      binary(32)       not null,
+    caller      binary(32)       null,
+    result      text             null,
+    deploy_hash binary(32)       not null,
+    job_status  tinyint unsigned not null,
+    finish_time int unsigned     not null,
+    timestamp   datetime         not null,
+
+    primary key (bid_id, deploy_hash)
 ) ENGINE = InnoDB
   default CHARSET = utf8;

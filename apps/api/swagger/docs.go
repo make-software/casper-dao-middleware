@@ -435,6 +435,97 @@ const docTemplate = `{
                 }
             }
         },
+        "/bids/{bid_id}/job": {
+            "get": {
+                "tags": [
+                    "BidEscrow"
+                ],
+                "summary": "Return Job by BidID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "BidID uint",
+                        "name": "bid_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entities.Job"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/job_offers": {
             "get": {
                 "tags": [
@@ -492,6 +583,133 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/entities.JobOffer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/job_offers/{job_offer_id}/bids": {
+            "get": {
+                "tags": [
+                    "BidEscrow"
+                ],
+                "summary": "Return paginated list of bid for JobOffer",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "JobOfferID uint",
+                        "name": "job_offer_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "10",
+                        "description": "Number of items per page",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "ASC",
+                            "DESC"
+                        ],
+                        "type": "string",
+                        "default": "ASC",
+                        "description": "Sorting direction",
+                        "name": "order_direction",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "default": "voting_id",
+                        "description": "Comma-separated list of sorting fields (job_offer_id)",
+                        "name": "order_by",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.PaginatedResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entities.Bid"
                                         }
                                     }
                                 }
@@ -963,6 +1181,76 @@ const docTemplate = `{
                 "AuctionTypeExternal"
             ]
         },
+        "entities.Bid": {
+            "type": "object",
+            "properties": {
+                "bid_id": {
+                    "type": "integer"
+                },
+                "cspr_stake": {
+                    "type": "integer"
+                },
+                "deploy_hash": {
+                    "type": "string"
+                },
+                "job_offer_id": {
+                    "type": "integer"
+                },
+                "onboard": {
+                    "type": "boolean"
+                },
+                "picked_by_job_poster": {
+                    "type": "boolean"
+                },
+                "proposed_payment": {
+                    "type": "integer"
+                },
+                "proposed_time_frame": {
+                    "type": "integer"
+                },
+                "reputation_stake": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "worker": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Job": {
+            "type": "object",
+            "properties": {
+                "bid_id": {
+                    "type": "integer"
+                },
+                "caller": {
+                    "type": "string"
+                },
+                "deploy_hash": {
+                    "type": "string"
+                },
+                "finish_time": {
+                    "type": "integer"
+                },
+                "job_poster": {
+                    "type": "string"
+                },
+                "job_status": {
+                    "$ref": "#/definitions/entities.JobStatus"
+                },
+                "result": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "worker": {
+                    "type": "string"
+                }
+            }
+        },
         "entities.JobOffer": {
             "type": "object",
             "properties": {
@@ -984,15 +1272,12 @@ const docTemplate = `{
                 "max_budget": {
                     "type": "integer"
                 },
-                "status": {
-                    "$ref": "#/definitions/entities.JobOfferStatus"
-                },
                 "timestamp": {
                     "type": "string"
                 }
             }
         },
-        "entities.JobOfferStatus": {
+        "entities.JobStatus": {
             "type": "integer",
             "enum": [
                 1,
@@ -1002,11 +1287,11 @@ const docTemplate = `{
                 5
             ],
             "x-enum-varnames": [
-                "JobOfferStatusBiddingProcess",
-                "JobOfferStatusWaitingForJobProf",
-                "JobOfferStatusGracePeriod",
-                "JobOfferStatusCanceled",
-                "JobOfferStatusCompleted"
+                "JobStatusCreated",
+                "JobStatusSubmitted",
+                "JobStatusCancelled",
+                "JobStatusDone",
+                "JobStatusRejected"
             ]
         },
         "entities.ReputationChangeReason": {

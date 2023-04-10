@@ -22,10 +22,10 @@ func (c *GetJobOffers) Execute() (*pagination.Result, error) {
 		return nil, err
 	}
 
-	votings, err := c.GetEntityManager().JobOfferRepository().Find(c.GetPaginationParams(), filters)
+	offers, err := c.GetEntityManager().JobOfferRepository().Find(c.GetPaginationParams(), filters)
 	if err != nil {
 		return nil, err
 	}
 
-	return pagination.NewResult(count, c.GetPaginationParams().PageSize, votings), nil
+	return pagination.NewResult(count, c.GetPaginationParams().PageSize, offers), nil
 }
