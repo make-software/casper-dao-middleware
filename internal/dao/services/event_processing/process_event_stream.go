@@ -37,10 +37,10 @@ func (c *ProcessEventStream) SetEventStreamPath(eventPath string) *ProcessEventS
 }
 
 func (c *ProcessEventStream) Execute(ctx context.Context) error {
-	//eventListener, err := casper.NewEventListener(c.GetBaseStreamURL(), c.eventStreamPath, &c.nodeStartFromEventID)
-	//if err != nil {
-	//	return err
-	//}
+	eventListener, err := casper.NewEventListener(c.GetBaseStreamURL(), c.eventStreamPath, &c.nodeStartFromEventID)
+	if err != nil {
+		return err
+	}
 
 	daoMetadata := c.GetDAOContractsMetadata()
 
@@ -50,71 +50,55 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	syncDaoSetting.SetEntityManager(c.GetEntityManager())
 	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
 	syncDaoSetting.Execute()
-
 	cesParser, err := ces.NewParser(c.GetCasperClient(), daoMetadata.ContractHashes())
 	if err != nil {
 		zap.S().With(zap.Error(err)).Error("Failed to create CES Parser")
 		return err
 	}
-
 	processRawDeploy := NewProcessRawDeploy()
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
 	processRawDeploy.SetCESEventParser(cesParser)
 	processRawDeploy.SetDAOContractsMetadata(daoMetadata)
 
-	client := casper.NewRPCClient("http://localhost:11101/rpc")
-	res, _ := client.GetDeploy("49efff58d1c33571f580629f0a6921b581ae4b3cb568849ca6ab29ef53b001c6")
-
-	processRawDeploy.SetDeployProcessedEvent(casper.DeployProcessedEvent{
-		DeployProcessed: casper.DeployProcessed{
-			DeployHash:      res.Deploy.Hash,
-			ExecutionResult: res.ExecutionResults[0].Result,
-		},
-	})
-	if err = processRawDeploy.Execute(); err != nil {
-		zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
+	stopListening := func() {
+		eventListener.Close()
+		zap.S().Info("Finish ProcessEvents command successfully")
 	}
+	// in case of blocking on eventListener.ReadEvent(), shutdown will happen on next event/ loop iteration
+	for {
+		select {
+		case <-ctx.Done():
+			stopListening()
+			return nil
+		default:
+			rawEventData, err := eventListener.ReadEvent()
+			if err != nil {
+				zap.S().With(zap.Error(err)).Error("Error on event listening")
+				stopListening()
+				return err
+			}
 
-	//stopListening := func() {
-	//	eventListener.Close()
-	//	zap.S().Info("Finish ProcessEvents command successfully")
-	//}
-	//// in case of blocking on eventListener.ReadEvent(), shutdown will happen on next event/ loop iteration
-	//for {
-	//	select {
-	//	case <-ctx.Done():
-	//		stopListening()
-	//		return nil
-	//	default:
-	//		rawEventData, err := eventListener.ReadEvent()
-	//		if err != nil {
-	//			zap.S().With(zap.Error(err)).Error("Error on event listening")
-	//			stopListening()
-	//			return err
-	//		}
-	//
-	//		if rawEventData.EventType != casper.DeployProcessedEventType {
-	//			zap.S().Debugln("Skip not supported event type, expect DeployProcessedEvent")
-	//			continue
-	//		}
-	//
-	//		deployProcessedEvent, err := rawEventData.Data.ParseAsDeployProcessedEvent()
-	//		if err != nil {
-	//			zap.S().With(zap.Error(err)).Info("Failed to parse rawEvent as DeployProcessedEvent")
-	//			return err
-	//		}
-	//
-	//		if deployProcessedEvent.DeployProcessed.ExecutionResult.Success == nil {
-	//			zap.S().With(zap.String("hash", deployProcessedEvent.DeployProcessed.DeployHash.String())).
-	//				Info("Not successful deploy, ignore")
-	//			continue
-	//		}
-	//
-	//		processRawDeploy.SetDeployProcessedEvent(*deployProcessedEvent)
-	//		if err = processRawDeploy.Execute(); err != nil {
-	//			zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
-	//		}
-	//	}
-	//}
-	return nil
+			if rawEventData.EventType != casper.DeployProcessedEventType {
+				zap.S().Debugln("Skip not supported event type, expect DeployProcessedEvent")
+				continue
+			}
+
+			deployProcessedEvent, err := rawEventData.Data.ParseAsDeployProcessedEvent()
+			if err != nil {
+				zap.S().With(zap.Error(err)).Info("Failed to parse rawEvent as DeployProcessedEvent")
+				return err
+			}
+
+			if deployProcessedEvent.DeployProcessed.ExecutionResult.Success == nil {
+				zap.S().With(zap.String("hash", deployProcessedEvent.DeployProcessed.DeployHash.String())).
+					Info("Not successful deploy, ignore")
+				continue
+			}
+
+			processRawDeploy.SetDeployProcessedEvent(*deployProcessedEvent)
+			if err = processRawDeploy.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
+			}
+		}
+	}
 }
