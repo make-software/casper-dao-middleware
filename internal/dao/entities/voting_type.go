@@ -10,6 +10,7 @@ const (
 	VotingTypeReputation
 	VotingTypeOnboarding
 	VotingTypeAdmin
+	VotingTypeBidEscrow
 )
 
 type VotingType struct {

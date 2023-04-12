@@ -50,11 +50,13 @@ func (c *ProcessEventStream) Execute(ctx context.Context) error {
 	syncDaoSetting.SetEntityManager(c.GetEntityManager())
 	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
 	syncDaoSetting.Execute()
+
 	cesParser, err := ces.NewParser(c.GetCasperClient(), daoMetadata.ContractHashes())
 	if err != nil {
 		zap.S().With(zap.Error(err)).Error("Failed to create CES Parser")
 		return err
 	}
+
 	processRawDeploy := NewProcessRawDeploy()
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
 	processRawDeploy.SetCESEventParser(cesParser)

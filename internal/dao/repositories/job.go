@@ -97,6 +97,7 @@ func (r job) Update(job *entities.Job) error {
 	queryBuilder := query.Update("jobs").
 		SetMap(map[string]interface{}{
 			"caller":     job.Caller,
+			"result":     job.Result,
 			"job_status": job.JobStatus,
 		})
 

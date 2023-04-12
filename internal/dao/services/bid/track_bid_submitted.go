@@ -31,7 +31,6 @@ func (s *TrackBidSubmitted) Execute() error {
 
 	var reputationStake *uint64
 	if bidSubmitted.ReputationStake != nil {
-		//TODO: we need to track ReputationChanges in that case
 		stake := bidSubmitted.ReputationStake.Into().Uint64()
 		reputationStake = &stake
 	} else {

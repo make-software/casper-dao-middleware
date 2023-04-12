@@ -13,10 +13,16 @@ type TrackVote struct {
 	di.CESEventAware
 	di.DeployProcessedEventAware
 	di.DAOContractsMetadataAware
+
+	voterContractPackageHash casper_types.Hash
 }
 
 func NewTrackVote() *TrackVote {
 	return &TrackVote{}
+}
+
+func (s *TrackVote) SetVoterContractPackageHash(hash casper_types.Hash) {
+	s.voterContractPackageHash = hash
 }
 
 func (s *TrackVote) Execute() error {
@@ -29,7 +35,7 @@ func (s *TrackVote) Execute() error {
 		return err
 	}
 
-	if err := s.collectReputationChanges(ballotCast, s.GetDAOContractsMetadata().ReputationVoterContractPackageHash); err != nil {
+	if err := s.collectReputationChanges(ballotCast, s.voterContractPackageHash); err != nil {
 		return err
 	}
 

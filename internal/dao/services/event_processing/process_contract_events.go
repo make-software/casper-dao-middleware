@@ -154,6 +154,28 @@ func (s *ProcessContractEvents) trackReputationContract(cesEvent ces.Event) erro
 				With(zap.String("contract", daoContractMetadata.ReputationContractHash.String())).Info("failed to track event")
 			return err
 		}
+	case reputation_events.StakeEventName:
+		trackStake := reputation.NewTrackStake()
+		trackStake.SetCESEvent(cesEvent)
+		trackStake.SetEntityManager(s.GetEntityManager())
+		trackStake.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		trackStake.SetDAOContractsMetadata(daoContractMetadata)
+		if err := trackStake.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.ReputationContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case reputation_events.UnstakeEventName:
+		trackUnstake := reputation.NewTrackUnstake()
+		trackUnstake.SetCESEvent(cesEvent)
+		trackUnstake.SetEntityManager(s.GetEntityManager())
+		trackUnstake.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		trackUnstake.SetDAOContractsMetadata(daoContractMetadata)
+		if err := trackUnstake.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.ReputationContractHash.String())).Info("failed to track event")
+			return err
+		}
 	default:
 		return fmt.Errorf("unsupported contract event - %s", cesEvent.Name)
 	}
@@ -184,6 +206,7 @@ func (s *ProcessContractEvents) trackRepoVoterContract(cesEvent ces.Event) error
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.RepoVoterContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.RepoVoterContractHash.String())).Info("failed to track event")
@@ -195,6 +218,7 @@ func (s *ProcessContractEvents) trackRepoVoterContract(cesEvent ces.Event) error
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.RepoVoterContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.RepoVoterContractHash.String())).Info("failed to track event")
@@ -206,6 +230,7 @@ func (s *ProcessContractEvents) trackRepoVoterContract(cesEvent ces.Event) error
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.RepoVoterContractPackageHash)
 		if err := trackBallotCast.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.RepoVoterContractHash.String())).Info("failed to track event")
@@ -250,6 +275,7 @@ func (s *ProcessContractEvents) trackReputationVoterContract(cesEvent ces.Event)
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.ReputationVoterContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.ReputationVoterContractHash.String())).Info("failed to track event")
@@ -261,6 +287,7 @@ func (s *ProcessContractEvents) trackReputationVoterContract(cesEvent ces.Event)
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.ReputationVoterContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.ReputationVoterContractHash.String())).Info("failed to track event")
@@ -272,6 +299,7 @@ func (s *ProcessContractEvents) trackReputationVoterContract(cesEvent ces.Event)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.ReputationVoterContractPackageHash)
 		if err := trackBallotCast.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.ReputationVoterContractHash.String())).Info("failed to track event")
@@ -316,6 +344,7 @@ func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) err
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.SimpleVoterContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
@@ -327,6 +356,7 @@ func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) err
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.SimpleVoterContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
@@ -382,6 +412,7 @@ func (s *ProcessContractEvents) trackSlashingVoterContract(cesEvent ces.Event) e
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.SlashingVoterContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
@@ -393,6 +424,7 @@ func (s *ProcessContractEvents) trackSlashingVoterContract(cesEvent ces.Event) e
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.SlashingVoterContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
@@ -404,6 +436,7 @@ func (s *ProcessContractEvents) trackSlashingVoterContract(cesEvent ces.Event) e
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.SlashingVoterContractPackageHash)
 		if err := trackBallotCast.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.SlashingVoterContractHash.String())).Info("failed to track event")
@@ -448,6 +481,7 @@ func (s *ProcessContractEvents) trackKycVoterContract(cesEvent ces.Event) error 
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.KycVoterContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.KycVoterContractHash.String())).Info("failed to track event")
@@ -459,6 +493,7 @@ func (s *ProcessContractEvents) trackKycVoterContract(cesEvent ces.Event) error 
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.KycVoterContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.KycVoterContractHash.String())).Info("failed to track event")
@@ -470,6 +505,7 @@ func (s *ProcessContractEvents) trackKycVoterContract(cesEvent ces.Event) error 
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.KycVoterContractPackageHash)
 		if err := trackBallotCast.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.KycVoterContractHash.String())).Info("failed to track event")
@@ -514,6 +550,7 @@ func (s *ProcessContractEvents) trackOnboardingRequestContract(cesEvent ces.Even
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.OnboardingRequestContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.OnboardingRequestContractHash.String())).Info("failed to track event")
@@ -525,6 +562,7 @@ func (s *ProcessContractEvents) trackOnboardingRequestContract(cesEvent ces.Even
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.OnboardingRequestContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.OnboardingRequestContractHash.String())).Info("failed to track event")
@@ -536,6 +574,7 @@ func (s *ProcessContractEvents) trackOnboardingRequestContract(cesEvent ces.Even
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.OnboardingRequestContractPackageHash)
 		if err := trackBallotCast.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.OnboardingRequestContractHash.String())).Info("failed to track event")
@@ -581,6 +620,7 @@ func (s *ProcessContractEvents) trackAdminContract(cesEvent ces.Event) error {
 		trackVotingEnded.SetEntityManager(s.GetEntityManager())
 		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.AdminContractPackageHash)
 		if err := trackVotingEnded.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
@@ -592,6 +632,7 @@ func (s *ProcessContractEvents) trackAdminContract(cesEvent ces.Event) error {
 		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
 		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.AdminContractPackageHash)
 		if err := trackVotingCanceled.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
@@ -603,6 +644,7 @@ func (s *ProcessContractEvents) trackAdminContract(cesEvent ces.Event) error {
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.AdminContractPackageHash)
 		if err := trackBallotCast.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
@@ -723,6 +765,61 @@ func (s *ProcessContractEvents) trackBidEscrowRepositoryContract(cesEvent ces.Ev
 		if err := trackJobDone.Execute(); err != nil {
 			zap.S().With(zap.String("event", cesEvent.Name)).
 				With(zap.String("contract", daoContractMetadata.BidEscrowContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case bid_escrow.VotingCreatedEventName:
+		trackVotingCreated := voting.NewTrackBidEscrowVotingCreated()
+		trackVotingCreated.SetCESEvent(cesEvent)
+		trackVotingCreated.SetEntityManager(s.GetEntityManager())
+		trackVotingCreated.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		if err := trackVotingCreated.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case base_events.BallotCastEventName:
+		trackBallotCast := votes.NewTrackVote()
+		trackBallotCast.SetCESEvent(cesEvent)
+		trackBallotCast.SetEntityManager(s.GetEntityManager())
+		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.BidEscrowContractPackageHash)
+		if err := trackBallotCast.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case base_events.BallotCanceledEventName:
+		trackBallotCanceled := votes.NewTrackCanceledVote()
+		trackBallotCanceled.SetCESEvent(cesEvent)
+		trackBallotCanceled.SetEntityManager(s.GetEntityManager())
+		if err := trackBallotCanceled.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case base_events.VotingEndedEventName:
+		trackVotingEnded := voting.NewTrackVotingEnded()
+		trackVotingEnded.SetCESEvent(cesEvent)
+		trackVotingEnded.SetEntityManager(s.GetEntityManager())
+		trackVotingEnded.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		trackVotingEnded.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingEnded.SetVoterContractPackageHash(daoContractMetadata.BidEscrowContractPackageHash)
+		if err := trackVotingEnded.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
+			return err
+		}
+	case base_events.VotingCanceledEventName:
+		trackVotingCanceled := voting.NewTrackVotingCanceled()
+		trackVotingCanceled.SetCESEvent(cesEvent)
+		trackVotingCanceled.SetEntityManager(s.GetEntityManager())
+		trackVotingCanceled.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		trackVotingCanceled.SetDAOContractsMetadata(daoContractMetadata)
+		trackVotingCanceled.SetVoterContractPackageHash(daoContractMetadata.BidEscrowContractPackageHash)
+		if err := trackVotingCanceled.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.AdminContractHash.String())).Info("failed to track event")
 			return err
 		}
 
