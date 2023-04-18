@@ -6,8 +6,8 @@ import (
 	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/di"
+	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/pkg/casper"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
@@ -37,81 +37,70 @@ func (c *ProcessEventStream) SetEventStreamPath(eventPath string) *ProcessEventS
 }
 
 func (c *ProcessEventStream) Execute(ctx context.Context) error {
-	//eventListener, err := casper.NewEventListener(c.GetBaseStreamURL(), c.eventStreamPath, &c.nodeStartFromEventID)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//daoMetadata := c.GetDAOContractsMetadata()
+	eventListener, err := casper.NewEventListener(c.GetBaseStreamURL(), c.eventStreamPath, &c.nodeStartFromEventID)
+	if err != nil {
+		return err
+	}
 
-	//syncDaoSetting := settings.NewSyncDAOSettings()
-	//syncDaoSetting.SetCasperClient(c.GetCasperClient())
-	//syncDaoSetting.SetVariableRepositoryContractStorageUref(daoMetadata.VariableRepositoryContractStorageUref)
-	//syncDaoSetting.SetEntityManager(c.GetEntityManager())
-	//syncDaoSetting.SetSettings(settings.VariableRepoSettings)
-	//syncDaoSetting.Execute()
+	daoMetadata := c.GetDAOContractsMetadata()
 
-	client := casper.NewRPCClient("https://casper-node-proxy.stg.make.services/rpc")
+	syncDaoSetting := settings.NewSyncDAOSettings()
+	syncDaoSetting.SetCasperClient(c.GetCasperClient())
+	syncDaoSetting.SetVariableRepositoryContractStorageUref(daoMetadata.VariableRepositoryContractStorageUref)
+	syncDaoSetting.SetEntityManager(c.GetEntityManager())
+	syncDaoSetting.SetSettings(settings.VariableRepoSettings)
+	syncDaoSetting.Execute()
 
-	cesParser, err := ces.NewParser(client, []types.Hash{})
+	cesParser, err := ces.NewParser(c.GetCasperClient(), daoMetadata.ContractHashes())
 	if err != nil {
 		zap.S().With(zap.Error(err)).Error("Failed to create CES Parser")
 		return err
 	}
 
-	deploy, _ := client.GetDeploy("c887e7ed9252307f539625e413bdfb46abbc101d9046d690eddf672a5549db44")
-
 	processRawDeploy := NewProcessRawDeploy()
 	processRawDeploy.SetEntityManager(c.GetEntityManager())
 	processRawDeploy.SetCESEventParser(cesParser)
-	processRawDeploy.SetDeployProcessedEvent(casper.DeployProcessedEvent{
-		DeployProcessed: casper.DeployProcessed{
-			ExecutionResult: deploy.ExecutionResults[0].Result,
-		},
-	})
-	processRawDeploy.Execute()
-	//processRawDeploy.SetDAOContractsMetadata(daoMetadata)
+	processRawDeploy.SetDAOContractsMetadata(daoMetadata)
 
-	//stopListening := func() {
-	//	eventListener.Close()
-	//	zap.S().Info("Finish ProcessEvents command successfully")
-	//}
-	//// in case of blocking on eventListener.ReadEvent(), shutdown will happen on next event/ loop iteration
-	//for {
-	//	select {
-	//	case <-ctx.Done():
-	//		stopListening()
-	//		return nil
-	//	default:
-	//		rawEventData, err := eventListener.ReadEvent()
-	//		if err != nil {
-	//			zap.S().With(zap.Error(err)).Error("Error on event listening")
-	//			stopListening()
-	//			return err
-	//		}
-	//
-	//		if rawEventData.EventType != casper.DeployProcessedEventType {
-	//			zap.S().Debugln("Skip not supported event type, expect DeployProcessedEvent")
-	//			continue
-	//		}
-	//
-	//		deployProcessedEvent, err := rawEventData.Data.ParseAsDeployProcessedEvent()
-	//		if err != nil {
-	//			zap.S().With(zap.Error(err)).Info("Failed to parse rawEvent as DeployProcessedEvent")
-	//			return err
-	//		}
-	//
-	//		if deployProcessedEvent.DeployProcessed.ExecutionResult.Success == nil {
-	//			zap.S().With(zap.String("hash", deployProcessedEvent.DeployProcessed.DeployHash.String())).
-	//				Info("Not successful deploy, ignore")
-	//			continue
-	//		}
-	//
-	//		processRawDeploy.SetDeployProcessedEvent(*deployProcessedEvent)
-	//		if err = processRawDeploy.Execute(); err != nil {
-	//			zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
-	//		}
-	//	}
-	//}
-	return nil
+	stopListening := func() {
+		eventListener.Close()
+		zap.S().Info("Finish ProcessEvents command successfully")
+	}
+	// in case of blocking on eventListener.ReadEvent(), shutdown will happen on next event/ loop iteration
+	for {
+		select {
+		case <-ctx.Done():
+			stopListening()
+			return nil
+		default:
+			rawEventData, err := eventListener.ReadEvent()
+			if err != nil {
+				zap.S().With(zap.Error(err)).Error("Error on event listening")
+				stopListening()
+				return err
+			}
+
+			if rawEventData.EventType != casper.DeployProcessedEventType {
+				zap.S().Debugln("Skip not supported event type, expect DeployProcessedEvent")
+				continue
+			}
+
+			deployProcessedEvent, err := rawEventData.Data.ParseAsDeployProcessedEvent()
+			if err != nil {
+				zap.S().With(zap.Error(err)).Info("Failed to parse rawEvent as DeployProcessedEvent")
+				return err
+			}
+
+			if deployProcessedEvent.DeployProcessed.ExecutionResult.Success == nil {
+				zap.S().With(zap.String("hash", deployProcessedEvent.DeployProcessed.DeployHash.String())).
+					Info("Not successful deploy, ignore")
+				continue
+			}
+
+			processRawDeploy.SetDeployProcessedEvent(*deployProcessedEvent)
+			if err = processRawDeploy.Execute(); err != nil {
+				zap.S().With(zap.Error(err)).Error("Failed to handle DeployProcessedEvent")
+			}
+		}
+	}
 }
