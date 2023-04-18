@@ -33,7 +33,7 @@ func (s *TrackJobRejected) Execute() error {
 	}
 
 	job.Caller = caller
-	job.JobStatus = entities.JobStatusRejected
+	job.JobStatusID = entities.JobStatusIDRejected
 
 	return s.GetEntityManager().JobRepository().Update(job)
 }

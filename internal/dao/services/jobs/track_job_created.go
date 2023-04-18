@@ -44,7 +44,7 @@ func (s *TrackJobCreated) Execute() error {
 		*jobPoster,
 		*worker,
 		jobCreated.FinishTime,
-		entities.JobStatusCreated,
+		entities.JobStatusIDCreated,
 		nil,
 		nil,
 		time.Now().UTC(),

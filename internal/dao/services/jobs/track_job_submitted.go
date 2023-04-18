@@ -28,7 +28,7 @@ func (s *TrackJobSubmitted) Execute() error {
 	}
 
 	job.Result = &jobSubmitted.Result
-	job.JobStatus = entities.JobStatusSubmitted
+	job.JobStatusID = entities.JobStatusIDSubmitted
 
 	return s.GetEntityManager().JobRepository().Update(job)
 }

@@ -16,7 +16,7 @@ type JobOffer interface {
 	Save(jobOffer *entities.JobOffer) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.JobOffer, error)
-	UpdateAuctionType(jobOfferID uint32, auctionType entities.AuctionType) error
+	UpdateAuctionType(jobOfferID uint32, auctionType entities.AuctionTypeID) error
 }
 
 type jobOffer struct {
@@ -39,7 +39,7 @@ func (r *jobOffer) Save(jobOffer *entities.JobOffer) error {
 			"job_poster",
 			"deploy_hash",
 			"max_budget",
-			"auction_type",
+			"auction_type_id",
 			"expected_time_frame",
 			"timestamp",
 		).
@@ -48,7 +48,7 @@ func (r *jobOffer) Save(jobOffer *entities.JobOffer) error {
 			jobOffer.JobPoster,
 			jobOffer.DeployHash,
 			jobOffer.MaxBudget,
-			jobOffer.AuctionType,
+			jobOffer.AuctionTypeID,
 			jobOffer.ExpectedTimeFrame,
 			jobOffer.Timestamp,
 		)
@@ -103,10 +103,10 @@ func (r *jobOffer) Count(filters map[string]interface{}) (uint64, error) {
 	return count, nil
 }
 
-func (r *jobOffer) UpdateAuctionType(jobOfferID uint32, auctionType entities.AuctionType) error {
+func (r *jobOffer) UpdateAuctionType(jobOfferID uint32, auctionType entities.AuctionTypeID) error {
 	queryBuilder := query.Update("job_offers").
 		SetMap(map[string]interface{}{
-			"auction_type": auctionType,
+			"auction_type_id": auctionType,
 		})
 
 	queryBuilder = queryBuilder.

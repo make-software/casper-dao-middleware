@@ -65,7 +65,7 @@ func (r job) Save(job *entities.Job) error {
 			"caller",
 			"result",
 			"deploy_hash",
-			"job_status",
+			"job_status_id",
 			"finish_time",
 			"timestamp",
 		).
@@ -76,7 +76,7 @@ func (r job) Save(job *entities.Job) error {
 			job.Caller,
 			job.Result,
 			job.DeployHash,
-			job.JobStatus,
+			job.JobStatusID,
 			job.FinishTime,
 			job.Timestamp,
 		)
@@ -96,9 +96,9 @@ func (r job) Save(job *entities.Job) error {
 func (r job) Update(job *entities.Job) error {
 	queryBuilder := query.Update("jobs").
 		SetMap(map[string]interface{}{
-			"caller":     job.Caller,
-			"result":     job.Result,
-			"job_status": job.JobStatus,
+			"caller":        job.Caller,
+			"result":        job.Result,
+			"job_status_id": job.JobStatusID,
 		})
 
 	queryBuilder = queryBuilder.

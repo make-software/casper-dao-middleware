@@ -130,7 +130,7 @@ create table job_offers
     job_poster          binary(32) not null,
     deploy_hash         binary(32) not null,
     max_budget          bigint unsigned not null,
-    auction_type        tinyint unsigned not null,
+    auction_type_id        tinyint unsigned not null,
     expected_time_frame int unsigned not null,
     timestamp           datetime not null,
 
@@ -165,7 +165,7 @@ create table jobs
     caller      binary(32)       null,
     result      text             null,
     deploy_hash binary(32)       not null,
-    job_status  tinyint unsigned not null,
+    job_status_id  tinyint unsigned not null,
     finish_time int unsigned     not null,
     timestamp   datetime         not null,
 

@@ -526,7 +526,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/job_offers": {
+        "/job-offers": {
             "get": {
                 "tags": [
                     "BidEscrow"
@@ -646,7 +646,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/job_offers/{job_offer_id}/bids": {
+        "/job-offers/{job_offer_id}/bids": {
             "get": {
                 "tags": [
                     "BidEscrow"
@@ -710,6 +710,91 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/entities.Bid"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.ErrorResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "$ref": "#/definitions/http_response.ErrorResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/job-statuses": {
+            "get": {
+                "tags": [
+                    "BidEscrow"
+                ],
+                "summary": "Return predefined list of JobStatuses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/http_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entities.Job"
+                                            }
                                         }
                                     }
                                 }
@@ -1170,15 +1255,15 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.AuctionType": {
+        "entities.AuctionTypeID": {
             "type": "integer",
             "enum": [
                 1,
                 2
             ],
             "x-enum-varnames": [
-                "AuctionTypeInternal",
-                "AuctionTypeExternal"
+                "AuctionTypeIDInternal",
+                "AuctionTypeIDExternal"
             ]
         },
         "entities.Bid": {
@@ -1237,8 +1322,8 @@ const docTemplate = `{
                 "job_poster": {
                     "type": "string"
                 },
-                "job_status": {
-                    "$ref": "#/definitions/entities.JobStatus"
+                "job_status_id": {
+                    "$ref": "#/definitions/entities.JobStatusID"
                 },
                 "result": {
                     "type": "string"
@@ -1254,8 +1339,8 @@ const docTemplate = `{
         "entities.JobOffer": {
             "type": "object",
             "properties": {
-                "auction_type": {
-                    "$ref": "#/definitions/entities.AuctionType"
+                "auction_type_id": {
+                    "$ref": "#/definitions/entities.AuctionTypeID"
                 },
                 "deploy_hash": {
                     "type": "string"
@@ -1277,7 +1362,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.JobStatus": {
+        "entities.JobStatusID": {
             "type": "integer",
             "enum": [
                 1,
@@ -1287,11 +1372,11 @@ const docTemplate = `{
                 5
             ],
             "x-enum-varnames": [
-                "JobStatusCreated",
-                "JobStatusSubmitted",
-                "JobStatusCancelled",
-                "JobStatusDone",
-                "JobStatusRejected"
+                "JobStatusIDCreated",
+                "JobStatusIDSubmitted",
+                "JobStatusIDCancelled",
+                "JobStatusIDDone",
+                "JobStatusIDRejected"
             ]
         },
         "entities.ReputationChangeReason": {
@@ -1453,7 +1538,8 @@ const docTemplate = `{
                 4,
                 5,
                 6,
-                7
+                7,
+                8
             ],
             "x-enum-varnames": [
                 "VotingTypeSimple",
@@ -1462,7 +1548,8 @@ const docTemplate = `{
                 "VotingTypeRepo",
                 "VotingTypeReputation",
                 "VotingTypeOnboarding",
-                "VotingTypeAdmin"
+                "VotingTypeAdmin",
+                "VotingTypeBidEscrow"
             ]
         },
         "http_response.ErrorResponse": {

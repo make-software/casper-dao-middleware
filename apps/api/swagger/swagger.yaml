@@ -10,14 +10,14 @@ definitions:
       timestamp:
         type: string
     type: object
-  entities.AuctionType:
+  entities.AuctionTypeID:
     enum:
     - 1
     - 2
     type: integer
     x-enum-varnames:
-    - AuctionTypeInternal
-    - AuctionTypeExternal
+    - AuctionTypeIDInternal
+    - AuctionTypeIDExternal
   entities.Bid:
     properties:
       bid_id:
@@ -55,8 +55,8 @@ definitions:
         type: integer
       job_poster:
         type: string
-      job_status:
-        $ref: '#/definitions/entities.JobStatus'
+      job_status_id:
+        $ref: '#/definitions/entities.JobStatusID'
       result:
         type: string
       timestamp:
@@ -66,8 +66,8 @@ definitions:
     type: object
   entities.JobOffer:
     properties:
-      auction_type:
-        $ref: '#/definitions/entities.AuctionType'
+      auction_type_id:
+        $ref: '#/definitions/entities.AuctionTypeID'
       deploy_hash:
         type: string
       expected_time_frame:
@@ -81,7 +81,7 @@ definitions:
       timestamp:
         type: string
     type: object
-  entities.JobStatus:
+  entities.JobStatusID:
     enum:
     - 1
     - 2
@@ -90,11 +90,11 @@ definitions:
     - 5
     type: integer
     x-enum-varnames:
-    - JobStatusCreated
-    - JobStatusSubmitted
-    - JobStatusCancelled
-    - JobStatusDone
-    - JobStatusRejected
+    - JobStatusIDCreated
+    - JobStatusIDSubmitted
+    - JobStatusIDCancelled
+    - JobStatusIDDone
+    - JobStatusIDRejected
   entities.ReputationChangeReason:
     enum:
     - 1
@@ -206,6 +206,7 @@ definitions:
     - 5
     - 6
     - 7
+    - 8
     type: integer
     x-enum-varnames:
     - VotingTypeSimple
@@ -215,6 +216,7 @@ definitions:
     - VotingTypeReputation
     - VotingTypeOnboarding
     - VotingTypeAdmin
+    - VotingTypeBidEscrow
   http_response.ErrorResponse:
     properties:
       error:
@@ -524,7 +526,7 @@ paths:
       summary: Return Job by BidID
       tags:
       - BidEscrow
-  /job_offers:
+  /job-offers:
     get:
       parameters:
       - default: 1
@@ -593,7 +595,7 @@ paths:
       summary: Return paginated list of votes for votingID
       tags:
       - BidEscrow
-  /job_offers/{job_offer_id}/bids:
+  /job-offers/{job_offer_id}/bids:
     get:
       parameters:
       - description: JobOfferID uint
@@ -665,6 +667,50 @@ paths:
                   $ref: '#/definitions/http_response.ErrorResult'
               type: object
       summary: Return paginated list of bid for JobOffer
+      tags:
+      - BidEscrow
+  /job-statuses:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entities.Job'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return predefined list of JobStatuses
       tags:
       - BidEscrow
   /settings:

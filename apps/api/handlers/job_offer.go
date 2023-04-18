@@ -26,7 +26,7 @@ func NewJobOffer(entityManager persistence.EntityManager) *JobOffer {
 //
 //	@Summary	Return paginated list of votes for votingID
 //
-//	@Router		/job_offers [GET]
+//	@Router		/job-offers [GET]
 //
 //	@Param		page			query		int			false	"Page number"											default(1)
 //	@Param		page_size		query		string		false	"Number of items per page"								default(10)
@@ -51,7 +51,7 @@ func (h *JobOffer) HandleGetJobOffers(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary	Return paginated list of bid for JobOffer
 //
-//	@Router		/job_offers/{job_offer_id}/bids [GET]
+//	@Router		/job-offers/{job_offer_id}/bids [GET]
 //
 //	@Param		job_offer_id	path		uint		true	"JobOfferID uint"
 //	@Param		page			query		int			false	"Page number"											default(1)
@@ -106,4 +106,19 @@ func (h *JobOffer) HandleGetBidJob(w http.ResponseWriter, r *http.Request) {
 	getJob.SetBidID(bidID)
 
 	http_response.FromFunction(getJob.Execute, w, r)
+}
+
+// HandleGetJobStatuses
+//
+//	@Summary	Return predefined list of JobStatuses
+//
+//	@Router		/job-statuses [GET]
+//
+//	@Success	200			{object}	http_response.SuccessResponse{data=[]entities.Job}
+//	@Failure	400,404,500	{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		BidEscrow
+func (h *JobOffer) HandleGetJobStatuses(w http.ResponseWriter, r *http.Request) {
+	getJobStatuses := jobs.NewGetJobStatuses()
+	http_response.FromFunction(getJobStatuses.Execute, w, r)
 }

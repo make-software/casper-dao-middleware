@@ -33,7 +33,7 @@ func (s *TrackJobDone) Execute() error {
 	}
 
 	job.Caller = caller
-	job.JobStatus = entities.JobStatusDone
+	job.JobStatusID = entities.JobStatusIDDone
 
 	return s.GetEntityManager().JobRepository().Update(job)
 }

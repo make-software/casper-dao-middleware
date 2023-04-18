@@ -34,7 +34,7 @@ func (s *TrackJobOfferCreated) Execute() error {
 		s.GetDeployProcessedEvent().DeployProcessed.DeployHash,
 		*jobPoster,
 		jobOfferCreated.MaxBudget.Into().Uint64(),
-		entities.AuctionTypeInternal,
+		entities.AuctionTypeIDInternal,
 		jobOfferCreated.ExpectedTimeFrame,
 		time.Now().UTC(),
 	)

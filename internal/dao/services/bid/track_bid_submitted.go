@@ -35,7 +35,7 @@ func (s *TrackBidSubmitted) Execute() error {
 		reputationStake = &stake
 	} else {
 		// if the reputation stake is missing it means the bid contains stake in cspr which is possible only in External auction
-		if err := s.GetEntityManager().JobOfferRepository().UpdateAuctionType(bidSubmitted.JobOfferID, entities.AuctionTypeExternal); err != nil {
+		if err := s.GetEntityManager().JobOfferRepository().UpdateAuctionType(bidSubmitted.JobOfferID, entities.AuctionTypeIDExternal); err != nil {
 			return err
 		}
 	}
