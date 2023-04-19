@@ -14,6 +14,7 @@ type DaoContracts struct {
 	KycNFTContractHash             types.Hash `env:"KYC_NFT_CONTRACT_HASH,required"`
 	OnboardingRequestContractHash  types.Hash `env:"ONBOARDING_REQUEST_CONTRACT_HASH,required"`
 	AdminContractHash              types.Hash `env:"ADMIN_CONTRACT_HASH,required"`
+	BidEscrowContractHash          types.Hash `env:"BID_ESCROW_CONTRACT_HASH,required"`
 }
 
 func (d DaoContracts) ToMap() map[string]types.Hash {
@@ -29,5 +30,6 @@ func (d DaoContracts) ToMap() map[string]types.Hash {
 		"variable_repository_contract": d.VariableRepositoryContractHash,
 		"onboarding_request_contract":  d.OnboardingRequestContractHash,
 		"admin":                        d.AdminContractHash,
+		"bid_escrow":                   d.BidEscrowContractHash,
 	}
 }

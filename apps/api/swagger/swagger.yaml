@@ -10,6 +10,91 @@ definitions:
       timestamp:
         type: string
     type: object
+  entities.AuctionTypeID:
+    enum:
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - AuctionTypeIDInternal
+    - AuctionTypeIDExternal
+  entities.Bid:
+    properties:
+      bid_id:
+        type: integer
+      cspr_stake:
+        type: integer
+      deploy_hash:
+        type: string
+      job_offer_id:
+        type: integer
+      onboard:
+        type: boolean
+      picked_by_job_poster:
+        type: boolean
+      proposed_payment:
+        type: integer
+      proposed_time_frame:
+        type: integer
+      reputation_stake:
+        type: integer
+      timestamp:
+        type: string
+      worker:
+        type: string
+    type: object
+  entities.Job:
+    properties:
+      bid_id:
+        type: integer
+      caller:
+        type: string
+      deploy_hash:
+        type: string
+      finish_time:
+        type: integer
+      job_poster:
+        type: string
+      job_status_id:
+        $ref: '#/definitions/entities.JobStatusID'
+      result:
+        type: string
+      timestamp:
+        type: string
+      worker:
+        type: string
+    type: object
+  entities.JobOffer:
+    properties:
+      auction_type_id:
+        $ref: '#/definitions/entities.AuctionTypeID'
+      deploy_hash:
+        type: string
+      expected_time_frame:
+        type: integer
+      job_offer_id:
+        type: integer
+      job_poster:
+        type: string
+      max_budget:
+        type: integer
+      timestamp:
+        type: string
+    type: object
+  entities.JobStatusID:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    type: integer
+    x-enum-varnames:
+    - JobStatusIDCreated
+    - JobStatusIDSubmitted
+    - JobStatusIDCancelled
+    - JobStatusIDDone
+    - JobStatusIDRejected
   entities.ReputationChangeReason:
     enum:
     - 1
@@ -121,6 +206,7 @@ definitions:
     - 5
     - 6
     - 7
+    - 8
     type: integer
     x-enum-varnames:
     - VotingTypeSimple
@@ -130,6 +216,7 @@ definitions:
     - VotingTypeReputation
     - VotingTypeOnboarding
     - VotingTypeAdmin
+    - VotingTypeBidEscrow
   http_response.ErrorResponse:
     properties:
       error:
@@ -391,6 +478,241 @@ paths:
       summary: Return paginated list of votes for address
       tags:
       - Vote
+  /bids/{bid_id}/job:
+    get:
+      parameters:
+      - description: BidID uint
+        in: path
+        name: bid_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Job'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return Job by BidID
+      tags:
+      - BidEscrow
+  /job-offers:
+    get:
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: voting_id
+        description: Comma-separated list of sorting fields (job_offer_id)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.JobOffer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of votes for votingID
+      tags:
+      - BidEscrow
+  /job-offers/{job_offer_id}/bids:
+    get:
+      parameters:
+      - description: JobOfferID uint
+        in: path
+        name: job_offer_id
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: "10"
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: string
+      - default: ASC
+        description: Sorting direction
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: order_direction
+        type: string
+      - collectionFormat: csv
+        default: voting_id
+        description: Comma-separated list of sorting fields (job_offer_id)
+        in: query
+        items:
+          type: string
+        name: order_by
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.PaginatedResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.Bid'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return paginated list of bid for JobOffer
+      tags:
+      - BidEscrow
+  /job-statuses:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entities.Job'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/http_response.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/http_response.ErrorResult'
+              type: object
+      summary: Return predefined list of JobStatuses
+      tags:
+      - BidEscrow
   /settings:
     get:
       parameters:

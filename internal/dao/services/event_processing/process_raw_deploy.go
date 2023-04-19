@@ -47,7 +47,7 @@ func (c *ProcessRawDeploy) Execute() error {
 	for _, result := range results {
 		processContractEvents.SetCESEvent(result.Event)
 		if err := processContractEvents.Execute(); err != nil {
-			return err
+			zap.S().With(zap.Error(err)).With("event", result.Event.Name).Error("Failed to process ces event")
 		}
 
 		zap.S().With("event", result.Event.Name).Info("Successfully tracked event")

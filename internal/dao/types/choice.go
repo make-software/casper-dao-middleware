@@ -5,8 +5,8 @@ import "errors"
 type Choice byte
 
 const (
-	ChoiceAgainst Choice = 1
-	ChoiceInFavor Choice = 2
+	ChoiceAgainst Choice = 0
+	ChoiceInFavor Choice = 1
 )
 
 func NewChoiceFromByte(b byte) (Choice, error) {

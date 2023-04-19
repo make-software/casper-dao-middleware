@@ -43,6 +43,7 @@ func NewRouter(
 	votingHandler := handlers.NewVoting(entityManager)
 	settingHandler := handlers.NewSetting(entityManager)
 	accountHandler := handlers.NewAccount(entityManager)
+	jobOffersHandler := handlers.NewJobOffer(entityManager)
 
 	router.Get("/accounts/{address}/total-reputation-snapshots", reputationHandler.HandleGetTotalReputationSnapshots)
 	router.Get("/accounts/{address}/votes", accountHandler.HandleGetAccountVotes)
@@ -53,6 +54,10 @@ func NewRouter(
 	router.Get("/votings/{voting_id}/votes", votingHandler.HandleGetVotingVotes)
 
 	router.Get("/settings", settingHandler.HandleGetSettings)
+	router.Get("/job-offers", jobOffersHandler.HandleGetJobOffers)
+	router.Get("/job-offers/{job_offer_id}/bids", jobOffersHandler.HandleGetJobOfferBids)
+	router.Get("/bids/{bid_id}/job", jobOffersHandler.HandleGetBidJob)
+	router.Get("/job-statuses", jobOffersHandler.HandleGetJobStatuses)
 
 	swaggerHost := string(cfg.Addr)
 	if envHost := os.Getenv("SWAGGER_HOST"); envHost != "" {

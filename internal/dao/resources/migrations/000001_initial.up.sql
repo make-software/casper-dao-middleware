@@ -49,14 +49,14 @@ create table reputation_changes
 create table total_reputation_snapshots
 (
     address                  binary(32) not null,
-    total_liquid_reputation  bigint not null,
+    total_liquid_reputation  bigint   not null,
     total_staked_reputation  bigint null,
     voting_lost_reputation   bigint null,
     voting_earned_reputation bigint null,
     voting_id                int unsigned null,
     deploy_hash              binary(32) not null,
     reason                   tinyint unsigned not null,
-    timestamp             datetime not null,
+    timestamp                datetime not null,
 
     primary key (deploy_hash)
 ) ENGINE = InnoDB
@@ -121,5 +121,54 @@ create table accounts
     timestamp datetime not null,
 
     primary key (hash)
+) ENGINE = InnoDB
+  default CHARSET = utf8;
+
+create table job_offers
+(
+    job_offer_id        int unsigned not null,
+    job_poster          binary(32) not null,
+    deploy_hash         binary(32) not null,
+    max_budget          bigint unsigned not null,
+    auction_type_id        tinyint unsigned not null,
+    expected_time_frame int unsigned not null,
+    timestamp           datetime not null,
+
+    primary key (job_offer_id, deploy_hash)
+) ENGINE = InnoDB
+  default CHARSET = utf8;
+
+create table bids
+(
+    job_offer_id         int unsigned not null,
+    bid_id               int unsigned not null,
+    worker               binary(32) not null,
+    deploy_hash          binary(32) not null,
+    onboard              tinyint unsigned not null,
+    proposed_time_frame  int unsigned not null,
+    proposed_payment     int unsigned not null,
+    picked_by_job_poster tinyint unsigned not null,
+    reputation_stake     int unsigned null,
+    cspr_stake           int unsigned null,
+    timestamp            datetime not null,
+
+    primary key (job_offer_id, deploy_hash)
+) ENGINE = InnoDB
+  default CHARSET = utf8;
+
+
+create table jobs
+(
+    bid_id      int unsigned     not null,
+    job_poster  binary(32)       not null,
+    worker      binary(32)       not null,
+    caller      binary(32)       null,
+    result      text             null,
+    deploy_hash binary(32)       not null,
+    job_status_id  tinyint unsigned not null,
+    finish_time int unsigned     not null,
+    timestamp   datetime         not null,
+
+    primary key (bid_id, deploy_hash)
 ) ENGINE = InnoDB
   default CHARSET = utf8;
