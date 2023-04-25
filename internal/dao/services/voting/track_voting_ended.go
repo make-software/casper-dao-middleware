@@ -244,11 +244,11 @@ func (s *TrackVotingEnded) updateVotingState(votingEnded base.VotingEndedEvent) 
 		//For example, when VotingClearnessDelta is set to 8 and the result of the Informal Voting is 42 percent "for" and 58 "against" then the time between votings should be doubled.
 		//When the result is 41/59, the default value of time will be used.
 		if 50-inFavourPercent > float64(storedVoting.ConfigVotingClearnessDelta) {
-			formalStartsAt = storedVoting.InformalVotingEndsAt.Add(time.Second * time.Duration(storedVoting.ConfigTimeBetweenInformalAndFormalVoting))
-			formalEndsAt = formalStartsAt.Add(time.Second * time.Duration(storedVoting.FormalVotingTime))
+			formalStartsAt = storedVoting.InformalVotingEndsAt.Add(time.Millisecond * time.Duration(storedVoting.ConfigTimeBetweenInformalAndFormalVoting))
+			formalEndsAt = formalStartsAt.Add(time.Millisecond * time.Duration(storedVoting.FormalVotingTime))
 		} else {
-			formalStartsAt = storedVoting.InformalVotingEndsAt.Add(time.Second * time.Duration(storedVoting.ConfigTimeBetweenInformalAndFormalVoting*2))
-			formalEndsAt = formalStartsAt.Add(time.Second * time.Duration(storedVoting.FormalVotingTime))
+			formalStartsAt = storedVoting.InformalVotingEndsAt.Add(time.Millisecond * time.Duration(storedVoting.ConfigTimeBetweenInformalAndFormalVoting*2))
+			formalEndsAt = formalStartsAt.Add(time.Millisecond * time.Duration(storedVoting.FormalVotingTime))
 		}
 
 		storedVoting.FormalVotingStartsAt = &formalStartsAt

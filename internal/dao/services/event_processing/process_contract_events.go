@@ -367,6 +367,7 @@ func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) err
 		trackBallotCast.SetCESEvent(cesEvent)
 		trackBallotCast.SetEntityManager(s.GetEntityManager())
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
+		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.SimpleVoterContractPackageHash)
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
 		//if err := trackBallotCast.Execute(); err != nil {
 		//	zap.S().With(zap.String("event", cesEvent.Name)).
