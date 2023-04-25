@@ -28,7 +28,7 @@ func (s *TrackRepoVotingCreated) Execute() error {
 	metadata := map[string]interface{}{
 		"variable_repo_to_edit": repoVotingCreatedEvent.VariableRepoToEdit.ToHash().ToHex(),
 		"key":                   repoVotingCreatedEvent.Key,
-		"value":                 repoVotingCreatedEvent.Value,
+		"value":                 string(repoVotingCreatedEvent.Value),
 		"activation_time":       repoVotingCreatedEvent.ActivationTime,
 	}
 
@@ -39,17 +39,17 @@ func (s *TrackRepoVotingCreated) Execute() error {
 
 	// starts the informal when the event was emitted
 	informalVotingStartsAt := time.Now().UTC()
-	informalVotingEndsAt := informalVotingStartsAt.Add(time.Second * time.Duration(repoVotingCreatedEvent.ConfigInformalVotingTime))
+	informalVotingEndsAt := informalVotingStartsAt.Add(time.Millisecond * time.Duration(repoVotingCreatedEvent.ConfigInformalVotingTime))
 
 	var formalVotingStartsAt, formalVotingEndsAt *time.Time
 
 	// if the `config_double_time_between_votings` is false we can surely say when FormalVoting will start
 	// as there is no need to have calculation of VotingEnded percentage based on `voting_clearness_delta`
 	if !repoVotingCreatedEvent.ConfigDoubleTimeBetweenVotings {
-		startsAt := informalVotingEndsAt.Add(time.Second * time.Duration(repoVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting))
+		startsAt := informalVotingEndsAt.Add(time.Millisecond * time.Duration(repoVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting))
 		formalVotingStartsAt = &startsAt
 
-		endsAt := formalVotingStartsAt.Add(time.Second * time.Duration(repoVotingCreatedEvent.ConfigFormalVotingTime))
+		endsAt := formalVotingStartsAt.Add(time.Millisecond * time.Duration(repoVotingCreatedEvent.ConfigFormalVotingTime))
 		formalVotingEndsAt = &endsAt
 	}
 

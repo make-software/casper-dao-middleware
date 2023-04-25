@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package event_tracking
 
 import (
@@ -17,6 +20,7 @@ import (
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/event_processing"
 	"casper-dao-middleware/internal/dao/utils"
+	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/mocks"
 	"casper-dao-middleware/pkg/casper/types"
@@ -35,32 +39,36 @@ type TrackVotingCreatedTestSuit struct {
 }
 
 func (suite *TrackVotingCreatedTestSuit) SetupSuite() {
-	//suite.db = boot.SetUpTestDB()
+	suite.db = boot.SetUpTestDB()
 
 	suite.mockCtrl = gomock.NewController(suite.T())
-	reputationContractHash, err := types.NewHashFromHexString("47f30c5dc923b3ddc0d812b6ac5020bcdabdd42f0c1f99c178d6b7869cdf3251")
+	reputationContractHash, err := types.NewHashFromHexString("ea0c001d969da098fefec42b141db88c74c5682e49333ded78035540a0b4f0bc")
 	assert.NoError(suite.T(), err)
 
-	simpleVoterContractHash, err := types.NewHashFromHexString("04c6b0a1fa97c5fde9017a9d84513da5c709faef0fd6cd3efddd4ab5040bbc90")
+	simpleVoterContractHash, err := types.NewHashFromHexString("954998ff95b0210e994f43f5afb5174b5085fda92d7c63962ef09c17886658c1")
+	assert.NoError(suite.T(), err)
+
+	repoVoterContractHash, err := types.NewHashFromHexString("6a3213fe5db928dd4bb3d1c5ecd3bfbc68656823c9486ef389a3080921d0d3ec")
 	assert.NoError(suite.T(), err)
 
 	suite.daoContractsMetadata = utils.DAOContractsMetadata{
-		ReputationContractPackageHash:  reputationContractHash,
-		SimpleVoterContractPackageHash: simpleVoterContractHash,
+		ReputationVoterContractPackageHash: reputationContractHash,
+		SimpleVoterContractPackageHash:     simpleVoterContractHash,
+		RepoVoterContractPackageHash:       repoVoterContractHash,
 	}
 
 	suite.entityManager = persistence.NewEntityManager(suite.db, suite.daoContractsMetadata)
 }
 
 func (suite *TrackVotingCreatedTestSuit) SetupTest() {
-	//_, err := suite.db.Exec(`TRUNCATE TABLE votings`)
-	//suite.NoError(err)
-	//
-	//_, err = suite.db.Exec(`TRUNCATE TABLE reputation_changes`)
-	//suite.NoError(err)
-	//
-	//_, err = suite.db.Exec(`TRUNCATE TABLE votes`)
-	//suite.NoError(err)
+	_, err := suite.db.Exec(`TRUNCATE TABLE votings`)
+	suite.NoError(err)
+
+	_, err = suite.db.Exec(`TRUNCATE TABLE reputation_changes`)
+	suite.NoError(err)
+
+	_, err = suite.db.Exec(`TRUNCATE TABLE votes`)
+	suite.NoError(err)
 }
 
 func (suite *TrackVotingCreatedTestSuit) TearDownTest() {
@@ -72,15 +80,15 @@ func (suite *TrackVotingCreatedTestSuit) TestTrackReputationVotingCreated() {
 
 	mockedClient := mocks.NewMockRPCClient(suite.mockCtrl)
 
-	simpleVoterContractHash, err := types.NewHashFromHexString("ea0c001d969da098fefec42b141db88c74c5682e49333ded78035540a0b4f0bc")
+	reputationVoterContractHash, err := types.NewHashFromHexString("ea0c001d969da098fefec42b141db88c74c5682e49333ded78035540a0b4f0bc")
 	assert.NoError(suite.T(), err)
 
 	mockedClient.EXPECT().GetLatestStateRootHash().Return(casper.GetStateRootHashResult{}, nil)
 
-	mockedClient.EXPECT().GetStateItem("", fmt.Sprintf("hash-%s", simpleVoterContractHash.ToHex()), nil).Return(casper.StateGetItemResult{
+	mockedClient.EXPECT().GetStateItem("", fmt.Sprintf("hash-%s", reputationVoterContractHash.ToHex()), nil).Return(casper.StateGetItemResult{
 		StoredValue: casper.StoredValue{
 			Contract: &casper.Contract{
-				ContractPackageHash: simpleVoterContractHash,
+				ContractPackageHash: reputationVoterContractHash,
 				NamedKeys: []casper.NamedKey{
 					{
 						Name: "__events",
@@ -115,7 +123,7 @@ func (suite *TrackVotingCreatedTestSuit) TestTrackReputationVotingCreated() {
 	err = json.Unmarshal(data, &res)
 	assert.NoError(suite.T(), err)
 
-	cesParser, err := ces.NewParser(suite.casperClient, []types.Hash{simpleVoterContractHash})
+	cesParser, err := ces.NewParser(suite.casperClient, []types.Hash{reputationVoterContractHash})
 	assert.NoError(suite.T(), err)
 
 	processRawDeploy := event_processing.NewProcessRawDeploy()
@@ -125,7 +133,7 @@ func (suite *TrackVotingCreatedTestSuit) TestTrackReputationVotingCreated() {
 
 	processRawDeploy.SetDeployProcessedEvent(casper.DeployProcessedEvent{
 		DeployProcessed: casper.DeployProcessed{
-			DeployHash:      simpleVoterContractHash,
+			DeployHash:      reputationVoterContractHash,
 			ExecutionResult: res.ExecutionResults[0].Result,
 			Timestamp:       time.Now(),
 		},
@@ -156,7 +164,7 @@ func (suite *TrackVotingCreatedTestSuit) TestTrackSimpleVotingCreated() {
 
 	mockedClient := mocks.NewMockRPCClient(suite.mockCtrl)
 
-	simpleVoterContractHash, err := types.NewHashFromHexString("ea0c001d969da098fefec42b141db88c74c5682e49333ded78035540a0b4f0bc")
+	simpleVoterContractHash, err := types.NewHashFromHexString("954998ff95b0210e994f43f5afb5174b5085fda92d7c63962ef09c17886658c1")
 	assert.NoError(suite.T(), err)
 
 	mockedClient.EXPECT().GetLatestStateRootHash().Return(casper.GetStateRootHashResult{}, nil)
@@ -227,6 +235,89 @@ func (suite *TrackVotingCreatedTestSuit) TestTrackSimpleVotingCreated() {
 	assert.Equal(suite.T(), voting.VotingID, uint32(0))
 	assert.NotEmpty(suite.T(), voting.Metadata)
 	assert.Equal(suite.T(), voting.VotingTypeID, entities.VotingTypeSimple)
+
+	var reputationChangesCount int
+	err = suite.db.Get(&reputationChangesCount, "select count(*) from reputation_changes")
+	assert.NoError(suite.T(), err)
+
+	assert.Equal(suite.T(), reputationChangesCount, 2)
+}
+
+func (suite *TrackVotingCreatedTestSuit) TestTrackRepoVoterVotingCreated() {
+	var schemaHex = `08000000100000004164646564546f57686974656c6973740100000007000000616464726573730b0e00000042616c6c6f7443616e63656c65640500000005000000766f7465720b09000000766f74696e675f6964040b000000766f74696e675f74797065030600000063686f69636503050000007374616b65080a00000042616c6c6f74436173740500000005000000766f7465720b09000000766f74696e675f6964040b000000766f74696e675f74797065030600000063686f69636503050000007374616b65080c0000004f776e65724368616e67656401000000090000006e65775f6f776e65720b1400000052656d6f76656446726f6d57686974656c6973740100000007000000616464726573730b110000005265706f566f74696e67437265617465640f000000150000007661726961626c655f7265706f5f746f5f656469740b030000006b65790a0500000076616c75650e030f00000061637469766174696f6e5f74696d650d050700000063726561746f720b050000007374616b650d0809000000766f74696e675f69640416000000636f6e6669675f696e666f726d616c5f71756f72756d041b000000636f6e6669675f696e666f726d616c5f766f74696e675f74696d650514000000636f6e6669675f666f726d616c5f71756f72756d0419000000636f6e6669675f666f726d616c5f766f74696e675f74696d650516000000636f6e6669675f746f74616c5f6f6e626f61726465640822000000636f6e6669675f646f75626c655f74696d655f6265747765656e5f766f74696e6773001d000000636f6e6669675f766f74696e675f636c6561726e6573735f64656c7461082e000000636f6e6669675f74696d655f6265747765656e5f696e666f726d616c5f616e645f666f726d616c5f766f74696e67050e000000566f74696e6743616e63656c65640300000009000000766f74696e675f6964040b000000766f74696e675f747970650308000000756e7374616b6573110b080b000000566f74696e67456e6465640d00000009000000766f74696e675f6964040b000000766f74696e675f74797065030d000000766f74696e675f726573756c74030e0000007374616b655f696e5f6661766f72080d0000007374616b655f616761696e73740816000000756e626f756e645f7374616b655f696e5f6661766f720815000000756e626f756e645f7374616b655f616761696e7374080e000000766f7465735f696e5f6661766f72040d000000766f7465735f616761696e73740408000000756e7374616b657311130b0408060000007374616b657311130b0408050000006275726e7311130b0408050000006d696e747311130b0408`
+	mockedClient := mocks.NewMockRPCClient(suite.mockCtrl)
+
+	repoVoterContractHash, err := types.NewHashFromHexString("6a3213fe5db928dd4bb3d1c5ecd3bfbc68656823c9486ef389a3080921d0d3ec")
+	assert.NoError(suite.T(), err)
+
+	mockedClient.EXPECT().GetLatestStateRootHash().Return(casper.GetStateRootHashResult{}, nil)
+
+	mockedClient.EXPECT().GetStateItem("", fmt.Sprintf("hash-%s", repoVoterContractHash.ToHex()), nil).Return(casper.StateGetItemResult{
+		StoredValue: casper.StoredValue{
+			Contract: &casper.Contract{
+				ContractPackageHash: repoVoterContractHash,
+				NamedKeys: []casper.NamedKey{
+					{
+						Name: "__events",
+						Key:  "uref-26babcb0c9924a1f983d1aaf7b32d718c34b9ea85fc12f3b6c46068c86422079-007",
+					}, {
+						Name: "__events_schema",
+						Key:  "uref-114af2ad7972ddadf4b92d62170ce14fad21741895cf24415d24ace244a91a9f-007",
+					}},
+			},
+		},
+	}, nil)
+
+	schemaBytes, err := hex.DecodeString(schemaHex)
+	assert.NoError(suite.T(), err)
+
+	mockedClient.EXPECT().GetStateItem("", "uref-114af2ad7972ddadf4b92d62170ce14fad21741895cf24415d24ace244a91a9f-007", nil).Return(
+		casper.StateGetItemResult{
+			StoredValue: casper.StoredValue{
+				CLValue: &casper.CLValue{
+					Bytes: schemaBytes,
+				},
+			},
+		}, nil)
+
+	suite.casperClient = mockedClient
+
+	var res casper.GetDeployResult
+
+	data, err := os.ReadFile("../../fixtures/events/voting_created/repo_voter_voting_created.json")
+	assert.NoError(suite.T(), err)
+
+	err = json.Unmarshal(data, &res)
+	assert.NoError(suite.T(), err)
+
+	cesParser, err := ces.NewParser(suite.casperClient, []types.Hash{repoVoterContractHash})
+	assert.NoError(suite.T(), err)
+
+	processRawDeploy := event_processing.NewProcessRawDeploy()
+	processRawDeploy.SetEntityManager(suite.entityManager)
+	processRawDeploy.SetCESEventParser(cesParser)
+	processRawDeploy.SetDAOContractsMetadata(suite.daoContractsMetadata)
+
+	processRawDeploy.SetDeployProcessedEvent(casper.DeployProcessedEvent{
+		DeployProcessed: casper.DeployProcessed{
+			DeployHash:      repoVoterContractHash,
+			ExecutionResult: res.ExecutionResults[0].Result,
+			Timestamp:       time.Now(),
+		},
+	})
+	assert.NoError(suite.T(), processRawDeploy.Execute())
+
+	count, err := suite.entityManager.VotingRepository().Count(nil)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), count, uint64(1))
+
+	var voting entities.Voting
+	err = suite.db.Get(&voting, "select * from votings")
+	assert.NoError(suite.T(), err)
+
+	assert.Equal(suite.T(), voting.VotingID, uint32(2))
+	assert.NotEmpty(suite.T(), voting.Metadata)
+	assert.Equal(suite.T(), voting.VotingTypeID, entities.VotingTypeRepo)
 
 	var reputationChangesCount int
 	err = suite.db.Get(&reputationChangesCount, "select count(*) from reputation_changes")

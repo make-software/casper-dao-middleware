@@ -37,17 +37,17 @@ func (s *TrackSlashingVotingCreated) Execute() error {
 
 	// starts the informal when the event was emitted
 	informalVotingStartsAt := time.Now().UTC()
-	informalVotingEndsAt := informalVotingStartsAt.Add(time.Second * time.Duration(slashingVotingCreatedEvent.ConfigInformalVotingTime))
+	informalVotingEndsAt := informalVotingStartsAt.Add(time.Millisecond * time.Duration(slashingVotingCreatedEvent.ConfigInformalVotingTime))
 
 	var formalVotingStartsAt, formalVotingEndsAt *time.Time
 
 	// if the `config_double_time_between_votings` is false we can surely say when FormalVoting will start
 	// as there is no need to have calculation of VotingEnded percentage based on `voting_clearness_delta`
 	if !slashingVotingCreatedEvent.ConfigDoubleTimeBetweenVotings {
-		startsAt := informalVotingEndsAt.Add(time.Second * time.Duration(slashingVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting))
+		startsAt := informalVotingEndsAt.Add(time.Millisecond * time.Duration(slashingVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting))
 		formalVotingStartsAt = &startsAt
 
-		endsAt := formalVotingStartsAt.Add(time.Second * time.Duration(slashingVotingCreatedEvent.ConfigFormalVotingTime))
+		endsAt := formalVotingStartsAt.Add(time.Millisecond * time.Duration(slashingVotingCreatedEvent.ConfigFormalVotingTime))
 		formalVotingEndsAt = &endsAt
 	}
 

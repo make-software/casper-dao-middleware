@@ -13,7 +13,7 @@ const VotingCreatedEventName = "RepoVotingCreated"
 type VotingCreatedEvent struct {
 	VariableRepoToEdit                       types.Address
 	Key                                      string
-	Value                                    uint8
+	Value                                    []byte
 	ActivationTime                           *uint64
 	Creator                                  types.Address
 	Stake                                    *casper_types.U512
@@ -43,15 +43,26 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 
 	val, ok = event.Data["key"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDString {
-		return VotingCreatedEvent{}, errors.New("invalid key value in event")
+		return VotingCreatedEvent{}, errors.New("invalid key key in event")
 	}
 	votingCreated.Key = *val.String
 
 	val, ok = event.Data["value"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDList {
 		return VotingCreatedEvent{}, errors.New("invalid value value in event")
 	}
-	votingCreated.Value = *val.U8
+
+	listClValue := *val.List
+	if len(listClValue) == 0 || listClValue[0].Type.CLTypeID != casper_types.CLTypeIDU8 {
+		return VotingCreatedEvent{}, errors.New("expected List(u8) for value field")
+	}
+
+	valueBytes := make([]byte, 0, len(listClValue))
+	for _, clValue := range listClValue {
+		valueBytes = append(valueBytes, *clValue.U8)
+	}
+
+	votingCreated.Value = valueBytes
 
 	val, ok = event.Data["activation_time"]
 	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
