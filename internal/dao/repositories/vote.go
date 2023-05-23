@@ -32,6 +32,7 @@ func NewVote(conn *sqlx.DB) *vote {
 		indexedFields: map[string]struct{}{
 			"address":   {},
 			"voting_id": {},
+			"is_formal": {},
 		},
 	}
 }

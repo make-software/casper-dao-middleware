@@ -1115,6 +1115,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Comma-separated list of VotingIDs (number)",
                         "name": "voting_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Is formal/informal filtering",
+                        "name": "is_formal",
                         "in": "query"
                     },
                     {
@@ -1454,6 +1460,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_canceled": {
+                    "type": "boolean"
+                },
+                "is_formal": {
                     "type": "boolean"
                 },
                 "is_in_favour": {

@@ -29,7 +29,8 @@ func NewVoting(entityManager persistence.EntityManager) *Voting {
 //
 //	@Router		/votings/{voting_id}/votes [GET]
 //
-//	@Param		voting_id		query		string		false	"Comma-separated list of VotingIDs (number)"
+//	@Param		voting_id		path		string		false	"Comma-separated list of VotingIDs (number)"
+//	@Param		is_formal		query		bool		false	"Is formal/informal filtering"
 //	@Param		includes		query		string		false	"Optional fields' schema (voting{})"
 //	@Param		page			query		int			false	"Page number"													default(1)
 //	@Param		page_size		query		string		false	"Number of items per page"										default(10)
@@ -47,6 +48,12 @@ func (h *Voting) HandleGetVotingVotes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isFormal, err := http_params.ParseOptionalBool("is_formal", r)
+	if err != nil {
+		http_response.Error(w, r, err)
+		return
+	}
+
 	includes, err := http_params.ParseOptionalData("includes", r)
 	if err != nil {
 		http_response.Error(w, r, err)
@@ -59,6 +66,7 @@ func (h *Voting) HandleGetVotingVotes(w http.ResponseWriter, r *http.Request) {
 	getVotes.SetVotingIDs([]uint32{votingID})
 	getVotes.SetEntityManager(h.entityManager)
 	getVotes.SetPaginationParams(paginationParams)
+	getVotes.SetIsFormal(isFormal)
 
 	paginatedVotes, err := getVotes.Execute()
 	if err != nil {

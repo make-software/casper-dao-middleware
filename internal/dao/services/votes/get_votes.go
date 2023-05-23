@@ -11,6 +11,7 @@ type GetVotes struct {
 	di.EntityManagerAware
 
 	votingIDs []uint32
+	isFormal  *bool
 	address   *types.Hash
 }
 
@@ -26,6 +27,10 @@ func (c *GetVotes) SetAddress(address *types.Hash) {
 	c.address = address
 }
 
+func (c *GetVotes) SetIsFormal(isFormal *bool) {
+	c.isFormal = isFormal
+}
+
 func (c *GetVotes) Execute() (*pagination.Result, error) {
 	filters := map[string]interface{}{}
 
@@ -35,6 +40,10 @@ func (c *GetVotes) Execute() (*pagination.Result, error) {
 
 	if c.address != nil {
 		filters["address"] = *c.address
+	}
+
+	if c.isFormal != nil {
+		filters["is_formal"] = *c.isFormal
 	}
 
 	count, err := c.GetEntityManager().VoteRepository().Count(filters)

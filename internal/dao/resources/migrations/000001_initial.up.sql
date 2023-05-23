@@ -95,6 +95,7 @@ create table votes
     amount       int unsigned not null,
     is_in_favour tinyint unsigned not null,
     is_canceled  tinyint unsigned not null,
+    is_formal    tinyint unsigned not null,
     timestamp    datetime not null,
 
     primary key (address, voting_id, deploy_hash)
@@ -130,7 +131,7 @@ create table job_offers
     job_poster          binary(32) not null,
     deploy_hash         binary(32) not null,
     max_budget          bigint unsigned not null,
-    auction_type_id        tinyint unsigned not null,
+    auction_type_id     tinyint unsigned not null,
     expected_time_frame int unsigned not null,
     timestamp           datetime not null,
 
@@ -159,15 +160,15 @@ create table bids
 
 create table jobs
 (
-    bid_id      int unsigned     not null,
-    job_poster  binary(32)       not null,
-    worker      binary(32)       not null,
-    caller      binary(32)       null,
-    result      text             null,
-    deploy_hash binary(32)       not null,
-    job_status_id  tinyint unsigned not null,
-    finish_time int unsigned     not null,
-    timestamp   datetime         not null,
+    bid_id        int unsigned not null,
+    job_poster    binary(32) not null,
+    worker        binary(32) not null,
+    caller        binary(32) null,
+    result        text null,
+    deploy_hash   binary(32) not null,
+    job_status_id tinyint unsigned not null,
+    finish_time   int unsigned not null,
+    timestamp     datetime not null,
 
     primary key (bid_id, deploy_hash)
 ) ENGINE = InnoDB

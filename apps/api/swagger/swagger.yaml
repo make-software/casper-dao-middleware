@@ -149,6 +149,8 @@ definitions:
         type: string
       is_canceled:
         type: boolean
+      is_formal:
+        type: boolean
       is_in_favour:
         type: boolean
       timestamp:
@@ -859,9 +861,13 @@ paths:
     get:
       parameters:
       - description: Comma-separated list of VotingIDs (number)
-        in: query
+        in: path
         name: voting_id
         type: string
+      - description: Is formal/informal filtering
+        in: query
+        name: is_formal
+        type: boolean
       - description: Optional fields' schema (voting{})
         in: query
         name: includes

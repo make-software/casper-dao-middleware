@@ -1,6 +1,8 @@
 package votes
 
 import (
+	"time"
+
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/events/base"
@@ -54,6 +56,19 @@ func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 		isInFavor = true
 	}
 
+	votingID := ballotCast.VotingID
+	voting, err := s.GetEntityManager().VotingRepository().GetByVotingID(votingID)
+	if err != nil {
+		return err
+	}
+
+	var isFormal bool
+	if voting.FormalVotingStartsAt != nil {
+		if time.Now().After(*voting.FormalVotingStartsAt) {
+			isFormal = true
+		}
+	}
+
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	vote := entities.NewVote(
 		*ballotCast.Voter.ToHash(),
@@ -61,6 +76,7 @@ func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 		ballotCast.VotingID,
 		uint64(staked),
 		isInFavor,
+		isFormal,
 		deployProcessedEvent.DeployProcessed.Timestamp)
 
 	return s.GetEntityManager().VoteRepository().Save(vote)
