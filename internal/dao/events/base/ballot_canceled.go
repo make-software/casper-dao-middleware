@@ -3,9 +3,11 @@ package base
 import (
 	"errors"
 
+	"github.com/make-software/casper-go-sdk/types/clvalue"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const BallotCanceledEventName = "BallotCanceled"
@@ -15,7 +17,7 @@ type BallotCanceledEvent struct {
 	VotingType uint8
 	Choice     types.Choice
 	VotingID   uint32
-	Stake      casper_types.U512
+	Stake      clvalue.UInt512
 }
 
 func ParseBallotCanceledEvent(event ces.Event) (BallotCanceledEvent, error) {
@@ -32,31 +34,31 @@ func ParseBallotCanceledEvent(event ces.Event) (BallotCanceledEvent, error) {
 	}
 
 	val, ok = event.Data["voting_id"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return BallotCanceledEvent{}, errors.New("invalid voting_id value in event")
 	}
-	ballotCanceled.VotingID = *val.U32
+	ballotCanceled.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["voting_type"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return BallotCanceledEvent{}, errors.New("invalid voting_type value in event")
 	}
-	ballotCanceled.VotingType = *val.U8
+	ballotCanceled.VotingType = val.UI8.Value()
 
 	val, ok = event.Data["choice"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return BallotCanceledEvent{}, errors.New("invalid choice value in event")
 	}
-	ballotCanceled.Choice, err = types.NewChoiceFromByte(*val.U8)
+	ballotCanceled.Choice, err = types.NewChoiceFromByte(val.UI8.Value())
 	if err != nil {
 		return BallotCanceledEvent{}, err
 	}
 
 	val, ok = event.Data["stake"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return BallotCanceledEvent{}, errors.New("invalid stake value in event")
 	}
-	ballotCanceled.Stake = *val.U512
+	ballotCanceled.Stake = *val.UI512
 
 	return ballotCanceled, nil
 }

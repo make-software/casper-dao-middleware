@@ -3,16 +3,17 @@ package types
 import (
 	"errors"
 
-	casper_types "casper-dao-middleware/pkg/casper/types"
+	"github.com/make-software/casper-go-sdk/casper"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
 )
 
 type Address struct {
-	AccountHash         *casper_types.Hash
-	ContractPackageHash *casper_types.Hash
+	AccountHash         *casper.Hash
+	ContractPackageHash *casper.Hash
 }
 
-func NewAddressFromCLValue(val casper_types.CLValue) (Address, error) {
-	if val.Type.CLTypeID != casper_types.CLTypeIDKey {
+func NewAddressFromCLValue(val casper.CLValue) (Address, error) {
+	if val.Type != cltype.Key {
 		return Address{}, errors.New("invalid CLTypeID")
 	}
 
@@ -20,17 +21,21 @@ func NewAddressFromCLValue(val casper_types.CLValue) (Address, error) {
 		return Address{}, errors.New("nil Key in CLValue")
 	}
 
-	if val.Key.AccountHash != nil && val.Key.Hash != nil {
+	if val.Key.Account != nil && val.Key.Hash != nil {
 		return Address{}, errors.New("expected one value in Key")
 	}
 
-	return Address{
-		AccountHash:         val.Key.AccountHash,
+	address := Address{
 		ContractPackageHash: val.Key.Hash,
-	}, nil
+	}
+
+	if val.Key.Account != nil {
+		address.AccountHash = &val.Key.Account.Hash
+	}
+	return address, nil
 }
 
-func (a Address) ToHash() *casper_types.Hash {
+func (a Address) ToHash() *casper.Hash {
 	if a.AccountHash != nil {
 		return a.AccountHash
 	}

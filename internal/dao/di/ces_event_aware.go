@@ -1,7 +1,7 @@
 package di
 
 import (
-	"casper-dao-middleware/pkg/go-ces-parser"
+	"github.com/make-software/ces-go-parser"
 )
 
 type CESEventAware struct {

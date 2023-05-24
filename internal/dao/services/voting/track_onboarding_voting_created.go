@@ -27,7 +27,7 @@ func (s *TrackOnboardingVotingCreated) Execute() error {
 
 	metadata := map[string]interface{}{
 		"reason":       onboardingRequestVotingCreatedEvent.Reason,
-		"cspr_deposit": onboardingRequestVotingCreatedEvent.CsprDeposit.Into().String(),
+		"cspr_deposit": onboardingRequestVotingCreatedEvent.CsprDeposit.Value().String(),
 	}
 
 	metadataJSON, err := json.Marshal(metadata)
@@ -63,8 +63,8 @@ func (s *TrackOnboardingVotingCreated) Execute() error {
 		onboardingRequestVotingCreatedEvent.ConfigFormalQuorum,
 		onboardingRequestVotingCreatedEvent.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		onboardingRequestVotingCreatedEvent.ConfigTotalOnboarded.Into().Uint64(),
-		onboardingRequestVotingCreatedEvent.ConfigVotingClearnessDelta.Into().Uint64(),
+		onboardingRequestVotingCreatedEvent.ConfigTotalOnboarded.Value().Uint64(),
+		onboardingRequestVotingCreatedEvent.ConfigVotingClearnessDelta.Value().Uint64(),
 		onboardingRequestVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

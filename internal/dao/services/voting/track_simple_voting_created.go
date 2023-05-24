@@ -62,8 +62,8 @@ func (s *TrackSimpleVotingCreated) Execute() error {
 		simpleVotingCreated.ConfigFormalQuorum,
 		simpleVotingCreated.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		simpleVotingCreated.ConfigTotalOnboarded.Into().Uint64(),
-		simpleVotingCreated.ConfigVotingClearnessDelta.Into().Uint64(),
+		simpleVotingCreated.ConfigTotalOnboarded.Value().Uint64(),
+		simpleVotingCreated.ConfigVotingClearnessDelta.Value().Uint64(),
 		simpleVotingCreated.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

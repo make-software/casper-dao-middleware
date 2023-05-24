@@ -24,16 +24,11 @@ func (s *TrackJobOfferCreated) Execute() error {
 		return err
 	}
 
-	jobPoster, err := jobOfferCreated.JobPoster.GetHashValue()
-	if err != nil {
-		return err
-	}
-
 	jobOffer := entities.NewJobOffer(
 		jobOfferCreated.JobOfferID,
 		s.GetDeployProcessedEvent().DeployProcessed.DeployHash,
-		*jobPoster,
-		jobOfferCreated.MaxBudget.Into().Uint64(),
+		jobOfferCreated.JobPoster,
+		jobOfferCreated.MaxBudget.Value().Uint64(),
 		entities.AuctionTypeIDInternal,
 		jobOfferCreated.ExpectedTimeFrame,
 		time.Now().UTC(),

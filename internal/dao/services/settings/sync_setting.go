@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -93,7 +94,7 @@ func (c *SyncDAOSetting) SetSetting(setting string) {
 }
 
 func (c *SyncDAOSetting) Execute() error {
-	stateRootHashRes, err := c.GetCasperClient().GetStateRootHashByHash("")
+	stateRootHashRes, err := c.GetCasperClient().GetStateRootHashByHash(context.Background(), "")
 	if err != nil {
 		return err
 	}
@@ -103,7 +104,7 @@ func (c *SyncDAOSetting) Execute() error {
 		return err
 	}
 
-	result, err := c.GetCasperClient().GetDictionaryItem(stateRootHashRes.StateRootHash, c.variableRepositoryContractStorageUref, settingItemKey)
+	result, err := c.GetCasperClient().GetDictionaryItem(context.Background(), stateRootHashRes.StateRootHash.String(), c.variableRepositoryContractStorageUref, settingItemKey)
 	if err != nil {
 		return err
 	}
@@ -113,7 +114,12 @@ func (c *SyncDAOSetting) Execute() error {
 		return errors.New("expected initialized CLValue")
 	}
 
-	record, err := types.NewRecordFromBytes(result.StoredValue.CLValue.Bytes)
+	bytes, err := result.StoredValue.CLValue.Bytes()
+	if err != nil {
+		return err
+	}
+
+	record, err := types.NewRecordFromBytes(bytes)
 	if err != nil {
 		return err
 	}

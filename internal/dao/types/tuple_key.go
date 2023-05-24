@@ -3,7 +3,7 @@ package types
 import (
 	"errors"
 
-	casper_types "casper-dao-middleware/pkg/casper/types"
+	"github.com/make-software/casper-go-sdk/types/clvalue"
 )
 
 type Tuple2 struct {
@@ -11,38 +11,41 @@ type Tuple2 struct {
 	Element2 uint32
 }
 
-func ParseTuple2U512MapFromCLValue(clValue casper_types.CLValue) (map[Tuple2]casper_types.U512, error) {
-	result := make(map[Tuple2]casper_types.U512, len(clValue.Map.Data))
-	for mapKey, mapVal := range clValue.Map.Data {
-		if mapVal.U512 == nil {
-			return nil, errors.New("expect not nil U512 value in map")
+func ParseTuple2U512MapFromCLValue(clValue clvalue.CLValue) (map[Tuple2]clvalue.UInt512, error) {
+	result := make(map[Tuple2]clvalue.UInt512, len(clValue.Map.Map()))
+	for _, mapVal := range clValue.Map.Data() {
+
+		if mapVal.Inner1.Tuple2 == nil {
+			return nil, errors.New("expect Tuple2 key in map")
 		}
 
-		if mapKey.Tuple2 == nil {
-			return nil, errors.New("expect not nil Tuple2 key in map")
-		}
+		keyValue := mapVal.Inner1.Tuple2
 
-		if mapKey.Tuple2[0].Key == nil {
+		if keyValue.Inner1.Key == nil {
 			return nil, errors.New("expect Key element1 in Tuple2 key in map")
 		}
 
-		if mapKey.Tuple2[1].U32 == nil {
+		if keyValue.Inner2.UI32 == nil {
 			return nil, errors.New("expect U32 element2 in Tuple2 key in map")
 		}
 
+		if mapVal.Inner2.UI512 == nil {
+			return nil, errors.New("expect UI512 element2 in map value")
+		}
+
 		var el1 string
-		if mapKey.Tuple2[0].Key.AccountHash != nil {
-			el1 = mapKey.Tuple2[0].Key.AccountHash.ToHex()
+		if keyValue.Inner1.Key.Account != nil {
+			el1 = keyValue.Inner1.Key.Account.ToHex()
 		} else {
-			el1 = mapKey.Tuple2[0].Key.Hash.ToHex()
+			el1 = keyValue.Inner1.Key.Hash.ToHex()
 		}
 
 		tupleKey := Tuple2{
 			Element1: el1,
-			Element2: *mapKey.Tuple2[1].U32,
+			Element2: keyValue.Inner2.UI32.Value(),
 		}
 
-		result[tupleKey] = *mapVal.U512
+		result[tupleKey] = *mapVal.Inner2.UI512
 	}
 
 	return result, nil

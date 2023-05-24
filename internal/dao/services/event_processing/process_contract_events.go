@@ -18,6 +18,8 @@ import (
 	"casper-dao-middleware/internal/dao/services/account"
 	"casper-dao-middleware/internal/dao/services/reputation"
 
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/events/admin"
 	base_events "casper-dao-middleware/internal/dao/events/base"
@@ -31,7 +33,6 @@ import (
 	"casper-dao-middleware/internal/dao/events/slashing_voter"
 	"casper-dao-middleware/internal/dao/events/va_nft"
 	"casper-dao-middleware/internal/dao/events/variable_repository"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type ProcessContractEvents struct {
@@ -369,11 +370,11 @@ func (s *ProcessContractEvents) trackSimpleVoterContract(cesEvent ces.Event) err
 		trackBallotCast.SetDeployProcessedEvent(s.GetDeployProcessedEvent())
 		trackBallotCast.SetVoterContractPackageHash(daoContractMetadata.SimpleVoterContractPackageHash)
 		trackBallotCast.SetDAOContractsMetadata(daoContractMetadata)
-		//if err := trackBallotCast.Execute(); err != nil {
-		//	zap.S().With(zap.String("event", cesEvent.Name)).
-		//		With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
-		//	return err
-		//}
+		if err := trackBallotCast.Execute(); err != nil {
+			zap.S().With(zap.String("event", cesEvent.Name)).
+				With(zap.String("contract", daoContractMetadata.SimpleVoterContractHash.String())).Info("failed to track event")
+			return err
+		}
 	case base_events.BallotCanceledEventName:
 		trackBallotCanceled := votes.NewTrackCanceledVote()
 		trackBallotCanceled.SetCESEvent(cesEvent)

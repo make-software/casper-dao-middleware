@@ -3,12 +3,15 @@ package types
 import (
 	"errors"
 	"strings"
+
+	"github.com/make-software/casper-go-sdk/casper"
 )
 
 var (
 	ErrInvalidKeyString = errors.New("invalid key string")
 )
 
+// TODO: delete it and use types from SDK
 const (
 	KeyAccount KeyType = iota
 	KeyHash
@@ -28,21 +31,10 @@ type (
 	KeyStringType string
 	Key           struct {
 		Type        KeyType
-		AccountHash *Hash
-		Hash        *Hash
+		AccountHash *casper.Hash
+		Hash        *casper.Hash
 	}
 )
-
-func (k Key) GetHashValue() (*Hash, error) {
-	switch k.Type {
-	case KeyAccount:
-		return k.AccountHash, nil
-	case KeyHash:
-		return k.Hash, nil
-	default:
-		return nil, errors.New("no hash value found")
-	}
-}
 
 func ParseKeyFromBytes(bytes []byte) (Key, []byte, error) {
 	if len(bytes) == 0 {
@@ -55,7 +47,7 @@ func ParseKeyFromBytes(bytes []byte) (Key, []byte, error) {
 
 	switch keyType {
 	case KeyAccount:
-		hash, err := NewHashFromRawBytes(remainder[:32])
+		hash, err := casper.NewHashFromBytes(remainder[:32])
 		if err != nil {
 			return Key{}, nil, err
 		}
@@ -64,7 +56,7 @@ func ParseKeyFromBytes(bytes []byte) (Key, []byte, error) {
 			AccountHash: &hash,
 		}, remainder[32:], nil
 	case KeyHash:
-		hash, err := NewHashFromRawBytes(remainder[:32])
+		hash, err := casper.NewHashFromBytes(remainder[:32])
 		if err != nil {
 			return Key{}, nil, err
 		}
@@ -95,7 +87,7 @@ func ParseKeyFromString(key string) (Key, error) {
 
 	switch keyTypeStr {
 	case "Account":
-		hash, err := NewHashFromHexString(keyValue)
+		hash, err := casper.NewHash(keyValue)
 		if err != nil {
 			return Key{}, err
 		}
@@ -104,7 +96,7 @@ func ParseKeyFromString(key string) (Key, error) {
 			AccountHash: &hash,
 		}, nil
 	case "Hash":
-		hash, err := NewHashFromHexString(keyValue)
+		hash, err := casper.NewHash(keyValue)
 		if err != nil {
 			return Key{}, err
 		}

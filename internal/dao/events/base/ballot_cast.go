@@ -3,9 +3,11 @@ package base
 import (
 	"errors"
 
+	"github.com/make-software/casper-go-sdk/types/clvalue"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const BallotCastEventName = "BallotCast"
@@ -15,7 +17,7 @@ type BallotCastEvent struct {
 	VotingType uint8
 	Choice     types.Choice
 	VotingID   uint32
-	Stake      casper_types.U512
+	Stake      clvalue.UInt512
 }
 
 func ParseBallotCastEvent(event ces.Event) (BallotCastEvent, error) {
@@ -23,7 +25,7 @@ func ParseBallotCastEvent(event ces.Event) (BallotCastEvent, error) {
 	var err error
 
 	val, ok := event.Data["voter"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok || val.Type != cltype.Key {
 		return BallotCastEvent{}, errors.New("invalid voter value in event")
 	}
 	ballotCast.Voter, err = types.NewAddressFromCLValue(val)
@@ -32,31 +34,31 @@ func ParseBallotCastEvent(event ces.Event) (BallotCastEvent, error) {
 	}
 
 	val, ok = event.Data["voting_id"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return BallotCastEvent{}, errors.New("invalid voting_id value in event")
 	}
-	ballotCast.VotingID = *val.U32
+	ballotCast.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["voting_type"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return BallotCastEvent{}, errors.New("invalid voting_type value in event")
 	}
-	ballotCast.VotingType = *val.U8
+	ballotCast.VotingType = val.UI8.Value()
 
 	val, ok = event.Data["choice"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return BallotCastEvent{}, errors.New("invalid choice value in event")
 	}
-	ballotCast.Choice, err = types.NewChoiceFromByte(*val.U8)
+	ballotCast.Choice, err = types.NewChoiceFromByte(val.UI8.Value())
 	if err != nil {
 		return BallotCastEvent{}, err
 	}
 
 	val, ok = event.Data["stake"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return BallotCastEvent{}, errors.New("invalid stake value in event")
 	}
-	ballotCast.Stake = *val.U512
+	ballotCast.Stake = *val.UI512
 
 	return ballotCast, nil
 }

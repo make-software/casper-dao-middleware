@@ -3,15 +3,18 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
+	"time"
+
+	"github.com/make-software/casper-go-sdk/casper"
 
 	"casper-dao-middleware/apps/api/config"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/assert"
 	"casper-dao-middleware/pkg/boot"
-	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/exec"
-	"casper-dao-middleware/pkg/http"
+	pkg_http "casper-dao-middleware/pkg/http"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -56,7 +59,11 @@ func main() {
 	})
 
 	assert.OK(container.Provide(func(cfg *config.Env) (utils.DAOContractsMetadata, error) {
-		return utils.NewDAOContractsMetadata(cfg.DaoContracts, casper.NewRPCClient(cfg.NodeRPCURL.String()))
+		handler := casper.NewRPCHandler(cfg.NodeRPCURL.String(), &http.Client{
+			Timeout: 20 * time.Second,
+		})
+
+		return utils.NewDAOContractsMetadata(cfg.DaoContracts, casper.NewRPCClient(handler))
 	}))
 
 	assert.OK(container.Provide(func(db *sqlx.DB, hashes utils.DAOContractsMetadata) persistence.EntityManager {
@@ -64,11 +71,11 @@ func main() {
 	}))
 
 	assert.OK(container.Provide(NewRouter))
-	assert.OK(container.Provide(func(cfg *config.Env) http.ServerAddress { return cfg.Addr }))
-	assert.OK(container.Provide(http.NewServer))
+	assert.OK(container.Provide(func(cfg *config.Env) pkg_http.ServerAddress { return cfg.Addr }))
+	assert.OK(container.Provide(pkg_http.NewServer))
 
 	assert.OK(container.Invoke(func(server http.Server) {
-		if err := server.ListenAndServe(ctx); err != nil {
+		if err := server.ListenAndServe(); err != nil {
 			log.Printf("Failed to serve api %s", err.Error())
 		}
 	}))

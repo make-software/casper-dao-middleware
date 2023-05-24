@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"casper-dao-middleware/pkg/casper/types"
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/pkg/errors"
 )
 
@@ -13,33 +14,33 @@ var (
 	ErrPublicKeyIsNotProvided = errors.NewInvalidInputError("`public_key` was not provided")
 )
 
-func parsePublicKeyByKey(key string, r *http.Request) (*types.PublicKey, bool, error) {
+func parsePublicKeyByKey(key string, r *http.Request) (*casper.PublicKey, bool, error) {
 	param, isProvided := getParamByKey(key, r)
 	if !isProvided {
 		return nil, false, nil
 	}
 
-	pubKey, err := types.NewPublicKeyFromHexString(param)
+	pubKey, err := casper.NewPublicKey(param)
 	if err != nil {
 		return nil, true, ErrFailedToParsePublicKey
 	}
 	return &pubKey, true, nil
 }
 
-func ParsePublicKey(key string, request *http.Request) (types.PublicKey, error) {
+func ParsePublicKey(key string, request *http.Request) (casper.PublicKey, error) {
 	pubKey, isProvided, err := parsePublicKeyByKey(key, request)
 	if err != nil {
-		return types.PublicKey{}, err
+		return casper.PublicKey{}, err
 	}
 
 	if !isProvided {
-		return types.PublicKey{}, ErrPublicKeyIsNotProvided
+		return casper.PublicKey{}, ErrPublicKeyIsNotProvided
 	}
 
 	return *pubKey, nil
 }
 
-func ParseOptionalPublicKey(key string, request *http.Request) (*types.PublicKey, error) {
+func ParseOptionalPublicKey(key string, request *http.Request) (*casper.PublicKey, error) {
 	pubKey, _, err := parsePublicKeyByKey(key, request)
 	if err != nil {
 		return nil, err
@@ -48,7 +49,7 @@ func ParseOptionalPublicKey(key string, request *http.Request) (*types.PublicKey
 	return pubKey, nil
 }
 
-func ParseOptionalPublicKeyList(key string, r *http.Request) ([]types.PublicKey, error) {
+func ParseOptionalPublicKeyList(key string, r *http.Request) ([]casper.PublicKey, error) {
 	param, isProvided := getParamByKey(key, r)
 	if !isProvided {
 		return nil, nil
@@ -59,9 +60,9 @@ func ParseOptionalPublicKeyList(key string, r *http.Request) ([]types.PublicKey,
 	}
 
 	list := commaListRegexp.FindAllString(param, -1)
-	res := make([]types.PublicKey, 0, len(list))
+	res := make([]casper.PublicKey, 0, len(list))
 	for _, key := range list {
-		pubKey, err := types.NewPublicKeyFromHexString(key)
+		pubKey, err := casper.NewPublicKey(key)
 		if err != nil {
 			return nil, ErrFailedToParsePublicKey
 		}

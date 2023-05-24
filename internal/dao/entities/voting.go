@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"time"
 
-	"casper-dao-middleware/pkg/casper/types"
+	"github.com/make-software/casper-go-sdk/casper"
 )
 
 type Voting struct {
-	Creator                                  types.Hash      `json:"creator" db:"creator"`
-	DeployHash                               types.Hash      `json:"deploy_hash" db:"deploy_hash"`
+	Creator                                  casper.Hash     `json:"creator" db:"creator"`
+	DeployHash                               casper.Hash     `json:"deploy_hash" db:"deploy_hash"`
 	VotingID                                 uint32          `json:"voting_id" db:"voting_id"`
 	VotingTypeID                             VotingTypeID    `json:"voting_type_id" db:"voting_type_id"`
 	InformalVotingQuorum                     uint32          `json:"informal_voting_quorum" db:"informal_voting_quorum"`
@@ -29,7 +29,7 @@ type Voting struct {
 }
 
 func NewVoting(
-	creator, deployHash types.Hash,
+	creator, deployHash casper.Hash,
 	votingID uint32,
 	votingTypeID VotingTypeID,
 	metadata json.RawMessage,

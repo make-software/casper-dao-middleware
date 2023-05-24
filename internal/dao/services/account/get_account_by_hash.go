@@ -1,22 +1,23 @@
 package account
 
 import (
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/entities"
-	"casper-dao-middleware/pkg/casper/types"
 )
 
 type GetAccountByHash struct {
 	di.EntityManagerAware
 
-	accountHash types.Hash
+	accountHash casper.Hash
 }
 
 func NewGetAccountByHash() *GetAccountByHash {
 	return &GetAccountByHash{}
 }
 
-func (c *GetAccountByHash) SetHash(hash types.Hash) {
+func (c *GetAccountByHash) SetHash(hash casper.Hash) {
 	c.accountHash = hash
 }
 

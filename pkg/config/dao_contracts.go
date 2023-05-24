@@ -1,24 +1,24 @@
 package config
 
-import "casper-dao-middleware/pkg/casper/types"
+import "github.com/make-software/casper-go-sdk/casper"
 
 type DaoContracts struct {
-	VariableRepositoryContractHash types.Hash `env:"VARIABLE_REPOSITORY_CONTRACT_HASH,required"`
-	ReputationContractHash         types.Hash `env:"REPUTATION_CONTRACT_HASH,required"`
-	SimpleVoterContractHash        types.Hash `env:"SIMPLE_VOTER_CONTRACT_HASH,required"`
-	RepoVoterContractHash          types.Hash `env:"REPO_VOTER_CONTRACT_HASH,required"`
-	ReputationVoterContractHash    types.Hash `env:"REPUTATION_VOTER_CONTRACT_HASH,required"`
-	SlashingVoterContractHash      types.Hash `env:"SLASHING_VOTER_CONTRACT_HASH,required"`
-	KycVoterContractHash           types.Hash `env:"KYC_VOTER_CONTRACT_HASH,required"`
-	VANFTContractHash              types.Hash `env:"VA_NFT_CONTRACT_HASH,required"`
-	KycNFTContractHash             types.Hash `env:"KYC_NFT_CONTRACT_HASH,required"`
-	OnboardingRequestContractHash  types.Hash `env:"ONBOARDING_REQUEST_CONTRACT_HASH,required"`
-	AdminContractHash              types.Hash `env:"ADMIN_CONTRACT_HASH,required"`
-	BidEscrowContractHash          types.Hash `env:"BID_ESCROW_CONTRACT_HASH,required"`
+	VariableRepositoryContractHash casper.Hash `env:"VARIABLE_REPOSITORY_CONTRACT_HASH,required"`
+	ReputationContractHash         casper.Hash `env:"REPUTATION_CONTRACT_HASH,required"`
+	SimpleVoterContractHash        casper.Hash `env:"SIMPLE_VOTER_CONTRACT_HASH,required"`
+	RepoVoterContractHash          casper.Hash `env:"REPO_VOTER_CONTRACT_HASH,required"`
+	ReputationVoterContractHash    casper.Hash `env:"REPUTATION_VOTER_CONTRACT_HASH,required"`
+	SlashingVoterContractHash      casper.Hash `env:"SLASHING_VOTER_CONTRACT_HASH,required"`
+	KycVoterContractHash           casper.Hash `env:"KYC_VOTER_CONTRACT_HASH,required"`
+	VANFTContractHash              casper.Hash `env:"VA_NFT_CONTRACT_HASH,required"`
+	KycNFTContractHash             casper.Hash `env:"KYC_NFT_CONTRACT_HASH,required"`
+	OnboardingRequestContractHash  casper.Hash `env:"ONBOARDING_REQUEST_CONTRACT_HASH,required"`
+	AdminContractHash              casper.Hash `env:"ADMIN_CONTRACT_HASH,required"`
+	BidEscrowContractHash          casper.Hash `env:"BID_ESCROW_CONTRACT_HASH,required"`
 }
 
-func (d DaoContracts) ToMap() map[string]types.Hash {
-	return map[string]types.Hash{
+func (d DaoContracts) ToMap() map[string]casper.Hash {
+	return map[string]casper.Hash{
 		"reputation_contract":          d.ReputationContractHash,
 		"simple_voter_contract":        d.SimpleVoterContractHash,
 		"repo_voter_contract":          d.RepoVoterContractHash,

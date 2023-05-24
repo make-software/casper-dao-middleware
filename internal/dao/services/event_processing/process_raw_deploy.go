@@ -3,8 +3,9 @@ package event_processing
 import (
 	"go.uber.org/zap"
 
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 type ProcessRawDeploy struct {

@@ -2,7 +2,9 @@ definitions:
   entities.Account:
     properties:
       hash:
-        type: string
+        items:
+          type: integer
+        type: array
       is_kyc:
         type: boolean
       is_va:
@@ -25,7 +27,9 @@ definitions:
       cspr_stake:
         type: integer
       deploy_hash:
-        type: string
+        items:
+          type: integer
+        type: array
       job_offer_id:
         type: integer
       onboard:
@@ -41,20 +45,28 @@ definitions:
       timestamp:
         type: string
       worker:
-        type: string
+        items:
+          type: integer
+        type: array
     type: object
   entities.Job:
     properties:
       bid_id:
         type: integer
       caller:
-        type: string
+        items:
+          type: integer
+        type: array
       deploy_hash:
-        type: string
+        items:
+          type: integer
+        type: array
       finish_time:
         type: integer
       job_poster:
-        type: string
+        items:
+          type: integer
+        type: array
       job_status_id:
         $ref: '#/definitions/entities.JobStatusID'
       result:
@@ -62,20 +74,26 @@ definitions:
       timestamp:
         type: string
       worker:
-        type: string
+        items:
+          type: integer
+        type: array
     type: object
   entities.JobOffer:
     properties:
       auction_type_id:
         $ref: '#/definitions/entities.AuctionTypeID'
       deploy_hash:
-        type: string
+        items:
+          type: integer
+        type: array
       expected_time_frame:
         type: integer
       job_offer_id:
         type: integer
       job_poster:
-        type: string
+        items:
+          type: integer
+        type: array
       max_budget:
         type: integer
       timestamp:
@@ -121,9 +139,13 @@ definitions:
   entities.TotalReputationSnapshot:
     properties:
       address:
-        type: string
+        items:
+          type: integer
+        type: array
       deploy_hash:
-        type: string
+        items:
+          type: integer
+        type: array
       reason:
         $ref: '#/definitions/entities.ReputationChangeReason'
       timestamp:
@@ -142,11 +164,15 @@ definitions:
   entities.Vote:
     properties:
       address:
-        type: string
+        items:
+          type: integer
+        type: array
       amount:
         type: integer
       deploy_hash:
-        type: string
+        items:
+          type: integer
+        type: array
       is_canceled:
         type: boolean
       is_formal:
@@ -167,9 +193,13 @@ definitions:
       config_voting_clearness_delta:
         type: integer
       creator:
-        type: string
+        items:
+          type: integer
+        type: array
       deploy_hash:
-        type: string
+        items:
+          type: integer
+        type: array
       formal_voting_ends_at:
         type: string
       formal_voting_quorum:

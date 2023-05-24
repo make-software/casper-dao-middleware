@@ -23,18 +23,13 @@ func (s *TrackUnstake) Execute() error {
 		return err
 	}
 
-	worker, err := unstake.Worker.GetHashValue()
-	if err != nil {
-		return err
-	}
-
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	changes := []entities.ReputationChange{
 		entities.NewReputationChange(
-			*worker,
+			unstake.Worker,
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			nil,
-			unstake.Amount.Into().Int64(),
+			unstake.Amount.Value().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonUnstaked,
 			deployProcessedEvent.DeployProcessed.Timestamp),
@@ -46,7 +41,7 @@ func (s *TrackUnstake) Execute() error {
 
 	liquidStakeReputation, err := s.GetEntityManager().
 		ReputationChangeRepository().
-		CalculateLiquidStakeReputationForAddress(*worker)
+		CalculateLiquidStakeReputationForAddress(unstake.Worker)
 	if err != nil {
 		return err
 	}
@@ -62,7 +57,7 @@ func (s *TrackUnstake) Execute() error {
 	}
 
 	reputationTotal := entities.NewTotalReputationSnapshot(
-		*worker,
+		unstake.Worker,
 		nil,
 		liquidReputation,
 		stakedReputation,

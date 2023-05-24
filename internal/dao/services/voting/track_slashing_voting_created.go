@@ -63,8 +63,8 @@ func (s *TrackSlashingVotingCreated) Execute() error {
 		slashingVotingCreatedEvent.ConfigFormalQuorum,
 		slashingVotingCreatedEvent.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		slashingVotingCreatedEvent.ConfigTotalOnboarded.Into().Uint64(),
-		slashingVotingCreatedEvent.ConfigVotingClearnessDelta.Into().Uint64(),
+		slashingVotingCreatedEvent.ConfigTotalOnboarded.Value().Uint64(),
+		slashingVotingCreatedEvent.ConfigVotingClearnessDelta.Value().Uint64(),
 		slashingVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

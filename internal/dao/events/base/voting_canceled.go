@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/make-software/casper-go-sdk/types/clvalue"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const VotingCanceledEventName = "VotingCanceled"
@@ -14,7 +16,7 @@ const VotingCanceledEventName = "VotingCanceled"
 type VotingCanceledEvent struct {
 	VotingID   uint32
 	VotingType uint8
-	Unstakes   map[types.Tuple2]casper_types.U512
+	Unstakes   map[types.Tuple2]clvalue.UInt512
 }
 
 func ParseVotingCanceledEvent(event ces.Event) (VotingCanceledEvent, error) {
@@ -24,19 +26,19 @@ func ParseVotingCanceledEvent(event ces.Event) (VotingCanceledEvent, error) {
 	)
 
 	val, ok := event.Data["voting_id"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingCanceledEvent{}, errors.New("invalid voting_id value in event")
 	}
-	votingCanceled.VotingID = *val.U32
+	votingCanceled.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["voting_type"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return VotingCanceledEvent{}, errors.New("invalid voting_type value in event")
 	}
-	votingCanceled.VotingType = *val.U8
+	votingCanceled.VotingType = val.UI8.Value()
 
 	val, ok = event.Data["unstakes"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDMap {
+	if !ok {
 		return VotingCanceledEvent{}, errors.New("invalid unstakes value in event")
 	}
 

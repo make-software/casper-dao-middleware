@@ -10,18 +10,20 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/event_processing"
 	"casper-dao-middleware/internal/dao/utils"
-	"casper-dao-middleware/pkg/go-ces-parser"
 
 	"github.com/caarlos0/env/v6"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
-	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/casper"
 	"casper-dao-middleware/pkg/casper/types"
+
+	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/config"
 )
 

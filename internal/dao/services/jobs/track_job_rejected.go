@@ -27,12 +27,7 @@ func (s *TrackJobRejected) Execute() error {
 		return err
 	}
 
-	caller, err := jobRejected.Caller.GetHashValue()
-	if err != nil {
-		return err
-	}
-
-	job.Caller = caller
+	job.Caller = &jobRejected.Caller
 	job.JobStatusID = entities.JobStatusIDRejected
 
 	return s.GetEntityManager().JobRepository().Update(job)

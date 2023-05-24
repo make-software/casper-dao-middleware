@@ -4,13 +4,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"strconv"
-
-	"casper-dao-middleware/pkg/casper/types"
 )
 
 type RecordValue struct {
 	U64Value  *uint64
-	UValue    *types.U256
+	UValue    *U256
 	Address   *Address
 	BoolValue *bool
 }
@@ -62,7 +60,7 @@ func NewRecordValueFromBytesWithReminder(rawBytes []byte) (RecordValue, []byte, 
 
 	// length 33 represent Key CLValue
 	if numBytes == 33 {
-		key, reminder, err := types.ParseKeyFromBytes(reminder)
+		key, reminder, err := ParseKeyFromBytes(reminder)
 		if err != nil {
 			return RecordValue{}, nil, err
 		}
@@ -99,7 +97,7 @@ func NewRecordValueFromBytesWithReminder(rawBytes []byte) (RecordValue, []byte, 
 		}, reminder[1:], nil
 	}
 
-	val, _, err := types.ParseUTypeFromBytes[types.U256](reminder)
+	val, _, err := ParseUTypeFromBytes[U256](reminder)
 	if err != nil {
 		return RecordValue{}, nil, err
 	}
@@ -114,7 +112,7 @@ func NewRecordValueFromBytes(rawBytes []byte) (RecordValue, error) {
 
 	// length 33 represent Key CLValue
 	if numBytes == 33 {
-		key, _, err := types.ParseKeyFromBytes(rawBytes)
+		key, _, err := ParseKeyFromBytes(rawBytes)
 		if err != nil {
 			return RecordValue{}, err
 		}
@@ -151,7 +149,7 @@ func NewRecordValueFromBytes(rawBytes []byte) (RecordValue, error) {
 		}, nil
 	}
 
-	val, _, err := types.ParseUTypeFromBytes[types.U256](rawBytes)
+	val, _, err := ParseUTypeFromBytes[U256](rawBytes)
 	if err != nil {
 		return RecordValue{}, err
 	}

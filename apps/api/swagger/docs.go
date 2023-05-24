@@ -1248,7 +1248,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "is_kyc": {
                     "type": "boolean"
@@ -1282,7 +1285,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "job_offer_id": {
                     "type": "integer"
@@ -1306,7 +1312,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "worker": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -1317,16 +1326,25 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "caller": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "finish_time": {
                     "type": "integer"
                 },
                 "job_poster": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "job_status_id": {
                     "$ref": "#/definitions/entities.JobStatusID"
@@ -1338,7 +1356,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "worker": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -1349,7 +1370,10 @@ const docTemplate = `{
                     "$ref": "#/definitions/entities.AuctionTypeID"
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "expected_time_frame": {
                     "type": "integer"
@@ -1358,7 +1382,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "job_poster": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "max_budget": {
                     "type": "integer"
@@ -1419,10 +1446,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "reason": {
                     "$ref": "#/definitions/entities.ReputationChangeReason"
@@ -1451,13 +1484,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "amount": {
                     "type": "integer"
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "is_canceled": {
                     "type": "boolean"
@@ -1489,10 +1528,16 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "creator": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "formal_voting_ends_at": {
                     "type": "string"

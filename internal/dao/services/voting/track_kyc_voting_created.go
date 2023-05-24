@@ -63,8 +63,8 @@ func (s *TrackKycVotingCreated) Execute() error {
 		kycVotingCreated.ConfigFormalQuorum,
 		kycVotingCreated.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		kycVotingCreated.ConfigTotalOnboarded.Into().Uint64(),
-		kycVotingCreated.ConfigVotingClearnessDelta.Into().Uint64(),
+		kycVotingCreated.ConfigTotalOnboarded.Value().Uint64(),
+		kycVotingCreated.ConfigVotingClearnessDelta.Value().Uint64(),
 		kycVotingCreated.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

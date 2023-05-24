@@ -1,8 +1,9 @@
 package reputation
 
 import (
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 )
 
@@ -10,14 +11,14 @@ type GetTotalReputationSnapshots struct {
 	di.EntityManagerAware
 	di.PaginationParamsAware
 
-	address *types.Hash
+	address *casper.Hash
 }
 
 func NewGetTotalReputationSnapshots() *GetTotalReputationSnapshots {
 	return &GetTotalReputationSnapshots{}
 }
 
-func (s *GetTotalReputationSnapshots) SetAddress(address *types.Hash) {
+func (s *GetTotalReputationSnapshots) SetAddress(address *casper.Hash) {
 	s.address = address
 }
 

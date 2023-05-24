@@ -64,8 +64,8 @@ func (s *TrackAdminVotingCreated) Execute() error {
 		adminVotingCreatedEvent.ConfigFormalQuorum,
 		adminVotingCreatedEvent.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		adminVotingCreatedEvent.ConfigTotalOnboarded.Into().Uint64(),
-		adminVotingCreatedEvent.ConfigVotingClearnessDelta.Into().Uint64(),
+		adminVotingCreatedEvent.ConfigTotalOnboarded.Value().Uint64(),
+		adminVotingCreatedEvent.ConfigVotingClearnessDelta.Value().Uint64(),
 		adminVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 
