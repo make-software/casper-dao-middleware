@@ -3,7 +3,6 @@ package rate
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -83,7 +82,7 @@ func (s *SyncRates) Execute(ctx context.Context) error {
 			}
 		case <-ctx.Done():
 			zap.S().Info("Exit on context signal")
-			return nil
+			return ctx.Err()
 		}
 	}
 }
@@ -109,7 +108,7 @@ func (s *SyncRates) syncRates(ctx context.Context) error {
 
 	if rates == 0 {
 		zap.S().With(zap.Error(err)).Error("Failed to get rates")
-		return errors.New("")
+		return fmt.Errorf("unable to get rates from the URL - %s", s.rateAPIUrl)
 	}
 
 	if err := s.putSetRateDeploy(ctx, rates); err != nil {
@@ -148,8 +147,6 @@ func (s *SyncRates) getRates(ctx context.Context) (float32, error) {
 }
 
 func (s *SyncRates) putSetRateDeploy(ctx context.Context, rates float32) error {
-	executionAmount := big.NewInt(s.contractExecutionAmount)
-
 	rate := int64(float32(1/rates) * motesToCSPRRate)
 
 	args := (&casper.Args{}).
@@ -163,11 +160,11 @@ func (s *SyncRates) putSetRateDeploy(ctx context.Context, rates float32) error {
 		},
 	}
 
-	payment := casper.StandardPayment(executionAmount)
-
 	deployHeader := casper.DefaultHeader()
 	deployHeader.Account = s.setRateDeployerPrivateKey.PublicKey()
 	deployHeader.ChainName = s.networkName
+
+	payment := casper.StandardPayment(big.NewInt(s.contractExecutionAmount))
 
 	deploy, err := casper.MakeDeploy(deployHeader, payment, session)
 	if err != nil {
