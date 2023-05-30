@@ -65,8 +65,8 @@ func (s *TrackRepoVotingCreated) Execute() error {
 		repoVotingCreatedEvent.ConfigFormalQuorum,
 		repoVotingCreatedEvent.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		repoVotingCreatedEvent.ConfigTotalOnboarded.Into().Uint64(),
-		repoVotingCreatedEvent.ConfigVotingClearnessDelta.Into().Uint64(),
+		repoVotingCreatedEvent.ConfigTotalOnboarded.Value().Uint64(),
+		repoVotingCreatedEvent.ConfigVotingClearnessDelta.Value().Uint64(),
 		repoVotingCreatedEvent.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

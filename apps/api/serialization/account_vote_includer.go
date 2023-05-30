@@ -1,10 +1,11 @@
 package serialization
 
 import (
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/persistence"
 	"casper-dao-middleware/internal/dao/services/votes"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 
 	"go.uber.org/zap"
@@ -29,7 +30,7 @@ func (s *AccountVoteIncluder) Include(args []string, jsonMapKey string) {
 		return
 	}
 
-	addressHash, err := types.NewHashFromHexString(args[0])
+	addressHash, err := casper.NewHash(args[0])
 	if err != nil {
 		zap.S().With(zap.Error(err)).Info("invalid Hash arg provided provided for account_vote function")
 		return

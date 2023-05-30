@@ -3,9 +3,12 @@ package reputation_voter
 import (
 	"errors"
 
+	"github.com/make-software/casper-go-sdk/types/clvalue"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
+
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const VotingCreatedEventName = "ReputationVotingCreated"
@@ -14,17 +17,17 @@ type VotingCreatedEvent struct {
 	Account                                  types.Address
 	Creator                                  types.Address
 	DocumentHash                             string
-	Stake                                    *casper_types.U512
+	Stake                                    *clvalue.UInt512
 	Action                                   uint8
-	Amount                                   casper_types.U512
+	Amount                                   clvalue.UInt512
 	VotingID                                 uint32
 	ConfigInformalQuorum                     uint32
 	ConfigInformalVotingTime                 uint64
 	ConfigFormalQuorum                       uint32
 	ConfigFormalVotingTime                   uint64
-	ConfigTotalOnboarded                     casper_types.U512
+	ConfigTotalOnboarded                     clvalue.UInt512
 	ConfigDoubleTimeBetweenVotings           bool
-	ConfigVotingClearnessDelta               casper_types.U512
+	ConfigVotingClearnessDelta               clvalue.UInt512
 	ConfigTimeBetweenInformalAndFormalVoting uint64
 }
 
@@ -32,107 +35,113 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 	var votingCreated VotingCreatedEvent
 
 	val, ok := event.Data["account"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok || val.Type != cltype.Key {
 		return VotingCreatedEvent{}, errors.New("invalid account value in event")
 	}
 	votingCreated.Account = types.Address{
-		AccountHash:         val.Key.AccountHash,
 		ContractPackageHash: val.Key.Hash,
+	}
+
+	if val.Key.Account != nil {
+		votingCreated.Account.AccountHash = &val.Key.Account.Hash
 	}
 
 	val, ok = event.Data["creator"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDKey {
+	if !ok || val.Type != cltype.Key {
 		return VotingCreatedEvent{}, errors.New("invalid creator value in event")
 	}
 	votingCreated.Creator = types.Address{
-		AccountHash:         val.Key.AccountHash,
 		ContractPackageHash: val.Key.Hash,
 	}
 
+	if val.Key.Account != nil {
+		votingCreated.Creator.AccountHash = &val.Key.Account.Hash
+	}
+
 	val, ok = event.Data["document_hash"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDString {
+	if !ok || val.Type != cltype.String {
 		return VotingCreatedEvent{}, errors.New("invalid document_hash value in event")
 	}
-	votingCreated.DocumentHash = *val.String
+	votingCreated.DocumentHash = val.StringVal.String()
 
 	val, ok = event.Data["stake"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
+	if !ok {
 		return VotingCreatedEvent{}, errors.New("invalid stake value in event")
 	}
 
 	if val.Option != nil {
-		if val.Option.Type.CLTypeID != casper_types.CLTypeIDU512 {
+		if val.Option.Inner.Type != cltype.UInt512 {
 			return VotingCreatedEvent{}, errors.New("invalid value inside option of `stake` value")
 		}
 
-		votingCreated.Stake = val.U512
+		votingCreated.Stake = val.Option.Inner.UI512
 	}
 
 	val, ok = event.Data["amount"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingCreatedEvent{}, errors.New("invalid amount value in event")
 	}
-	votingCreated.Amount = *val.U512
+	votingCreated.Amount = *val.UI512
 
 	val, ok = event.Data["action"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return VotingCreatedEvent{}, errors.New("invalid action value in event")
 	}
-	votingCreated.Action = *val.U8
+	votingCreated.Action = val.UI8.Value()
 
 	val, ok = event.Data["voting_id"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingCreatedEvent{}, errors.New("invalid voting_id value in event")
 	}
-	votingCreated.VotingID = *val.U32
+	votingCreated.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["config_informal_quorum"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingCreatedEvent{}, errors.New("invalid config_informal_quorum value in event")
 	}
-	votingCreated.ConfigInformalQuorum = *val.U32
+	votingCreated.ConfigInformalQuorum = val.UI32.Value()
 
 	val, ok = event.Data["config_informal_voting_time"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU64 {
+	if !ok || val.Type != cltype.UInt64 {
 		return VotingCreatedEvent{}, errors.New("invalid config_informal_voting_time value in event")
 	}
-	votingCreated.ConfigInformalVotingTime = *val.U64
+	votingCreated.ConfigInformalVotingTime = val.UI64.Value()
 
 	val, ok = event.Data["config_formal_quorum"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingCreatedEvent{}, errors.New("invalid config_formal_quorum value in event")
 	}
-	votingCreated.ConfigFormalQuorum = *val.U32
+	votingCreated.ConfigFormalQuorum = val.UI32.Value()
 
 	val, ok = event.Data["config_formal_voting_time"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU64 {
+	if !ok || val.Type != cltype.UInt64 {
 		return VotingCreatedEvent{}, errors.New("invalid config_formal_voting_time value in event")
 	}
-	votingCreated.ConfigFormalVotingTime = *val.U64
+	votingCreated.ConfigFormalVotingTime = val.UI64.Value()
 
 	val, ok = event.Data["config_total_onboarded"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingCreatedEvent{}, errors.New("invalid config_total_onboarded value in event")
 	}
-	votingCreated.ConfigTotalOnboarded = *val.U512
+	votingCreated.ConfigTotalOnboarded = *val.UI512
 
 	val, ok = event.Data["config_double_time_between_votings"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDBool {
+	if !ok || val.Type != cltype.Bool {
 		return VotingCreatedEvent{}, errors.New("invalid config_double_time_between_votings value in event")
 	}
-	votingCreated.ConfigDoubleTimeBetweenVotings = *val.Bool
+	votingCreated.ConfigDoubleTimeBetweenVotings = val.Bool.Value()
 
 	val, ok = event.Data["config_voting_clearness_delta"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingCreatedEvent{}, errors.New("invalid config_voting_clearness_delta value in event")
 	}
-	votingCreated.ConfigVotingClearnessDelta = *val.U512
+	votingCreated.ConfigVotingClearnessDelta = *val.UI512
 
 	val, ok = event.Data["config_time_between_informal_and_formal_voting"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU64 {
+	if !ok || val.Type != cltype.UInt64 {
 		return VotingCreatedEvent{}, errors.New("invalid config_time_between_informal_and_formal_voting value in event")
 	}
-	votingCreated.ConfigTimeBetweenInformalAndFormalVoting = *val.U64
+	votingCreated.ConfigTimeBetweenInformalAndFormalVoting = val.UI64.Value()
 
 	return votingCreated, nil
 }

@@ -1,8 +1,9 @@
 package repositories
 
 import (
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/entities"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
 
@@ -18,7 +19,7 @@ type Vote interface {
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Vote, error)
 	CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32, error)
-	UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error
+	UpdateIsCanceled(votingID uint32, address casper.Hash, isCanceled bool) error
 }
 
 type vote struct {
@@ -138,7 +139,7 @@ func (r *vote) CountVotesNumberForVotings(votingIDs []uint32) (map[uint32]uint32
 	return result, nil
 }
 
-func (r *vote) UpdateIsCanceled(votingID uint32, address types.Hash, isCanceled bool) error {
+func (r *vote) UpdateIsCanceled(votingID uint32, address casper.Hash, isCanceled bool) error {
 	queryBuilder := query.Update("votes").
 		Set("is_canceled", isCanceled).
 		Where(sq.Eq{

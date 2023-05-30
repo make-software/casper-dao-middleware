@@ -1,8 +1,9 @@
 package votes
 
 import (
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/di"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/pagination"
 )
 
@@ -12,7 +13,7 @@ type GetVotes struct {
 
 	votingIDs []uint32
 	isFormal  *bool
-	address   *types.Hash
+	address   *casper.Hash
 }
 
 func NewGetVotes() *GetVotes {
@@ -23,7 +24,7 @@ func (c *GetVotes) SetVotingIDs(votingIDs []uint32) {
 	c.votingIDs = votingIDs
 }
 
-func (c *GetVotes) SetAddress(address *types.Hash) {
+func (c *GetVotes) SetAddress(address *casper.Hash) {
 	c.address = address
 }
 

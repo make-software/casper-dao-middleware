@@ -29,7 +29,7 @@ func (s *TrackMint) Execute() error {
 			*mintEvent.Address.ToHash(),
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			nil,
-			mintEvent.Amount.Into().Int64(),
+			mintEvent.Amount.Value().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonMinted,
 			deployProcessedEvent.DeployProcessed.Timestamp),

@@ -3,11 +3,12 @@ package votes
 import (
 	"time"
 
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/events/base"
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
 )
 
 type TrackVote struct {
@@ -16,14 +17,14 @@ type TrackVote struct {
 	di.DeployProcessedEventAware
 	di.DAOContractsMetadataAware
 
-	voterContractPackageHash casper_types.Hash
+	voterContractPackageHash casper.ContractPackageHash
 }
 
 func NewTrackVote() *TrackVote {
 	return &TrackVote{}
 }
 
-func (s *TrackVote) SetVoterContractPackageHash(hash casper_types.Hash) {
+func (s *TrackVote) SetVoterContractPackageHash(hash casper.ContractPackageHash) {
 	s.voterContractPackageHash = hash
 }
 
@@ -49,7 +50,7 @@ func (s *TrackVote) Execute() error {
 }
 
 func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
-	staked := ballotCast.Stake.Into().Int64()
+	staked := ballotCast.Stake.Value().Int64()
 
 	var isInFavor bool
 	if ballotCast.Choice == types.ChoiceInFavor {
@@ -82,9 +83,9 @@ func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 	return s.GetEntityManager().VoteRepository().Save(vote)
 }
 
-func (s *TrackVote) collectReputationChanges(ballotCast base.BallotCastEvent, voterContractPackageHash casper_types.Hash) error {
+func (s *TrackVote) collectReputationChanges(ballotCast base.BallotCastEvent, voterContractPackageHash casper.ContractPackageHash) error {
 	deployProcessedEvent := s.GetDeployProcessedEvent()
-	staked := ballotCast.Stake.Into().Int64()
+	staked := ballotCast.Stake.Value().Int64()
 
 	changes := []entities.ReputationChange{
 		// one event represent negative reputation leaving from "Reputation" contract

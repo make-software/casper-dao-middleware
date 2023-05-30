@@ -1238,7 +1238,10 @@
             "type": "object",
             "properties": {
                 "hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "is_kyc": {
                     "type": "boolean"
@@ -1272,7 +1275,10 @@
                     "type": "integer"
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "job_offer_id": {
                     "type": "integer"
@@ -1296,7 +1302,10 @@
                     "type": "string"
                 },
                 "worker": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -1307,16 +1316,25 @@
                     "type": "integer"
                 },
                 "caller": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "finish_time": {
                     "type": "integer"
                 },
                 "job_poster": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "job_status_id": {
                     "$ref": "#/definitions/entities.JobStatusID"
@@ -1328,7 +1346,10 @@
                     "type": "string"
                 },
                 "worker": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -1339,7 +1360,10 @@
                     "$ref": "#/definitions/entities.AuctionTypeID"
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "expected_time_frame": {
                     "type": "integer"
@@ -1348,7 +1372,10 @@
                     "type": "integer"
                 },
                 "job_poster": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "max_budget": {
                     "type": "integer"
@@ -1409,10 +1436,16 @@
             "type": "object",
             "properties": {
                 "address": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "reason": {
                     "$ref": "#/definitions/entities.ReputationChangeReason"
@@ -1441,13 +1474,19 @@
             "type": "object",
             "properties": {
                 "address": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "amount": {
                     "type": "integer"
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "is_canceled": {
                     "type": "boolean"
@@ -1479,10 +1518,16 @@
                     "type": "integer"
                 },
                 "creator": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "deploy_hash": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "formal_voting_ends_at": {
                     "type": "string"

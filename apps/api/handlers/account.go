@@ -49,7 +49,9 @@ func (h *Account) HandleGetAccountVotes(w http.ResponseWriter, r *http.Request) 
 			http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
 			return
 		}
-		addressHash = accountPubKey.AccountHash()
+
+		accountHash := accountPubKey.AccountHash()
+		addressHash = &accountHash.Hash
 	}
 
 	includes, err := http_params.ParseOptionalData("includes", r)
@@ -125,7 +127,8 @@ func (h *Account) HandleGetAccountsByAddress(w http.ResponseWriter, r *http.Requ
 			http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
 			return
 		}
-		addressHash = accountPubKey.AccountHash()
+		accountHash := accountPubKey.AccountHash()
+		addressHash = &accountHash.Hash
 	}
 
 	getAccount := account.NewGetAccountByHash()

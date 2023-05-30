@@ -23,18 +23,13 @@ func (s *TrackStake) Execute() error {
 		return err
 	}
 
-	worker, err := stake.Worker.GetHashValue()
-	if err != nil {
-		return err
-	}
-
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	changes := []entities.ReputationChange{
 		entities.NewReputationChange(
-			*worker,
+			stake.Worker,
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			nil,
-			-stake.Amount.Into().Int64(),
+			-stake.Amount.Value().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonStaked,
 			deployProcessedEvent.DeployProcessed.Timestamp),
@@ -46,7 +41,7 @@ func (s *TrackStake) Execute() error {
 
 	liquidStakeReputation, err := s.GetEntityManager().
 		ReputationChangeRepository().
-		CalculateLiquidStakeReputationForAddress(*worker)
+		CalculateLiquidStakeReputationForAddress(stake.Worker)
 	if err != nil {
 		return err
 	}
@@ -62,7 +57,7 @@ func (s *TrackStake) Execute() error {
 	}
 
 	reputationTotal := entities.NewTotalReputationSnapshot(
-		*worker,
+		stake.Worker,
 		nil,
 		liquidReputation,
 		stakedReputation,

@@ -3,12 +3,13 @@ package voting
 import (
 	"time"
 
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/events/base"
 	"casper-dao-middleware/internal/dao/types"
 	"casper-dao-middleware/internal/dao/utils"
-	casper_types "casper-dao-middleware/pkg/casper/types"
 )
 
 type TrackVotingEnded struct {
@@ -17,14 +18,14 @@ type TrackVotingEnded struct {
 	di.DeployProcessedEventAware
 	di.DAOContractsMetadataAware
 
-	voterContractPackageHash casper_types.Hash
+	voterContractPackageHash casper.ContractPackageHash
 }
 
 func NewTrackVotingEnded() *TrackVotingEnded {
 	return &TrackVotingEnded{}
 }
 
-func (s *TrackVotingEnded) SetVoterContractPackageHash(hash casper_types.Hash) {
+func (s *TrackVotingEnded) SetVoterContractPackageHash(hash casper.ContractPackageHash) {
 	s.voterContractPackageHash = hash
 }
 
@@ -49,20 +50,20 @@ func (s *TrackVotingEnded) Execute() error {
 	return nil
 }
 
-func (s *TrackVotingEnded) collectReputationChanges(votingEnded base.VotingEndedEvent, voterContractPackageHash casper_types.Hash) error {
+func (s *TrackVotingEnded) collectReputationChanges(votingEnded base.VotingEndedEvent, voterContractPackageHash casper.ContractPackageHash) error {
 	changes := make([]entities.ReputationChange, 0, len(votingEnded.Burns)+len(votingEnded.Mints)+len(votingEnded.Unstakes)*2)
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 
 	// if we have unstakes it means that address will also have one record in mints
 	// so here, we need only subtract unstake amount from voter contract and add unstake amount to reputation contract
 	for key, val := range votingEnded.Unstakes {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 		changes = append(changes,
 			entities.NewReputationChange(
 				address,
 				voterContractPackageHash,
 				&votingEnded.VotingID,
-				-val.Into().Int64(),
+				-val.Value().Int64(),
 				deployProcessedEvent.DeployProcessed.DeployHash,
 				entities.ReputationChangeReasonUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
@@ -72,7 +73,7 @@ func (s *TrackVotingEnded) collectReputationChanges(votingEnded base.VotingEnded
 				address,
 				s.GetDAOContractsMetadata().ReputationContractPackageHash,
 				&votingEnded.VotingID,
-				val.Into().Int64(),
+				val.Value().Int64(),
 				deployProcessedEvent.DeployProcessed.DeployHash,
 				entities.ReputationChangeReasonUnstaked,
 				deployProcessedEvent.DeployProcessed.Timestamp,
@@ -82,13 +83,13 @@ func (s *TrackVotingEnded) collectReputationChanges(votingEnded base.VotingEnded
 
 	// in case of mints, just add mint amount to reputation contract
 	for key, val := range votingEnded.Mints {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 
 		changes = append(changes, entities.NewReputationChange(
 			address,
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			nil,
-			val.Into().Int64(),
+			val.Value().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonVotingGained,
 			deployProcessedEvent.DeployProcessed.Timestamp),
@@ -97,13 +98,13 @@ func (s *TrackVotingEnded) collectReputationChanges(votingEnded base.VotingEnded
 
 	// in case of burns, subtract burn amount from voter contract
 	for key, val := range votingEnded.Burns {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 
 		changes = append(changes, entities.NewReputationChange(
 			address,
 			voterContractPackageHash,
 			nil,
-			-val.Into().Int64(),
+			-val.Value().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonVotingLost,
 			deployProcessedEvent.DeployProcessed.Timestamp),
@@ -116,22 +117,22 @@ func (s *TrackVotingEnded) collectReputationChanges(votingEnded base.VotingEnded
 func (s *TrackVotingEnded) aggregateReputationTotals(votingEnded base.VotingEndedEvent) error {
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 
-	addresses := make([]casper_types.Hash, 0, len(votingEnded.Mints)+len(votingEnded.Burns))
+	addresses := make([]casper.Hash, 0, len(votingEnded.Mints)+len(votingEnded.Burns))
 
 	if len(votingEnded.Mints) == 0 && len(votingEnded.Burns) == 0 {
 		for key := range votingEnded.Unstakes {
-			address, _ := casper_types.NewHashFromHexString(key.Element1)
+			address, _ := casper.NewHash(key.Element1)
 			addresses = append(addresses, address)
 		}
 	}
 
 	for key := range votingEnded.Mints {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 		addresses = append(addresses, address)
 	}
 
 	for key := range votingEnded.Burns {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 		addresses = append(addresses, address)
 	}
 
@@ -154,7 +155,7 @@ func (s *TrackVotingEnded) aggregateReputationTotals(votingEnded base.VotingEnde
 	// if Mints and Burns are empty, just iterate over Unstakes to create record with released reputation
 	if len(votingEnded.Mints) == 0 && len(votingEnded.Burns) == 0 {
 		for key := range votingEnded.Unstakes {
-			address, _ := casper_types.NewHashFromHexString(key.Element1)
+			address, _ := casper.NewHash(key.Element1)
 
 			liquidStakeReputation, ok := addressToLiquidStakeReputation[address.ToHex()]
 			if !ok {
@@ -175,7 +176,7 @@ func (s *TrackVotingEnded) aggregateReputationTotals(votingEnded base.VotingEnde
 	}
 
 	for key, val := range votingEnded.Mints {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 
 		liquidStakeReputation, ok := addressToLiquidStakeReputation[address.ToHex()]
 		if !ok {
@@ -188,14 +189,14 @@ func (s *TrackVotingEnded) aggregateReputationTotals(votingEnded base.VotingEnde
 			*liquidStakeReputation.LiquidAmount,
 			*liquidStakeReputation.StakedAmount,
 			0,
-			val.Into().Uint64(),
+			val.Value().Uint64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonVotingGained,
 			deployProcessedEvent.DeployProcessed.Timestamp))
 	}
 
 	for key, val := range votingEnded.Burns {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 
 		liquidStakeReputation, ok := addressToLiquidStakeReputation[address.ToHex()]
 		if !ok {
@@ -217,7 +218,7 @@ func (s *TrackVotingEnded) aggregateReputationTotals(votingEnded base.VotingEnde
 			&votingEnded.VotingID,
 			liquidReputation,
 			stakedReputation,
-			val.Into().Uint64(),
+			val.Value().Uint64(),
 			0,
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonVotingLost,

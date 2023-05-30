@@ -3,9 +3,12 @@ package va_nft
 import (
 	"errors"
 
+	"github.com/make-software/casper-go-sdk/types/clvalue"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
+
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const TransferEventName = "Transfer"
@@ -13,23 +16,23 @@ const TransferEventName = "Transfer"
 type TransferEvent struct {
 	From    *types.Address
 	To      *types.Address
-	TokenID casper_types.U512
+	TokenID clvalue.UInt512
 }
 
 func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 	var vaTransfer TransferEvent
 
 	val, ok := event.Data["from"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
+	if !ok {
 		return TransferEvent{}, errors.New("invalid from value in event")
 	}
 
 	if val.Option != nil {
-		if val.Option.Type.CLTypeID != casper_types.CLTypeIDKey {
+		if val.Option.Inner.Type != cltype.Key {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}
 
-		from, err := types.NewAddressFromCLValue(*val.Option)
+		from, err := types.NewAddressFromCLValue(*val.Option.Inner)
 		if err != nil {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}
@@ -37,16 +40,16 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 	}
 
 	val, ok = event.Data["to"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDOption {
+	if !ok {
 		return TransferEvent{}, errors.New("invalid to value in event")
 	}
 
 	if val.Option != nil {
-		if val.Option.Type.CLTypeID != casper_types.CLTypeIDKey {
+		if val.Option.Inner.Type != cltype.Key {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}
 
-		to, err := types.NewAddressFromCLValue(*val.Option)
+		to, err := types.NewAddressFromCLValue(*val.Option.Inner)
 		if err != nil {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}
@@ -54,10 +57,10 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 	}
 
 	val, ok = event.Data["token_id"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return TransferEvent{}, errors.New("invalid token_id value in event")
 	}
-	vaTransfer.TokenID = *val.U512
+	vaTransfer.TokenID = *val.UI512
 
 	return vaTransfer, nil
 }

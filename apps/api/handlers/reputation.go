@@ -44,7 +44,8 @@ func (h *Reputation) HandleGetTotalReputationSnapshots(w http.ResponseWriter, r 
 			http_response.Error(w, r, errors.NewInvalidInputError("Account address is not a valid account hash or public key"))
 			return
 		}
-		addressHash = accountPubKey.AccountHash()
+		accountHash := accountPubKey.AccountHash()
+		addressHash = &accountHash.Hash
 	}
 
 	paginationParams := pagination.NewParamsFromRequest(r)

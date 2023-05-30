@@ -6,9 +6,10 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/utils"
-	"casper-dao-middleware/pkg/casper/types"
 )
 
 // ReputationChange DB table interface
@@ -16,8 +17,8 @@ import (
 //go:generate mockgen -destination=../tests/mocks/reputation_change_repo_mock.go -package=mocks -source=./reputation_change.go ReputationChange
 type ReputationChange interface {
 	SaveBatch(changes []entities.ReputationChange) error
-	CalculateLiquidStakeReputationForAddress(address types.Hash) (entities.LiquidStakeReputation, error)
-	CalculateAggregatedLiquidStakeReputationForAddresses(addresses []types.Hash) ([]entities.LiquidStakeReputation, error)
+	CalculateLiquidStakeReputationForAddress(address casper.Hash) (entities.LiquidStakeReputation, error)
+	CalculateAggregatedLiquidStakeReputationForAddresses(addresses []casper.Hash) ([]entities.LiquidStakeReputation, error)
 }
 
 type reputationChange struct {
@@ -59,7 +60,7 @@ func (r *reputationChange) SaveBatch(changes []entities.ReputationChange) error 
 	return nil
 }
 
-func (r *reputationChange) CalculateLiquidStakeReputationForAddress(address types.Hash) (entities.LiquidStakeReputation, error) {
+func (r *reputationChange) CalculateLiquidStakeReputationForAddress(address casper.Hash) (entities.LiquidStakeReputation, error) {
 	query := `
 	SELECT 
 	    (SELECT ABS(SUM(amount)) FROM reputation_changes WHERE contract_package_hash = ?) as liquid_amount, 
@@ -82,7 +83,7 @@ func (r *reputationChange) CalculateLiquidStakeReputationForAddress(address type
 	return liquidStakeReputation, nil
 }
 
-func (r *reputationChange) CalculateAggregatedLiquidStakeReputationForAddresses(addresses []types.Hash) ([]entities.LiquidStakeReputation, error) {
+func (r *reputationChange) CalculateAggregatedLiquidStakeReputationForAddresses(addresses []casper.Hash) ([]entities.LiquidStakeReputation, error) {
 	addressesParams := make([]string, 0, len(addresses))
 	for range addresses {
 		addressesParams = append(addressesParams, "?")

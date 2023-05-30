@@ -7,6 +7,7 @@ import (
 	"sort"
 )
 
+// TODO: remove it and use SDK types
 type UType interface {
 	U128 | U256 | U512
 }

@@ -25,22 +25,12 @@ func (s *TrackBidEscrowVotingCreated) Execute() error {
 		return err
 	}
 
-	worker, err := bidEscrowVotingCreated.Worker.GetHashValue()
-	if err != nil {
-		return err
-	}
-
-	jobPoster, err := bidEscrowVotingCreated.JobPoster.GetHashValue()
-	if err != nil {
-		return err
-	}
-
 	metadata := map[string]interface{}{
 		"job_id":       bidEscrowVotingCreated.JobID,
 		"bid_id":       bidEscrowVotingCreated.BidID,
 		"job_offer_id": bidEscrowVotingCreated.JobOfferID,
-		"worker":       worker.ToHex(),
-		"job_poster":   jobPoster.ToHex(),
+		"worker":       bidEscrowVotingCreated.Worker.ToHex(),
+		"job_poster":   bidEscrowVotingCreated.JobPoster.ToHex(),
 	}
 
 	metadataJSON, err := json.Marshal(metadata)
@@ -76,8 +66,8 @@ func (s *TrackBidEscrowVotingCreated) Execute() error {
 		bidEscrowVotingCreated.ConfigFormalQuorum,
 		bidEscrowVotingCreated.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		bidEscrowVotingCreated.ConfigTotalOnboarded.Into().Uint64(),
-		bidEscrowVotingCreated.ConfigVotingClearnessDelta.Into().Uint64(),
+		bidEscrowVotingCreated.ConfigTotalOnboarded.Value().Uint64(),
+		bidEscrowVotingCreated.ConfigVotingClearnessDelta.Value().Uint64(),
 		bidEscrowVotingCreated.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

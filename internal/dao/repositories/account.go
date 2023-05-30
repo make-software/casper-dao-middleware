@@ -6,8 +6,9 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/entities"
-	"casper-dao-middleware/pkg/casper/types"
 	"casper-dao-middleware/pkg/errors"
 	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
@@ -21,7 +22,7 @@ type Account interface {
 	UpsertIsVA(account entities.Account) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Account, error)
-	FindByHash(hash types.Hash) (*entities.Account, error)
+	FindByHash(hash casper.Hash) (*entities.Account, error)
 }
 
 type account struct {
@@ -138,7 +139,7 @@ func (r *account) Find(params *pagination.Params, filters map[string]interface{}
 	return accounts, nil
 }
 
-func (r *account) FindByHash(hash types.Hash) (*entities.Account, error) {
+func (r *account) FindByHash(hash casper.Hash) (*entities.Account, error) {
 	queryBuilder := query.Select("*").
 		From("accounts").
 		Where(sq.Eq{

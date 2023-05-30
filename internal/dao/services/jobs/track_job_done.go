@@ -27,12 +27,7 @@ func (s *TrackJobDone) Execute() error {
 		return err
 	}
 
-	caller, err := jobDone.Caller.GetHashValue()
-	if err != nil {
-		return err
-	}
-
-	job.Caller = caller
+	job.Caller = &jobDone.Caller
 	job.JobStatusID = entities.JobStatusIDDone
 
 	return s.GetEntityManager().JobRepository().Update(job)

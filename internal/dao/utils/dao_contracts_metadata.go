@@ -1,64 +1,65 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
-	"casper-dao-middleware/pkg/casper"
-	"casper-dao-middleware/pkg/casper/types"
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/pkg/config"
 )
 
 const variableRepositoryContractStorageUrefName = "storage__repository__contract"
 
 type DAOContractsMetadata struct {
-	VariableRepositoryContractPackageHash types.Hash
-	VariableRepositoryContractHash        types.Hash
+	VariableRepositoryContractPackageHash casper.ContractPackageHash
+	VariableRepositoryContractHash        casper.Hash
 	VariableRepositoryContractStorageUref string
 
-	ReputationContractPackageHash types.Hash
-	ReputationContractHash        types.Hash
+	ReputationContractPackageHash casper.ContractPackageHash
+	ReputationContractHash        casper.Hash
 
-	SimpleVoterContractPackageHash types.Hash
-	SimpleVoterContractHash        types.Hash
+	SimpleVoterContractPackageHash casper.ContractPackageHash
+	SimpleVoterContractHash        casper.Hash
 
-	RepoVoterContractPackageHash types.Hash
-	RepoVoterContractHash        types.Hash
+	RepoVoterContractPackageHash casper.ContractPackageHash
+	RepoVoterContractHash        casper.Hash
 
-	ReputationVoterContractPackageHash types.Hash
-	ReputationVoterContractHash        types.Hash
+	ReputationVoterContractPackageHash casper.ContractPackageHash
+	ReputationVoterContractHash        casper.Hash
 
-	SlashingVoterContractPackageHash types.Hash
-	SlashingVoterContractHash        types.Hash
+	SlashingVoterContractPackageHash casper.ContractPackageHash
+	SlashingVoterContractHash        casper.Hash
 
-	KycVoterContractPackageHash types.Hash
-	KycVoterContractHash        types.Hash
+	KycVoterContractPackageHash casper.ContractPackageHash
+	KycVoterContractHash        casper.Hash
 
-	VANFTContractPackageHash types.Hash
-	VANFTContractHash        types.Hash
+	VANFTContractPackageHash casper.ContractPackageHash
+	VANFTContractHash        casper.Hash
 
-	KycNFTContractPackageHash types.Hash
-	KycNFTContractHash        types.Hash
+	KycNFTContractPackageHash casper.ContractPackageHash
+	KycNFTContractHash        casper.Hash
 
-	OnboardingRequestContractPackageHash types.Hash
-	OnboardingRequestContractHash        types.Hash
+	OnboardingRequestContractPackageHash casper.ContractPackageHash
+	OnboardingRequestContractHash        casper.Hash
 
-	AdminContractPackageHash types.Hash
-	AdminContractHash        types.Hash
+	AdminContractPackageHash casper.ContractPackageHash
+	AdminContractHash        casper.Hash
 
-	BidEscrowContractPackageHash types.Hash
-	BidEscrowContractHash        types.Hash
+	BidEscrowContractPackageHash casper.ContractPackageHash
+	BidEscrowContractHash        casper.Hash
 }
 
 func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
 	result := DAOContractsMetadata{}
-	stateRootHash, err := casperClient.GetStateRootHashByHash("")
+	stateRootHash, err := casperClient.GetStateRootHashLatest(context.Background())
 	if err != nil {
 		return DAOContractsMetadata{}, err
 	}
 
 	for contractName, contractHashHex := range contractHashes.ToMap() {
-		stateItemRes, err := casperClient.GetStateItem(stateRootHash.StateRootHash, fmt.Sprintf("hash-%s", contractHashHex), []string{})
+		stateItemRes, err := casperClient.GetStateItem(context.Background(), stateRootHash.StateRootHash.String(), fmt.Sprintf("hash-%s", contractHashHex), []string{})
 		if err != nil {
 			return DAOContractsMetadata{}, err
 		}
@@ -108,7 +109,7 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 			result.VariableRepositoryContractHash = contractHashHex
 			for _, namedKey := range stateItemRes.StoredValue.Contract.NamedKeys {
 				if namedKey.Name == variableRepositoryContractStorageUrefName {
-					result.VariableRepositoryContractStorageUref = namedKey.Key
+					result.VariableRepositoryContractStorageUref = namedKey.Key.String()
 					break
 				}
 			}
@@ -123,8 +124,8 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 	return result, nil
 }
 
-func (d DAOContractsMetadata) ContractHashes() []types.Hash {
-	return []types.Hash{
+func (d DAOContractsMetadata) ContractHashes() []casper.Hash {
+	return []casper.Hash{
 		d.ReputationContractHash,
 		d.VANFTContractHash,
 		d.KycNFTContractHash,

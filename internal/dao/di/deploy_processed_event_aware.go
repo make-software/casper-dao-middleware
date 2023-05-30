@@ -1,17 +1,17 @@
 package di
 
 import (
-	"casper-dao-middleware/pkg/casper"
+	"github.com/make-software/casper-go-sdk/sse"
 )
 
 type DeployProcessedEventAware struct {
-	deployProcessedEvent casper.DeployProcessedEvent
+	deployProcessedEvent sse.DeployProcessedEvent
 }
 
-func (a *DeployProcessedEventAware) SetDeployProcessedEvent(event casper.DeployProcessedEvent) {
+func (a *DeployProcessedEventAware) SetDeployProcessedEvent(event sse.DeployProcessedEvent) {
 	a.deployProcessedEvent = event
 }
 
-func (a *DeployProcessedEventAware) GetDeployProcessedEvent() casper.DeployProcessedEvent {
+func (a *DeployProcessedEventAware) GetDeployProcessedEvent() sse.DeployProcessedEvent {
 	return a.deployProcessedEvent
 }

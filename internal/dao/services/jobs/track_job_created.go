@@ -24,16 +24,6 @@ func (s *TrackJobCreated) Execute() error {
 		return err
 	}
 
-	worker, err := jobCreated.Worker.GetHashValue()
-	if err != nil {
-		return err
-	}
-
-	jobPoster, err := jobCreated.JobPoster.GetHashValue()
-	if err != nil {
-		return err
-	}
-
 	if err := s.GetEntityManager().BidRepository().UpdateIsPickedBy(jobCreated.BidID, true); err != nil {
 		return err
 	}
@@ -41,8 +31,8 @@ func (s *TrackJobCreated) Execute() error {
 	job := entities.NewJob(
 		jobCreated.BidID,
 		s.GetDeployProcessedEvent().DeployProcessed.DeployHash,
-		*jobPoster,
-		*worker,
+		jobCreated.JobPoster,
+		jobCreated.Worker,
 		jobCreated.FinishTime,
 		entities.JobStatusIDCreated,
 		nil,

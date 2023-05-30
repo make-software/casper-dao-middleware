@@ -27,12 +27,7 @@ func (s *TrackJobCancelled) Execute() error {
 		return err
 	}
 
-	caller, err := jobCancelled.Caller.GetHashValue()
-	if err != nil {
-		return err
-	}
-
-	job.Caller = caller
+	job.Caller = &jobCancelled.Caller
 	job.JobStatusID = entities.JobStatusIDCancelled
 
 	return s.GetEntityManager().JobRepository().Update(job)

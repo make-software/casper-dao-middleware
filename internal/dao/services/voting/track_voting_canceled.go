@@ -1,10 +1,11 @@
 package voting
 
 import (
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/entities"
 	"casper-dao-middleware/internal/dao/events/base"
-	casper_types "casper-dao-middleware/pkg/casper/types"
 )
 
 type TrackVotingCanceled struct {
@@ -13,14 +14,14 @@ type TrackVotingCanceled struct {
 	di.DeployProcessedEventAware
 	di.DAOContractsMetadataAware
 
-	voterContractPackageHash casper_types.Hash
+	voterContractPackageHash casper.ContractPackageHash
 }
 
 func NewTrackVotingCanceled() *TrackVotingCanceled {
 	return &TrackVotingCanceled{}
 }
 
-func (s *TrackVotingCanceled) SetVoterContractPackageHash(hash casper_types.Hash) {
+func (s *TrackVotingCanceled) SetVoterContractPackageHash(hash casper.ContractPackageHash) {
 	s.voterContractPackageHash = hash
 }
 
@@ -41,13 +42,13 @@ func (s *TrackVotingCanceled) Execute() error {
 	return nil
 }
 
-func (s *TrackVotingCanceled) collectReputationChanges(votingCanceled base.VotingCanceledEvent, voterContractPackageHash casper_types.Hash) error {
+func (s *TrackVotingCanceled) collectReputationChanges(votingCanceled base.VotingCanceledEvent, voterContractPackageHash casper.ContractPackageHash) error {
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	changes := make([]entities.ReputationChange, 0, len(votingCanceled.Unstakes)*2)
 
 	for key, val := range votingCanceled.Unstakes {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
-		unstaked := val.Into().Int64()
+		address, _ := casper.NewHash(key.Element1)
+		unstaked := val.Value().Int64()
 		changes = append(changes,
 			// reverse operation to BallotCast, one positive reputation change to ReputationContractPackageHash
 			// and negative from VoterContractPackageHash
@@ -82,9 +83,9 @@ func (s *TrackVotingCanceled) updateVotingIsCancel(votingCanceled base.VotingCan
 func (s *TrackVotingCanceled) aggregateReputationTotals(votingCanceled base.VotingCanceledEvent) error {
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 
-	addresses := make([]casper_types.Hash, 0, len(votingCanceled.Unstakes))
+	addresses := make([]casper.Hash, 0, len(votingCanceled.Unstakes))
 	for key := range votingCanceled.Unstakes {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 		addresses = append(addresses, address)
 	}
 
@@ -105,7 +106,7 @@ func (s *TrackVotingCanceled) aggregateReputationTotals(votingCanceled base.Voti
 	totals := make([]entities.TotalReputationSnapshot, 0, len(votingCanceled.Unstakes))
 
 	for key, val := range votingCanceled.Unstakes {
-		address, _ := casper_types.NewHashFromHexString(key.Element1)
+		address, _ := casper.NewHash(key.Element1)
 
 		liquidStakeReputation, ok := addressToLiquidStakeReputation[address.ToHex()]
 		if !ok {
@@ -128,7 +129,7 @@ func (s *TrackVotingCanceled) aggregateReputationTotals(votingCanceled base.Voti
 			liquidReputation,
 			stakedReputation,
 			0,
-			val.Into().Uint64(),
+			val.Value().Uint64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonUnstaked,
 			deployProcessedEvent.DeployProcessed.Timestamp))

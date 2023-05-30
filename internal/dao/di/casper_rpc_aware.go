@@ -1,8 +1,6 @@
 package di
 
-import (
-	"casper-dao-middleware/pkg/casper"
-)
+import "github.com/make-software/casper-go-sdk/casper"
 
 type CasperClientAware struct {
 	casperClient casper.RPCClient

@@ -29,7 +29,7 @@ func (s *TrackReputationVotingCreated) Execute() error {
 		"document_hash": reputationVotingCreated.DocumentHash,
 		"account":       reputationVotingCreated.Account.ToHash().ToHex(),
 		"action":        reputationVotingCreated.Action,
-		"amount":        reputationVotingCreated.Amount.Into().Uint64(),
+		"amount":        reputationVotingCreated.Amount.Value().Uint64(),
 	}
 
 	metadataJSON, err := json.Marshal(metadata)
@@ -65,8 +65,8 @@ func (s *TrackReputationVotingCreated) Execute() error {
 		reputationVotingCreated.ConfigFormalQuorum,
 		reputationVotingCreated.ConfigFormalVotingTime,
 		formalVotingStartsAt, formalVotingEndsAt,
-		reputationVotingCreated.ConfigTotalOnboarded.Into().Uint64(),
-		reputationVotingCreated.ConfigVotingClearnessDelta.Into().Uint64(),
+		reputationVotingCreated.ConfigTotalOnboarded.Value().Uint64(),
+		reputationVotingCreated.ConfigVotingClearnessDelta.Value().Uint64(),
 		reputationVotingCreated.ConfigTimeBetweenInformalAndFormalVoting,
 	)
 

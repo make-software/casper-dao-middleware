@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/make-software/casper-go-sdk/types/clvalue"
+	"github.com/make-software/casper-go-sdk/types/clvalue/cltype"
+	"github.com/make-software/ces-go-parser"
+
 	"casper-dao-middleware/internal/dao/types"
-	casper_types "casper-dao-middleware/pkg/casper/types"
-	"casper-dao-middleware/pkg/go-ces-parser"
 )
 
 const VotingEndedEventName = "VotingEnded"
@@ -15,16 +17,16 @@ type VotingEndedEvent struct {
 	VotingID             uint32
 	VotingType           types.VotingType
 	VotingResult         uint8
-	StakeInFavour        casper_types.U512
-	StakeAgainst         casper_types.U512
-	UnboundStakeInFavour casper_types.U512
-	UnboundStakeAgainst  casper_types.U512
+	StakeInFavour        clvalue.UInt512
+	StakeAgainst         clvalue.UInt512
+	UnboundStakeInFavour clvalue.UInt512
+	UnboundStakeAgainst  clvalue.UInt512
 	VotesInFavor         uint32
 	VotesAgainst         uint32
-	Unstakes             map[types.Tuple2]casper_types.U512
-	Stakes               map[types.Tuple2]casper_types.U512
-	Burns                map[types.Tuple2]casper_types.U512
-	Mints                map[types.Tuple2]casper_types.U512
+	Unstakes             map[types.Tuple2]clvalue.UInt512
+	Stakes               map[types.Tuple2]clvalue.UInt512
+	Burns                map[types.Tuple2]clvalue.UInt512
+	Mints                map[types.Tuple2]clvalue.UInt512
 }
 
 func ParseVotingEndedEvent(event ces.Event) (VotingEndedEvent, error) {
@@ -32,68 +34,64 @@ func ParseVotingEndedEvent(event ces.Event) (VotingEndedEvent, error) {
 	var err error
 
 	val, ok := event.Data["voting_id"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingEndedEvent{}, errors.New("invalid voting_id value in event")
 	}
-	votingEnded.VotingID = *val.U32
+	votingEnded.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["voting_type"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return VotingEndedEvent{}, errors.New("invalid voting_type value in event")
 	}
 
-	votingEnded.VotingType, err = types.NewVotingTypeFromByte(*val.U8)
+	votingEnded.VotingType, err = types.NewVotingTypeFromByte(val.UI8.Value())
 	if err != nil {
 		return VotingEndedEvent{}, err
 	}
 
 	val, ok = event.Data["voting_result"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU8 {
+	if !ok || val.Type != cltype.UInt8 {
 		return VotingEndedEvent{}, errors.New("invalid voting_result value in event")
 	}
-	votingEnded.VotingResult = *val.U8
+	votingEnded.VotingResult = val.UI8.Value()
 
 	val, ok = event.Data["stake_in_favor"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingEndedEvent{}, errors.New("invalid stake_in_favor value in event")
 	}
-	votingEnded.StakeInFavour = *val.U512
+	votingEnded.StakeInFavour = *val.UI512
 
 	val, ok = event.Data["stake_against"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingEndedEvent{}, errors.New("invalid stake_against value in event")
 	}
-	votingEnded.StakeAgainst = *val.U512
+	votingEnded.StakeAgainst = *val.UI512
 
 	val, ok = event.Data["unbound_stake_in_favor"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingEndedEvent{}, errors.New("invalid unbound_stake_in_favor value in event")
 	}
-	votingEnded.UnboundStakeInFavour = *val.U512
+	votingEnded.UnboundStakeInFavour = *val.UI512
 
 	val, ok = event.Data["unbound_stake_against"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU512 {
+	if !ok || val.Type != cltype.UInt512 {
 		return VotingEndedEvent{}, errors.New("invalid unbound_stake_against value in event")
 	}
-	votingEnded.UnboundStakeAgainst = *val.U512
+	votingEnded.UnboundStakeAgainst = *val.UI512
 
 	val, ok = event.Data["votes_in_favor"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingEndedEvent{}, errors.New("invalid votes_in_favor value in event")
 	}
-	votingEnded.VotesInFavor = *val.U32
+	votingEnded.VotesInFavor = val.UI32.Value()
 
 	val, ok = event.Data["votes_against"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDU32 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingEndedEvent{}, errors.New("invalid votes_against value in event")
 	}
-	votingEnded.VotesInFavor = *val.U32
+	votingEnded.VotesInFavor = val.UI32.Value()
 
 	val, ok = event.Data["unstakes"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDMap {
-		return VotingEndedEvent{}, errors.New("invalid unstakes value in event")
-	}
-
 	if val.Map == nil {
 		return VotingEndedEvent{}, errors.New("nil unstakes map")
 	}
@@ -106,7 +104,7 @@ func ParseVotingEndedEvent(event ces.Event) (VotingEndedEvent, error) {
 	votingEnded.Unstakes = unstakes
 
 	val, ok = event.Data["stakes"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDMap {
+	if !ok {
 		return VotingEndedEvent{}, errors.New("invalid stakes value in event")
 	}
 
@@ -122,7 +120,7 @@ func ParseVotingEndedEvent(event ces.Event) (VotingEndedEvent, error) {
 	votingEnded.Stakes = stakes
 
 	val, ok = event.Data["burns"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDMap {
+	if !ok {
 		return VotingEndedEvent{}, errors.New("invalid burns value in event")
 	}
 
@@ -138,7 +136,7 @@ func ParseVotingEndedEvent(event ces.Event) (VotingEndedEvent, error) {
 	votingEnded.Burns = burns
 
 	val, ok = event.Data["mints"]
-	if !ok || val.Type.CLTypeID != casper_types.CLTypeIDMap {
+	if !ok {
 		return VotingEndedEvent{}, errors.New("invalid mints value in event")
 	}
 
