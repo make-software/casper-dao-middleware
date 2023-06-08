@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	motesToCSPRRate = 1_000_000_000
-	getRatesRetries = 10
+	motesToCSPRRate    = 1_000_000_000
+	getRatesRetries    = 10
+	getRatesRetrySleep = time.Second * 5
 )
 
 type SyncRates struct {
@@ -102,7 +103,7 @@ func (s *SyncRates) syncRates(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-time.After(2 * time.Second):
+		case <-time.After(getRatesRetrySleep):
 		}
 	}
 
@@ -177,5 +178,5 @@ func (s *SyncRates) putSetRateDeploy(ctx context.Context, rates float32) error {
 	}
 
 	_, err = s.GetCasperClient().PutDeploy(ctx, *deploy)
-	return nil
+	return err
 }
