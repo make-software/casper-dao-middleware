@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"net/url"
 	"path/filepath"
-	"time"
 
 	"github.com/make-software/casper-go-sdk/casper"
 	"github.com/pkg/errors"
@@ -25,7 +24,6 @@ type Env struct {
 	SetRateDeployerPrivateKeyPath string              `env:"SET_RATE_DEPLOYER_PRIVATE_KEY_PATH,required"`
 	NetworkName                   string              `env:"NETWORK_NAME,required"`
 	RateApiURL                    string              `env:"RATE_API_URL,required"`
-	RateSyncDuration              time.Duration       `env:"RATE_SYNC_DURATION,required"`
 	CSPRRateProviderContractHash  casper.ContractHash `env:"CSPR_RATE_PROVIDER_CONTRACT_HASH,required"`
 }
 

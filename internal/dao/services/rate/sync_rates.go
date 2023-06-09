@@ -31,13 +31,12 @@ type SyncRates struct {
 	csprRatesProviderContractHash casper.ContractHash
 	contractExecutionAmount       int64
 	rateAPIUrl                    string
-	syncDuration                  time.Duration
 }
 
 func NewSyncRates() *SyncRates {
 	return &SyncRates{
 		httpClient: http.Client{
-			Timeout: time.Second * 10,
+			Timeout: time.Second * 20,
 		},
 	}
 }
@@ -62,37 +61,13 @@ func (s *SyncRates) SetContractExecutionAmount(executionAmount int64) {
 	s.contractExecutionAmount = executionAmount
 }
 
-func (s *SyncRates) SetSyncDuration(duration time.Duration) {
-	s.syncDuration = duration
-}
-
 func (s *SyncRates) Execute(ctx context.Context) error {
 	zap.S().Info("Rates oracle started...")
-	if err := s.syncRates(ctx); err != nil {
-		zap.S().With(zap.Error(err)).Error("Failed to sync rates")
-		return err
-	}
-
-	ticker := time.NewTicker(s.syncDuration)
-	for {
-		select {
-		case <-ticker.C:
-			if err := s.syncRates(ctx); err != nil {
-				zap.S().With(zap.Error(err)).Error("Failed to sync rates")
-				return err
-			}
-		case <-ctx.Done():
-			zap.S().Info("Exit on context signal")
-			return ctx.Err()
-		}
-	}
-}
-
-func (s *SyncRates) syncRates(ctx context.Context) error {
 	var (
 		rates float32
 		err   error
 	)
+
 	for i := 1; i <= getRatesRetries; i++ {
 		rates, err = s.getRates(ctx)
 		if err == nil {

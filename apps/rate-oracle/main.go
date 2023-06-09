@@ -53,7 +53,6 @@ func main() {
 
 	assert.OK(container.Invoke(func(env *config.Env, casperClient casper.RPCClient) error {
 		syncRate := rate.NewSyncRates()
-		syncRate.SetSyncDuration(env.RateSyncDuration)
 		syncRate.SetCasperClient(casperClient)
 		syncRate.SetRateDeployerPrivateKey(env.SetRateDeployerPrivateKey)
 		syncRate.SetRateAPIUrl(env.RateApiURL)
