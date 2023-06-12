@@ -97,7 +97,7 @@ func main() {
 		client.Streamer = sse.NewStreamer(connection, streamReader, 1*time.Minute)
 		client.RegisterHandler(sse.DeployProcessedEventType, handlers.NewDeployProcessed(entityManager, casperClient, metadata, cesParser).Handle)
 
-		client.EventStream = make(chan sse.RawEvent)
+		client.EventStream = make(chan sse.RawEvent, 10)
 		client.WorkersCount = 1
 
 		defer client.Stop()

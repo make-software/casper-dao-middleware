@@ -74,8 +74,8 @@ func main() {
 	assert.OK(container.Provide(func(cfg *config.Env) pkg_http.ServerAddress { return cfg.Addr }))
 	assert.OK(container.Provide(pkg_http.NewServer))
 
-	assert.OK(container.Invoke(func(server http.Server) {
-		if err := server.ListenAndServe(); err != nil {
+	assert.OK(container.Invoke(func(server pkg_http.Server) {
+		if err := server.ListenAndServe(ctx); err != nil {
 			log.Printf("Failed to serve api %s", err.Error())
 		}
 	}))

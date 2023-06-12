@@ -53,13 +53,15 @@ type DAOContractsMetadata struct {
 
 func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient casper.RPCClient) (DAOContractsMetadata, error) {
 	result := DAOContractsMetadata{}
-	stateRootHash, err := casperClient.GetStateRootHashLatest(context.Background())
+	stateRootHashRes, err := casperClient.GetStateRootHashLatest(context.Background())
 	if err != nil {
 		return DAOContractsMetadata{}, err
 	}
 
+	stateRootHash := stateRootHashRes.StateRootHash.String()
+
 	for contractName, contractHashHex := range contractHashes.ToMap() {
-		stateItemRes, err := casperClient.GetStateItem(context.Background(), stateRootHash.StateRootHash.String(), fmt.Sprintf("hash-%s", contractHashHex), []string{})
+		stateItemRes, err := casperClient.QueryGlobalStateByStateHash(context.Background(), &stateRootHash, fmt.Sprintf("hash-%s", contractHashHex), []string{})
 		if err != nil {
 			return DAOContractsMetadata{}, err
 		}

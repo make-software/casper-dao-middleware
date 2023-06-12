@@ -12,8 +12,8 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0
-	github.com/make-software/casper-go-sdk v0.9.6
-	github.com/make-software/ces-go-parser v0.9.2
+	github.com/make-software/casper-go-sdk v1.1.2
+	github.com/make-software/ces-go-parser v1.0.0
 	github.com/stretchr/testify v1.8.2
 	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.8.7

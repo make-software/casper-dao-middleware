@@ -104,7 +104,8 @@ func (c *SyncDAOSetting) Execute() error {
 		return err
 	}
 
-	result, err := c.GetCasperClient().GetDictionaryItem(context.Background(), stateRootHashRes.StateRootHash.String(), c.variableRepositoryContractStorageUref, settingItemKey)
+	stateRootHash := stateRootHashRes.StateRootHash.String()
+	result, err := c.GetCasperClient().GetDictionaryItem(context.Background(), &stateRootHash, c.variableRepositoryContractStorageUref, settingItemKey)
 	if err != nil {
 		return err
 	}
