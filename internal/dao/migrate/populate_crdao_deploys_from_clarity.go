@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/make-software/casper-go-sdk/casper"
+	"github.com/make-software/casper-go-sdk/sse"
 	"go.uber.org/zap"
 
 	"github.com/make-software/ces-go-parser"
@@ -19,9 +22,6 @@ import (
 	"github.com/caarlos0/env/v6"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-
-	"casper-dao-middleware/pkg/casper"
-	"casper-dao-middleware/pkg/casper/types"
 
 	"casper-dao-middleware/pkg/boot"
 	"casper-dao-middleware/pkg/config"
@@ -80,7 +80,11 @@ func (c *PopulateCrDAODeploysFromClarity) SetUp() error {
 		return err
 	}
 
-	c.casperClient = casper.NewRPCClient(cfg.NodeRPCURL.String())
+	handler := casper.NewRPCHandler(cfg.NodeRPCURL.String(), &http.Client{
+		Timeout: 20 * time.Second,
+	})
+
+	c.casperClient = casper.NewRPCClient(handler)
 
 	c.daoContractsMetadata, err = utils.NewDAOContractsMetadata(cfg.DaoContracts, c.casperClient)
 	if err != nil {
@@ -110,11 +114,11 @@ func (c *PopulateCrDAODeploysFromClarity) Execute() error {
 		if err := daoDeploysCursor.Scan(&rawDeployHash); err != nil {
 			return fmt.Errorf("failed to scan deploy hash: %s", err.Error())
 		}
-		deployHash, err := types.NewHashFromRawBytes([]byte(rawDeployHash))
+		deployHash, err := casper.NewHashFromBytes([]byte(rawDeployHash))
 		if err != nil {
 			return err
 		}
-		deploy, err := c.casperClient.GetDeploy(deployHash.ToHex())
+		deploy, err := c.casperClient.GetDeploy(context.Background(), deployHash.ToHex())
 		if err != nil {
 			return fmt.Errorf("failed to get deploy by hash: %s", err.Error())
 		}
@@ -122,13 +126,11 @@ func (c *PopulateCrDAODeploysFromClarity) Execute() error {
 			log.Println("Failed deploy, skipping: ", deploy.Deploy.Hash.ToHex())
 			continue
 		}
-		processRawDeploy.SetDeployProcessedEvent(casper.DeployProcessedEvent{
-			DeployProcessed: casper.DeployProcessed{
+		processRawDeploy.SetDeployProcessedEvent(sse.DeployProcessedEvent{
+			DeployProcessed: sse.DeployProcessedPayload{
 				DeployHash:      deploy.Deploy.Hash,
 				Account:         deploy.Deploy.Header.Account.ToHex(),
-				Timestamp:       deploy.Deploy.Header.Timestamp,
-				TTL:             deploy.Deploy.Header.TTL,
-				BlockHash:       deploy.Deploy.Header.TTL,
+				Timestamp:       deploy.Deploy.Header.Timestamp.ToTime(),
 				ExecutionResult: deploy.ExecutionResults[0].Result,
 			},
 		})

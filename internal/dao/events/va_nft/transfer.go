@@ -28,15 +28,17 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 	}
 
 	if val.Option != nil {
-		if val.Option.Inner.Type != cltype.Key {
+		if val.Option.Type.Inner != cltype.Key {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}
 
-		from, err := types.NewAddressFromCLValue(*val.Option.Inner)
-		if err != nil {
-			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
+		if val.Option.Inner != nil {
+			from, err := types.NewAddressFromCLValue(*val.Option.Inner)
+			if err != nil {
+				return TransferEvent{}, errors.New("invalid value inside option of `from` value")
+			}
+			vaTransfer.From = &from
 		}
-		vaTransfer.From = &from
 	}
 
 	val, ok = event.Data["to"]

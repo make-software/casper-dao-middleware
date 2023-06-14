@@ -46,18 +46,18 @@ func ParseValueUpdatedEvent(event ces.Event) (ValueUpdatedEvent, error) {
 		recordValueBytes = append(recordValueBytes, clValue.UI8.Value())
 	}
 
-	//var err error
-	//valueUpdated.Value, err = types.NewRecordValueFromBytes(recordValueBytes)
-	//if err != nil {
-	//	return ValueUpdatedEvent{}, err
-	//}
+	var err error
+	valueUpdated.Value, err = types.NewRecordValueFromBytes(recordValueBytes)
+	if err != nil {
+		return ValueUpdatedEvent{}, err
+	}
 
 	val, ok = event.Data["activation_time"]
 	if !ok {
 		return ValueUpdatedEvent{}, errors.New("invalid activation_time value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.UI64 == nil {
 			return ValueUpdatedEvent{}, errors.New("expected U64 in Option(Some())")
 		}
