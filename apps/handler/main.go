@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -70,6 +71,7 @@ func main() {
 		return utils.NewDAOContractsMetadata(cfg.DaoContracts, rpcClient)
 	}))
 
+	fmt.Println("Temp log")
 	//nolint:gocritic
 	assert.OK(container.Provide(func(db *sqlx.DB, hashes utils.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
