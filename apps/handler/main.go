@@ -14,7 +14,7 @@ import (
 	"casper-dao-middleware/apps/handler/config"
 	"casper-dao-middleware/apps/handler/handlers"
 	"casper-dao-middleware/internal/dao/persistence"
-	"casper-dao-middleware/internal/dao/services/event_processing"
+	"casper-dao-middleware/internal/dao/services/settings"
 	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/assert"
 	"casper-dao-middleware/pkg/boot"
@@ -80,9 +80,9 @@ func main() {
 			zap.S().With(zap.Error(err)).Fatal("Failed to create CES Parser")
 		}
 
-		syncDaoSetting := event_processing.NewSyncInstallDAOContracts()
+		syncDaoSetting := settings.NewSyncInitialDAOSettings()
 		syncDaoSetting.SetCasperClient(casperClient)
-		syncDaoSetting.SetDAOContractsInstallBlocks(env.DAOContractsInstallBlocks)
+		syncDaoSetting.SetVariableRepoInstallDeployHash(env.VariableRepoInstallDeployHash)
 		syncDaoSetting.SetDAOContractsMetadata(metadata)
 		syncDaoSetting.SetEntityManager(entityManager)
 		syncDaoSetting.SetCESParser(cesParser)

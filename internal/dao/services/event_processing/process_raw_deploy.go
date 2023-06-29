@@ -26,17 +26,19 @@ func (c *ProcessRawDeploy) Execute() error {
 		return err
 	}
 
+	for _, result := range results {
+		if result.Error != nil {
+			zap.S().With(zap.Error(err)).Error("Failed to parse ces events")
+			return err
+		}
+	}
+
 	processContractEvents := NewProcessContractEvents()
 	processContractEvents.SetDAOContractsMetadata(daoContractsMetadata)
 	processContractEvents.SetDeployProcessedEvent(c.GetDeployProcessedEvent())
 	processContractEvents.SetEntityManager(c.GetEntityManager())
 
 	for _, result := range results {
-		if result.Error != nil {
-			zap.S().With(zap.Error(err)).Error("Failed to parse ces events")
-			continue
-		}
-
 		processContractEvents.SetCESEvent(result.Event)
 		if err := processContractEvents.Execute(); err != nil {
 			zap.S().With(zap.Error(err)).With("event", result.Event.Name).Error("Failed to process ces event")
