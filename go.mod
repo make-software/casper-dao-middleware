@@ -12,14 +12,13 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0
-	github.com/make-software/casper-go-sdk v1.1.2
-	github.com/make-software/ces-go-parser v1.0.0
+	github.com/make-software/casper-go-sdk v1.1.4
+	github.com/make-software/ces-go-parser v1.1.2
 	github.com/stretchr/testify v1.8.2
 	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.8.7
 	go.uber.org/dig v1.15.0
 	go.uber.org/zap v1.23.0
-	golang.org/x/crypto v0.9.0
 )
 
 require (
@@ -39,6 +38,7 @@ require (
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect

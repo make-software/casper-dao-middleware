@@ -43,7 +43,7 @@ func (h DeployProcessed) Handle(ctx context.Context, event sse.RawEvent) error {
 
 	processRawDeploy := event_processing.NewProcessRawDeploy()
 	processRawDeploy.SetEntityManager(h.entityManager)
-	processRawDeploy.SetCESEventParser(h.cesParser)
+	processRawDeploy.SetCESParser(h.cesParser)
 	processRawDeploy.SetDAOContractsMetadata(h.daoMetadata)
 	processRawDeploy.SetDeployProcessedEvent(deployProcessedEvent)
 	if err = processRawDeploy.Execute(); err != nil {

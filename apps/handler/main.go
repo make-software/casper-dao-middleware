@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -15,7 +14,7 @@ import (
 	"casper-dao-middleware/apps/handler/config"
 	"casper-dao-middleware/apps/handler/handlers"
 	"casper-dao-middleware/internal/dao/persistence"
-	"casper-dao-middleware/internal/dao/services/settings"
+	"casper-dao-middleware/internal/dao/services/event_processing"
 	"casper-dao-middleware/internal/dao/utils"
 	"casper-dao-middleware/pkg/assert"
 	"casper-dao-middleware/pkg/boot"
@@ -71,23 +70,24 @@ func main() {
 		return utils.NewDAOContractsMetadata(cfg.DaoContracts, rpcClient)
 	}))
 
-	fmt.Println("Temp log")
-	//nolint:gocritic
 	assert.OK(container.Provide(func(db *sqlx.DB, hashes utils.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
 	}))
 
 	assert.OK(container.Invoke(func(env *config.Env, entityManager persistence.EntityManager, casperClient casper.RPCClient, metadata utils.DAOContractsMetadata) error {
-		syncDaoSetting := settings.NewSyncDAOSettings()
-		syncDaoSetting.SetCasperClient(casperClient)
-		syncDaoSetting.SetVariableRepositoryContractStorageUref(metadata.VariableRepositoryContractStorageUref)
-		syncDaoSetting.SetEntityManager(entityManager)
-		syncDaoSetting.SetSettings(settings.VariableRepoSettings)
-		syncDaoSetting.Execute()
-
 		cesParser, err := ces.NewParser(casperClient, metadata.ContractHashes())
 		if err != nil {
 			zap.S().With(zap.Error(err)).Fatal("Failed to create CES Parser")
+		}
+
+		syncDaoSetting := event_processing.NewSyncInstallDAOContracts()
+		syncDaoSetting.SetCasperClient(casperClient)
+		syncDaoSetting.SetDAOContractsInstallBlocks(env.DAOContractsInstallBlocks)
+		syncDaoSetting.SetDAOContractsMetadata(metadata)
+		syncDaoSetting.SetEntityManager(entityManager)
+		syncDaoSetting.SetCESParser(cesParser)
+		if err := syncDaoSetting.Execute(); err != nil {
+			zap.S().With(zap.Error(err)).Fatal("Failed to sync install DAO Contracts")
 		}
 
 		connection := sse.NewHttpConnection(&http.Client{Transport: &http.Transport{

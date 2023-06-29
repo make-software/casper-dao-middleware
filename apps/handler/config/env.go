@@ -18,6 +18,7 @@ type Env struct {
 	EventStreamPath           string        `env:"EVENT_STREAM_PATH,required"`
 	DictionarySetEventsBuffer uint32        `env:"DICTIONARY_SET_EVENTS_READ_BACK_BUFFER" envDefault:"100"`
 	NewNodeStartFromEventID   uint64
+	DAOContractsInstallBlocks []uint64 `env:"DAO_CONTRACTS_INSTALL_BLOCKS,required" envSeparator:","`
 
 	NodeSSEURL *url.URL
 	NodeRPCURL *url.URL
