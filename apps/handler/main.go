@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -71,23 +70,24 @@ func main() {
 		return utils.NewDAOContractsMetadata(cfg.DaoContracts, rpcClient)
 	}))
 
-	fmt.Println("Temp log")
-	//nolint:gocritic
 	assert.OK(container.Provide(func(db *sqlx.DB, hashes utils.DAOContractsMetadata) persistence.EntityManager {
 		return persistence.NewEntityManager(db, hashes)
 	}))
 
 	assert.OK(container.Invoke(func(env *config.Env, entityManager persistence.EntityManager, casperClient casper.RPCClient, metadata utils.DAOContractsMetadata) error {
-		syncDaoSetting := settings.NewSyncDAOSettings()
-		syncDaoSetting.SetCasperClient(casperClient)
-		syncDaoSetting.SetVariableRepositoryContractStorageUref(metadata.VariableRepositoryContractStorageUref)
-		syncDaoSetting.SetEntityManager(entityManager)
-		syncDaoSetting.SetSettings(settings.VariableRepoSettings)
-		syncDaoSetting.Execute()
-
 		cesParser, err := ces.NewParser(casperClient, metadata.ContractHashes())
 		if err != nil {
 			zap.S().With(zap.Error(err)).Fatal("Failed to create CES Parser")
+		}
+
+		syncDaoSetting := settings.NewSyncInitialDAOSettings()
+		syncDaoSetting.SetCasperClient(casperClient)
+		syncDaoSetting.SetVariableRepoInstallDeployHash(env.VariableRepoInstallDeployHash)
+		syncDaoSetting.SetDAOContractsMetadata(metadata)
+		syncDaoSetting.SetEntityManager(entityManager)
+		syncDaoSetting.SetCESParser(cesParser)
+		if err := syncDaoSetting.Execute(); err != nil {
+			zap.S().With(zap.Error(err)).Fatal("Failed to sync install DAO Contracts")
 		}
 
 		connection := sse.NewHttpConnection(&http.Client{Transport: &http.Transport{

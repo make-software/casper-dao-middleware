@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/make-software/casper-go-sdk/casper"
+
 	"casper-dao-middleware/pkg/config"
 
 	"github.com/caarlos0/env/v6"
@@ -14,10 +16,11 @@ import (
 )
 
 type Env struct {
-	LogLevel                  zapcore.Level `env:"LOG_LEVEL" envDefault:"info"`
-	EventStreamPath           string        `env:"EVENT_STREAM_PATH,required"`
-	DictionarySetEventsBuffer uint32        `env:"DICTIONARY_SET_EVENTS_READ_BACK_BUFFER" envDefault:"100"`
-	NewNodeStartFromEventID   uint64
+	LogLevel                      zapcore.Level `env:"LOG_LEVEL" envDefault:"info"`
+	EventStreamPath               string        `env:"EVENT_STREAM_PATH,required"`
+	DictionarySetEventsBuffer     uint32        `env:"DICTIONARY_SET_EVENTS_READ_BACK_BUFFER" envDefault:"100"`
+	NewNodeStartFromEventID       uint64
+	VariableRepoInstallDeployHash casper.Hash `env:"VARIABLE_REPOSITORY_INSTALL_DEPLOY_HASH,required" `
 
 	NodeSSEURL *url.URL
 	NodeRPCURL *url.URL

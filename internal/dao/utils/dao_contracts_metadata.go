@@ -10,12 +10,9 @@ import (
 	"casper-dao-middleware/pkg/config"
 )
 
-const variableRepositoryContractStorageUrefName = "storage__repository__contract"
-
 type DAOContractsMetadata struct {
 	VariableRepositoryContractPackageHash casper.ContractPackageHash
 	VariableRepositoryContractHash        casper.Hash
-	VariableRepositoryContractStorageUref string
 
 	ReputationContractPackageHash casper.ContractPackageHash
 	ReputationContractHash        casper.Hash
@@ -109,16 +106,6 @@ func NewDAOContractsMetadata(contractHashes config.DaoContracts, casperClient ca
 		case "variable_repository_contract":
 			result.VariableRepositoryContractPackageHash = contractPackageHash
 			result.VariableRepositoryContractHash = contractHashHex
-			for _, namedKey := range stateItemRes.StoredValue.Contract.NamedKeys {
-				if namedKey.Name == variableRepositoryContractStorageUrefName {
-					result.VariableRepositoryContractStorageUref = namedKey.Key.String()
-					break
-				}
-			}
-
-			if result.VariableRepositoryContractStorageUref == "" {
-				return DAOContractsMetadata{}, errors.New("error: missing variable repository contract storage uref in contract")
-			}
 		}
 
 	}

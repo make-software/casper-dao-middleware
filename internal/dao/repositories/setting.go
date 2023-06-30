@@ -13,6 +13,7 @@ import (
 //go:generate mockgen -destination=../tests/mocks/setting_repo_mock.go -package=mocks -source=./setting.go Setting
 type Setting interface {
 	Upsert(setting entities.Setting) error
+	Save(setting entities.Setting) error
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Setting, error)
 }
@@ -47,6 +48,34 @@ func (r *setting) Upsert(setting entities.Setting) error {
 		).
 		Suffix("ON DUPLICATE KEY UPDATE value = values(value), next_value = values(next_value), activation_time = values(activation_time)")
 
+	sql, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.conn.Exec(sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *setting) Save(setting entities.Setting) error {
+	queryBuilder := query.Insert("settings").
+		Options("IGNORE").
+		Columns(
+			"name",
+			"value",
+			"next_value",
+			"activation_time",
+		).
+		Values(
+			setting.Name,
+			setting.Value,
+			setting.NextValue,
+			setting.ActivationTime,
+		)
 	sql, args, err := queryBuilder.ToSql()
 	if err != nil {
 		return err

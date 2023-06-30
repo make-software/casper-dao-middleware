@@ -51,10 +51,10 @@ github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mailru/easyjson v0.7.6 h1:8yTIVnZgCoiM1TgqoeTl+LfU5Jg6/xL3QhGQnimLYnA=
 github.com/mailru/easyjson v0.7.6/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
-github.com/make-software/casper-go-sdk v1.1.2 h1:VarawPN0ammjh2W0lNsVCdhrK8C8o4euWZl7x+Gyi+k=
-github.com/make-software/casper-go-sdk v1.1.2/go.mod h1:Znsqvm5ZGn3EiEjp2zXYDGwOlH828tLIBPfldcBl37U=
-github.com/make-software/ces-go-parser v1.0.0 h1:wDp06E7o3aIRlkms7oVo8F8Pj6Xu1+3uZfdRh5GKk3E=
-github.com/make-software/ces-go-parser v1.0.0/go.mod h1:NJvGrCuWMTGBKtbj73sC9A6MSt8v/j+c2ZqwZRZaO9M=
+github.com/make-software/casper-go-sdk v1.1.4 h1:VWL/43w4u/OrYpykOvH9VgRsTU5qvSg0NwOORI0q5uQ=
+github.com/make-software/casper-go-sdk v1.1.4/go.mod h1:Znsqvm5ZGn3EiEjp2zXYDGwOlH828tLIBPfldcBl37U=
+github.com/make-software/ces-go-parser v1.1.2 h1:5+maapfFy0Y2FaNnUr0u6rrIr0uqmt+NEwXwHFqealI=
+github.com/make-software/ces-go-parser v1.1.2/go.mod h1:7Hoh35fh85LHz7oc+skG8emqsMvC7Id8l2xPVutfEC4=
 github.com/mattn/go-sqlite3 v1.14.6 h1:dNPt6NO46WmLVt2DLNpwczCmdV5boIZ6g/tlDrlRUbg=
 github.com/mattn/go-sqlite3 v1.14.6/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=

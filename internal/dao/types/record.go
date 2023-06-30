@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/binary"
-	"errors"
 	"strconv"
 )
 
@@ -21,36 +20,6 @@ type FutureValue struct {
 type Record struct {
 	Value       RecordValue
 	FutureValue *FutureValue
-}
-
-func NewRecordFromBytes(rawBytes []byte) (Record, error) {
-	recordValue, reminder, err := NewRecordValueFromBytesWithReminder(rawBytes)
-	if err != nil {
-		return Record{}, nil
-	}
-
-	record := Record{
-		Value: recordValue,
-	}
-
-	if len(reminder) == 0 {
-		return Record{}, errors.New("invalid record format")
-	}
-
-	if reminder[0] == 1 {
-		recordValue, reminder, err = NewRecordValueFromBytesWithReminder(reminder[1:])
-		if err != nil {
-			return Record{}, nil
-		}
-
-		activationTime := binary.LittleEndian.Uint64(reminder)
-
-		record.FutureValue = &FutureValue{
-			Value:          recordValue,
-			ActivationTime: activationTime,
-		}
-	}
-	return record, nil
 }
 
 func NewRecordValueFromBytesWithReminder(rawBytes []byte) (RecordValue, []byte, error) {
