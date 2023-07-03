@@ -16,7 +16,7 @@ const TransferEventName = "Transfer"
 type TransferEvent struct {
 	From    *types.Address
 	To      *types.Address
-	TokenID clvalue.UInt512
+	TokenID clvalue.UInt256
 }
 
 func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
@@ -59,10 +59,10 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 	}
 
 	val, ok = event.Data["token_id"]
-	if !ok || val.Type != cltype.UInt512 {
+	if !ok || val.Type != cltype.UInt256 {
 		return TransferEvent{}, errors.New("invalid token_id value in event")
 	}
-	kycTransfer.TokenID = *val.UI512
+	kycTransfer.TokenID = *val.UI256
 
 	return kycTransfer, nil
 }
