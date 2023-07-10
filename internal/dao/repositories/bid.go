@@ -26,8 +26,10 @@ type bid struct {
 
 func NewBid(conn *sqlx.DB) *bid {
 	return &bid{
-		conn:          conn,
-		indexedFields: map[string]struct{}{},
+		conn: conn,
+		indexedFields: map[string]struct{}{
+			"job_offer_id": {},
+		},
 	}
 }
 
