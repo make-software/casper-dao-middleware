@@ -17,6 +17,7 @@ import (
 type Job interface {
 	Save(job *entities.Job) error
 	GetByBidID(bidID uint32) (*entities.Job, error)
+	GetByID(jobID uint32) (*entities.Job, error)
 	Update(job *entities.Job) error
 }
 
@@ -48,6 +49,29 @@ func (r job) GetByBidID(bidID uint32) (*entities.Job, error) {
 	if err := r.conn.Get(&job, sqlQuery, args...); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError("not found job info by bid_id")
+		}
+		return nil, err
+	}
+
+	return &job, nil
+}
+
+func (r job) GetByID(jobID uint32) (*entities.Job, error) {
+	queryBuilder := query.Select("*").
+		From("jobs").
+		Where(sq.Eq{
+			"job_id": jobID,
+		})
+
+	sqlQuery, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	job := entities.Job{}
+	if err := r.conn.Get(&job, sqlQuery, args...); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError("not found job info by job_id")
 		}
 		return nil, err
 	}

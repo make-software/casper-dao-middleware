@@ -14,7 +14,7 @@ const BallotCastEventName = "BallotCast"
 
 type BallotCastEvent struct {
 	Voter      types.Address
-	VotingType uint8
+	VotingType uint32
 	Choice     types.Choice
 	VotingID   uint32
 	Stake      clvalue.UInt512
@@ -40,16 +40,17 @@ func ParseBallotCastEvent(event ces.Event) (BallotCastEvent, error) {
 	ballotCast.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["voting_type"]
-	if !ok || val.Type != cltype.UInt8 {
+	if !ok || val.Type != cltype.UInt32 {
 		return BallotCastEvent{}, errors.New("invalid voting_type value in event")
 	}
-	ballotCast.VotingType = val.UI8.Value()
+	ballotCast.VotingType = val.UI32.Value()
 
 	val, ok = event.Data["choice"]
-	if !ok || val.Type != cltype.UInt8 {
+	if !ok || val.Type != cltype.UInt32 {
 		return BallotCastEvent{}, errors.New("invalid choice value in event")
 	}
-	ballotCast.Choice, err = types.NewChoiceFromByte(val.UI8.Value())
+
+	ballotCast.Choice, err = types.NewChoiceFromByte(byte(val.UI32.Value()))
 	if err != nil {
 		return BallotCastEvent{}, err
 	}
