@@ -108,6 +108,32 @@ func (h *JobOffer) HandleGetBidJob(w http.ResponseWriter, r *http.Request) {
 	http_response.FromFunction(getJob.Execute, w, r)
 }
 
+// HandleGetJobByID
+//
+//	@Summary	Return Job by JobIF
+//
+//	@Router		/jobs/{job_id}/  [GET]
+//
+//	@Param		job_id		path		uint	true	"JobID uint"
+//
+//	@Success	200			{object}	http_response.SuccessResponse{data=entities.Job}
+//	@Failure	400,404,500	{object}	http_response.ErrorResponse{error=http_response.ErrorResult}
+//
+//	@tags		BidEscrow
+func (h *JobOffer) HandleGetJobByID(w http.ResponseWriter, r *http.Request) {
+	jobID, err := http_params.ParseUint32("job_id", r)
+	if err != nil {
+		http_response.Error(w, r, err)
+		return
+	}
+
+	getJobByID := jobs.NewGetJobById()
+	getJobByID.SetEntityManager(h.entityManager)
+	getJobByID.SetJobID(jobID)
+
+	http_response.FromFunction(getJobByID.Execute, w, r)
+}
+
 // HandleGetJobStatuses
 //
 //	@Summary	Return predefined list of JobStatuses

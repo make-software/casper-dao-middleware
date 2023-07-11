@@ -13,6 +13,7 @@ import (
 const JobCreatedEventName = "JobCreated"
 
 type JobCreatedEvent struct {
+	JobID      uint32
 	BidID      uint32
 	JobPoster  casper.Hash
 	Worker     casper.Hash
@@ -28,6 +29,12 @@ func ParseJobCreatedEvent(event ces.Event) (JobCreatedEvent, error) {
 		return JobCreatedEvent{}, errors.New("invalid bid_id value in event")
 	}
 	jobCreated.BidID = val.UI32.Value()
+
+	val, ok = event.Data["job_id"]
+	if !ok || val.Type != cltype.UInt32 {
+		return JobCreatedEvent{}, errors.New("invalid job_id value in event")
+	}
+	jobCreated.JobID = val.UI32.Value()
 
 	val, ok = event.Data["worker"]
 	if !ok || val.Type != cltype.Key {

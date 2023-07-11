@@ -29,6 +29,7 @@ func (s *TrackJobCreated) Execute() error {
 	}
 
 	job := entities.NewJob(
+		jobCreated.JobID,
 		jobCreated.BidID,
 		s.GetDeployProcessedEvent().DeployProcessed.DeployHash,
 		jobCreated.JobPoster,

@@ -22,6 +22,7 @@ type JobStatus struct {
 }
 
 type Job struct {
+	JobID       uint32       `json:"job_id" db:"job_id"`
 	BidID       uint32       `json:"bid_id" db:"bid_id"`
 	JobPoster   casper.Hash  `json:"job_poster" db:"job_poster"`
 	Worker      casper.Hash  `json:"worker" db:"worker"`
@@ -34,6 +35,7 @@ type Job struct {
 }
 
 func NewJob(
+	jobID uint32,
 	bidID uint32,
 	deployHash, jobPoster, worker casper.Hash,
 	finishTime uint64,
@@ -42,6 +44,7 @@ func NewJob(
 	caller *casper.Hash,
 	timestamp time.Time) Job {
 	return Job{
+		JobID:       jobID,
 		BidID:       bidID,
 		JobPoster:   jobPoster,
 		Worker:      worker,

@@ -161,6 +161,7 @@ create table bids
 create table jobs
 (
     bid_id        int unsigned not null,
+    job_id        int unsigned not null,
     job_poster    binary(32) not null,
     worker        binary(32) not null,
     caller        binary(32) null,
