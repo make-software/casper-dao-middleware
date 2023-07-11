@@ -14,7 +14,9 @@ require (
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0
 	github.com/make-software/casper-go-sdk v1.1.4
 	github.com/make-software/ces-go-parser v1.1.2
-	github.com/stretchr/testify v1.8.2
+	github.com/pelletier/go-toml/v2 v2.0.8
+	github.com/pkg/errors v0.9.1
+	github.com/stretchr/testify v1.8.3
 	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.8.7
 	go.uber.org/dig v1.15.0
@@ -32,7 +34,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect

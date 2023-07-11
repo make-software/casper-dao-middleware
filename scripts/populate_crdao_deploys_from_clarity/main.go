@@ -27,13 +27,6 @@ import (
 	"casper-dao-middleware/pkg/config"
 )
 
-// MigrateCommand common migration command interface
-// Maybe we can extract it in some common place to have unified interface for all Migration commands/scripts
-type MigrateCommand interface {
-	SetUp() error
-	Execute() error
-	TearDown() error
-}
 type Env struct {
 	ClarityDBConfig config.DBConfig `envPrefix:"CLARITY_"`
 	CrDAODBConfig   config.DBConfig `envPrefix:"CRDAO_"`
@@ -106,7 +99,7 @@ func (c *PopulateCrDAODeploysFromClarity) Execute() error {
 
 	processRawDeploy := event_processing.NewProcessRawDeploy()
 	processRawDeploy.SetEntityManager(crdaoEntityManager)
-	processRawDeploy.SetCESEventParser(cesParser)
+	processRawDeploy.SetCESParser(cesParser)
 	processRawDeploy.SetDAOContractsMetadata(c.daoContractsMetadata)
 
 	for daoDeploysCursor.Next() {
@@ -166,9 +159,7 @@ func (c *PopulateCrDAODeploysFromClarity) createDAODeployCursor(clarityDB *sqlx.
 	return daoDeploysCursor
 }
 func main() {
-	runCommand(new(PopulateCrDAODeploysFromClarity))
-}
-func runCommand(command MigrateCommand) {
+	command := new(PopulateCrDAODeploysFromClarity)
 	if err := command.SetUp(); err != nil {
 		log.Fatalf("Command initialization failed: %s", err.Error())
 	}
