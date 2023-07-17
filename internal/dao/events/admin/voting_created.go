@@ -15,7 +15,7 @@ const VotingCreatedEventName = "AdminVotingCreated"
 
 type VotingCreatedEvent struct {
 	ContractToUpdate                         types.Address
-	Action                                   uint8
+	Action                                   uint32
 	Address                                  types.Address
 	Creator                                  types.Address
 	Stake                                    *clvalue.UInt512
@@ -44,10 +44,10 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 	}
 
 	val, ok = event.Data["action"]
-	if !ok || val.Type != cltype.UInt8 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingCreatedEvent{}, errors.New("invalid action value in event")
 	}
-	votingCreated.Action = val.UI8.Value()
+	votingCreated.Action = val.UI32.Value()
 
 	val, ok = event.Data["address"]
 	if !ok || val.Type != cltype.Key {

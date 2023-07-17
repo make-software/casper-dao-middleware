@@ -57,14 +57,11 @@ func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 		isInFavor = true
 	}
 
-	votingID := ballotCast.VotingID
-	voting, err := s.GetEntityManager().VotingRepository().GetByVotingID(votingID)
-	if err != nil {
-		return err
-	}
-
 	var isFormal bool
-	if voting.FormalVotingStartsAt != nil {
+	var votingID = ballotCast.VotingID
+
+	voting, err := s.GetEntityManager().VotingRepository().GetByVotingID(votingID)
+	if err == nil && voting.FormalVotingStartsAt != nil {
 		if time.Now().After(*voting.FormalVotingStartsAt) {
 			isFormal = true
 		}
