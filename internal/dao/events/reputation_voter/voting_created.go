@@ -18,7 +18,7 @@ type VotingCreatedEvent struct {
 	Creator                                  types.Address
 	DocumentHash                             string
 	Stake                                    *clvalue.UInt512
-	Action                                   uint8
+	Action                                   uint32
 	Amount                                   clvalue.UInt512
 	VotingID                                 uint32
 	ConfigInformalQuorum                     uint32
@@ -84,10 +84,10 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 	votingCreated.Amount = *val.UI512
 
 	val, ok = event.Data["action"]
-	if !ok || val.Type != cltype.UInt8 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingCreatedEvent{}, errors.New("invalid action value in event")
 	}
-	votingCreated.Action = val.UI8.Value()
+	votingCreated.Action = val.UI32.Value()
 
 	val, ok = event.Data["voting_id"]
 	if !ok || val.Type != cltype.UInt32 {

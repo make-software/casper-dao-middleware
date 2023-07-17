@@ -40,20 +40,20 @@ func ParseVotingEndedEvent(event ces.Event) (VotingEndedEvent, error) {
 	votingEnded.VotingID = val.UI32.Value()
 
 	val, ok = event.Data["voting_type"]
-	if !ok || val.Type != cltype.UInt8 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingEndedEvent{}, errors.New("invalid voting_type value in event")
 	}
 
-	votingEnded.VotingType, err = types.NewVotingTypeFromByte(val.UI8.Value())
+	votingEnded.VotingType, err = types.NewVotingTypeFromByte(byte(val.UI32.Value()))
 	if err != nil {
 		return VotingEndedEvent{}, err
 	}
 
 	val, ok = event.Data["voting_result"]
-	if !ok || val.Type != cltype.UInt8 {
+	if !ok || val.Type != cltype.UInt32 {
 		return VotingEndedEvent{}, errors.New("invalid voting_result value in event")
 	}
-	votingEnded.VotingResult = val.UI8.Value()
+	votingEnded.VotingResult = byte(val.UI32.Value())
 
 	val, ok = event.Data["stake_in_favor"]
 	if !ok || val.Type != cltype.UInt512 {
