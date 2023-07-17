@@ -8,7 +8,6 @@ import (
 
 	"github.com/make-software/casper-go-sdk/casper"
 	"github.com/make-software/casper-go-sdk/sse"
-
 	"github.com/make-software/ces-go-parser"
 
 	"casper-dao-middleware/apps/handler/config"
