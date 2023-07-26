@@ -55,10 +55,7 @@ func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 		isInFavor = true
 	}
 
-	var isFormal bool
-	if ballotCast.VotingType == types.VotingTypeFormal {
-		isFormal = true
-	}
+	var isFormal = ballotCast.VotingType == types.VotingTypeFormal
 
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	vote := entities.NewVote(
