@@ -14,7 +14,7 @@ const BallotCanceledEventName = "BallotCanceled"
 
 type BallotCanceledEvent struct {
 	Voter      types.Address
-	VotingType uint32
+	VotingType types.VotingType
 	Choice     types.Choice
 	VotingID   uint32
 	Stake      clvalue.UInt512
@@ -43,7 +43,11 @@ func ParseBallotCanceledEvent(event ces.Event) (BallotCanceledEvent, error) {
 	if !ok || val.Type != cltype.UInt32 {
 		return BallotCanceledEvent{}, errors.New("invalid voting_type value in event")
 	}
-	ballotCanceled.VotingType = val.UI32.Value()
+
+	ballotCanceled.VotingType, err = types.NewVotingTypeFromByte(byte(val.UI32.Value()))
+	if err != nil {
+		return BallotCanceledEvent{}, err
+	}
 
 	val, ok = event.Data["choice"]
 	if !ok || val.Type != cltype.UInt32 {
