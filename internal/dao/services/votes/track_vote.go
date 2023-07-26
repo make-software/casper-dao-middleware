@@ -1,8 +1,6 @@
 package votes
 
 import (
-	"time"
-
 	"github.com/make-software/casper-go-sdk/casper"
 
 	"casper-dao-middleware/internal/dao/di"
@@ -57,20 +55,7 @@ func (s *TrackVote) saveVote(ballotCast base.BallotCastEvent) error {
 		isInFavor = true
 	}
 
-	var isFormal bool
-	var votingID = ballotCast.VotingID
-
-	voting, err := s.GetEntityManager().VotingRepository().GetByVotingID(votingID)
-	if err == nil {
-		if voting.FormalVotingStartsAt != nil && time.Now().After(*voting.FormalVotingStartsAt) {
-			isFormal = true
-		}
-
-		// if we have the result of informal voting, the next vote is formal
-		if voting.InformalVotingResult != nil {
-			isFormal = true
-		}
-	}
+	var isFormal = ballotCast.VotingType == types.VotingTypeFormal
 
 	deployProcessedEvent := s.GetDeployProcessedEvent()
 	vote := entities.NewVote(
