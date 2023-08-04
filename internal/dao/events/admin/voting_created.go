@@ -68,7 +68,7 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 	}
 
 	val, ok = event.Data["stake"]
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.Type != cltype.UInt512 {
 			return VotingCreatedEvent{}, errors.New("invalid value inside option of `stake` value")
 		}

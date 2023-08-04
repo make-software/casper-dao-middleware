@@ -72,7 +72,7 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 		return VotingCreatedEvent{}, errors.New("invalid activation_time value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.Type != cltype.UInt64 {
 			return VotingCreatedEvent{}, errors.New("invalid value inside option of `activation_time` value")
 		}
@@ -95,7 +95,7 @@ func ParseVotingCreatedEvent(event ces.Event) (VotingCreatedEvent, error) {
 		return VotingCreatedEvent{}, errors.New("invalid stake value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.Type != cltype.UInt512 {
 			return VotingCreatedEvent{}, errors.New("invalid value inside option of `stake` value")
 		}

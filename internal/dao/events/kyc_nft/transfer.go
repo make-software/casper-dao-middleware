@@ -27,7 +27,7 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 		return TransferEvent{}, errors.New("invalid from value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Type.Inner != cltype.Key {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}
@@ -46,7 +46,7 @@ func ParseTransferEvent(event ces.Event) (TransferEvent, error) {
 		return TransferEvent{}, errors.New("invalid to value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.Type != cltype.Key {
 			return TransferEvent{}, errors.New("invalid value inside option of `from` value")
 		}

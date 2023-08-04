@@ -71,7 +71,7 @@ func ParseBidSubmittedEvent(event ces.Event) (BidSubmittedEvent, error) {
 		return BidSubmittedEvent{}, errors.New("invalid reputation_stake value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.Type != cltype.UInt512 {
 			return BidSubmittedEvent{}, errors.New("invalid value inside option of `reputation_stake` value")
 		}
@@ -84,7 +84,7 @@ func ParseBidSubmittedEvent(event ces.Event) (BidSubmittedEvent, error) {
 		return BidSubmittedEvent{}, errors.New("invalid cspr_stake value in event")
 	}
 
-	if val.Option != nil {
+	if val.Option != nil && val.Option.Inner != nil {
 		if val.Option.Inner.Type != cltype.UInt512 {
 			return BidSubmittedEvent{}, errors.New("invalid value inside option of `cspr_stake` value")
 		}
