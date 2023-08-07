@@ -2,6 +2,7 @@ package voting
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"casper-dao-middleware/internal/dao/di"
@@ -38,8 +39,19 @@ func (s *TrackBidEscrowVotingCreated) Execute() error {
 		return err
 	}
 
+	//TODO: use value from config when contract support it
+	setting, err := s.GetEntityManager().SettingRepository().GetByName("VotingStartAfterJobSubmission")
+	if err != nil {
+		return err
+	}
+
+	delayVotingStart, err := strconv.ParseUint(setting.Value, 10, 0)
+	if err != nil {
+		return err
+	}
+
 	// starts the informal when the event was emitted
-	informalVotingStartsAt := time.Now().UTC()
+	informalVotingStartsAt := time.Now().UTC().Add(time.Millisecond * time.Duration(delayVotingStart))
 	informalVotingEndsAt := informalVotingStartsAt.Add(time.Millisecond * time.Duration(bidEscrowVotingCreated.ConfigInformalVotingTime))
 
 	var formalVotingStartsAt, formalVotingEndsAt *time.Time

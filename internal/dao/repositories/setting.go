@@ -1,7 +1,12 @@
 package repositories
 
 import (
+	"database/sql"
+
+	sq "github.com/Masterminds/squirrel"
+
 	"casper-dao-middleware/internal/dao/entities"
+	"casper-dao-middleware/pkg/errors"
 	"casper-dao-middleware/pkg/pagination"
 	"casper-dao-middleware/pkg/query"
 
@@ -14,6 +19,7 @@ import (
 type Setting interface {
 	Upsert(setting entities.Setting) error
 	Save(setting entities.Setting) error
+	GetByName(name string) (*entities.Setting, error)
 	Count(filters map[string]interface{}) (uint64, error)
 	Find(params *pagination.Params, filters map[string]interface{}) ([]*entities.Setting, error)
 }
@@ -30,6 +36,29 @@ func NewSetting(conn *sqlx.DB) *setting {
 			"name": {},
 		},
 	}
+}
+
+func (r *setting) GetByName(name string) (*entities.Setting, error) {
+	queryBuilder := query.Select("*").
+		From("settings").
+		Where(sq.Eq{
+			"name": name,
+		})
+
+	sqlQuery, args, err := queryBuilder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	setting := entities.Setting{}
+	if err := r.conn.Get(&setting, sqlQuery, args...); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError("not found setting by name")
+		}
+		return nil, err
+	}
+
+	return &setting, nil
 }
 
 func (r *setting) Upsert(setting entities.Setting) error {
