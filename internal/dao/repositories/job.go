@@ -81,8 +81,8 @@ func (r job) GetByID(jobID uint32) (*entities.Job, error) {
 
 func (r job) Save(job *entities.Job) error {
 	queryBuilder := query.Insert("jobs").
-		Options("IGNORE").
 		Columns(
+			"job_id",
 			"bid_id",
 			"job_poster",
 			"worker",
@@ -94,6 +94,7 @@ func (r job) Save(job *entities.Job) error {
 			"timestamp",
 		).
 		Values(
+			job.JobID,
 			job.BidID,
 			job.JobPoster,
 			job.Worker,
