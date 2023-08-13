@@ -858,7 +858,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/jobs/{job_id}/": {
+        "/jobs/{job_id}": {
             "get": {
                 "tags": [
                     "BidEscrow"

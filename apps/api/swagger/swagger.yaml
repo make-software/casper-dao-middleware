@@ -747,7 +747,7 @@ paths:
       summary: Return predefined list of JobStatuses
       tags:
       - BidEscrow
-  /jobs/{job_id}/:
+  /jobs/{job_id}:
     get:
       parameters:
       - description: JobID uint

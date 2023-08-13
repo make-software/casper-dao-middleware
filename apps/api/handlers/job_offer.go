@@ -112,7 +112,7 @@ func (h *JobOffer) HandleGetBidJob(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary	Return Job by JobIF
 //
-//	@Router		/jobs/{job_id}/  [GET]
+//	@Router		/jobs/{job_id}  [GET]
 //
 //	@Param		job_id		path		uint	true	"JobID uint"
 //
