@@ -63,14 +63,16 @@ func (r *reputationChange) SaveBatch(changes []entities.ReputationChange) error 
 func (r *reputationChange) CalculateLiquidStakeReputationForAddress(address casper.Hash) (entities.LiquidStakeReputation, error) {
 	query := `
 	SELECT 
-	    (SELECT ABS(SUM(amount)) FROM reputation_changes WHERE contract_package_hash = ?) as liquid_amount, 
-	    (SELECT SUM(amount)  FROM reputation_changes WHERE contract_package_hash != ?) as staked_amount  
+	    (SELECT ABS(SUM(amount)) FROM reputation_changes WHERE contract_package_hash = ? and address = ?) as liquid_amount, 
+	    (SELECT ABS(SUM(amount))  FROM reputation_changes WHERE contract_package_hash != ? and address = ?) as staked_amount  
 	FROM reputation_changes WHERE address = ?;
 `
 
 	args := []interface{}{
 		r.contractPackageHashes.ReputationContractPackageHash,
+		address,
 		r.contractPackageHashes.ReputationContractPackageHash,
+		address,
 		address,
 	}
 
@@ -89,27 +91,47 @@ func (r *reputationChange) CalculateAggregatedLiquidStakeReputationForAddresses(
 		addressesParams = append(addressesParams, "?")
 	}
 
+	// liquid_amount
 	query := fmt.Sprintf(`
 	SELECT 
-	    (SELECT SUM(amount) FROM reputation_changes WHERE contract_package_hash = ?) as liquid_amount, 
-	    (SELECT SUM(amount)  FROM reputation_changes WHERE contract_package_hash != ?) as staked_amount,
-	    address
-	FROM reputation_changes WHERE address in (%s) GROUP BY address;
+	    ABS(SUM(amount)) as liquid_amount,
+		address
+	FROM reputation_changes  WHERE contract_package_hash = ? and address in (%s) GROUP BY address;
 `, strings.Join(addressesParams, ","))
 
 	args := []interface{}{
-		r.contractPackageHashes.ReputationContractPackageHash,
 		r.contractPackageHashes.ReputationContractPackageHash,
 	}
 	for _, address := range addresses {
 		args = append(args, address)
 	}
 
-	liquidStakeReputations := make([]entities.LiquidStakeReputation, 0)
-	err := r.conn.Select(&liquidStakeReputations, query, args...)
-	if err != nil {
+	liquidReputations := make([]entities.LiquidStakeReputation, 0)
+	if err := r.conn.Select(&liquidReputations, query, args...); err != nil {
+		return nil, err
+	}
+	liquidReputationsMap := make(map[string]*uint64)
+	for _, entry := range liquidReputations {
+		liquidReputationsMap[entry.Address.String()] = entry.LiquidAmount
+	}
+
+	// staked_amount
+	query = fmt.Sprintf(`
+	SELECT 
+	    ABS(SUM(amount)) as staked_amount,
+	    address
+	FROM reputation_changes  WHERE contract_package_hash != ? and address in (%s) GROUP BY address;
+`, strings.Join(addressesParams, ","))
+
+	stakeReputations := make([]entities.LiquidStakeReputation, 0)
+	if err := r.conn.Select(&stakeReputations, query, args...); err != nil {
 		return nil, err
 	}
 
-	return liquidStakeReputations, nil
+	for i := range stakeReputations {
+		liquidReputation := liquidReputationsMap[stakeReputations[i].Address.String()]
+		stakeReputations[i].LiquidAmount = liquidReputation
+	}
+
+	return stakeReputations, nil
 }
