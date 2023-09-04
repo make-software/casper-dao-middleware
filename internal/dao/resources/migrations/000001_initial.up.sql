@@ -58,7 +58,7 @@ create table total_reputation_snapshots
     reason                   tinyint unsigned not null,
     timestamp                datetime not null,
 
-    primary key (deploy_hash)
+    primary key (deploy_hash, address)
 ) ENGINE = InnoDB
   default CHARSET = utf8;
 
