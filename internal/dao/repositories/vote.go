@@ -48,6 +48,7 @@ func (r *vote) Save(vote *entities.Vote) error {
 			"amount",
 			"is_in_favour",
 			"is_canceled",
+			"is_formal",
 			"timestamp",
 		).
 		Values(
@@ -57,6 +58,7 @@ func (r *vote) Save(vote *entities.Vote) error {
 			vote.Amount,
 			vote.IsInFavor,
 			vote.IsCanceled,
+			vote.IsFormal,
 			vote.Timestamp,
 		)
 	sql, args, err := queryBuilder.ToSql()
