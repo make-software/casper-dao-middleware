@@ -35,5 +35,37 @@ func (s *TrackBurn) Execute() error {
 			deployProcessedEvent.DeployProcessed.Timestamp),
 	}
 
-	return s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes)
+	if err := s.GetEntityManager().ReputationChangeRepository().SaveBatch(changes); err != nil {
+		return err
+	}
+
+	liquidStakeReputation, err := s.GetEntityManager().
+		ReputationChangeRepository().
+		CalculateLiquidStakeReputationForAddress(*burnEvent.Address.ToHash())
+	if err != nil {
+		return err
+	}
+
+	var liquidReputation uint64
+	if liquidStakeReputation.LiquidAmount != nil {
+		liquidReputation = *liquidStakeReputation.LiquidAmount
+	}
+
+	var stakedReputation uint64
+	if liquidStakeReputation.StakedAmount != nil {
+		stakedReputation = *liquidStakeReputation.StakedAmount
+	}
+
+	reputationTotal := entities.NewTotalReputationSnapshot(
+		*burnEvent.Address.ToHash(),
+		nil,
+		liquidReputation,
+		stakedReputation,
+		0,
+		0,
+		deployProcessedEvent.DeployProcessed.DeployHash,
+		entities.ReputationChangeReasonBurned,
+		deployProcessedEvent.DeployProcessed.Timestamp)
+
+	return s.GetEntityManager().TotalReputationSnapshotRepository().SaveBatch([]entities.TotalReputationSnapshot{reputationTotal})
 }
