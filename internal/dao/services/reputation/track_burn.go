@@ -24,12 +24,14 @@ func (s *TrackBurn) Execute() error {
 	}
 
 	deployProcessedEvent := s.GetDeployProcessedEvent()
+	burnedAmount := burnEvent.Amount.Value().Int64()
+
 	changes := []entities.ReputationChange{
 		entities.NewReputationChange(
 			*burnEvent.Address.ToHash(),
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			nil,
-			-burnEvent.Amount.Value().Int64(),
+			-burnedAmount,
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonBurned,
 			deployProcessedEvent.DeployProcessed.Timestamp),
@@ -61,7 +63,7 @@ func (s *TrackBurn) Execute() error {
 		nil,
 		liquidReputation,
 		stakedReputation,
-		0,
+		uint64(burnedAmount),
 		0,
 		deployProcessedEvent.DeployProcessed.DeployHash,
 		entities.ReputationChangeReasonBurned,
