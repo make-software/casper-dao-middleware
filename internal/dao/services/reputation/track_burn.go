@@ -29,7 +29,7 @@ func (s *TrackBurn) Execute() error {
 			*burnEvent.Address.ToHash(),
 			s.GetDAOContractsMetadata().ReputationContractPackageHash,
 			nil,
-			burnEvent.Amount.Value().Int64(),
+			-burnEvent.Amount.Value().Int64(),
 			deployProcessedEvent.DeployProcessed.DeployHash,
 			entities.ReputationChangeReasonBurned,
 			deployProcessedEvent.DeployProcessed.Timestamp),
