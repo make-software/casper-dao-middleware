@@ -14,8 +14,9 @@ require (
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0
 	github.com/make-software/casper-go-sdk v1.1.4
 	github.com/make-software/ces-go-parser v1.1.2
+	github.com/pelletier/go-toml/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.16.1
 	go.uber.org/dig v1.15.0

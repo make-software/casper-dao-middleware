@@ -2,6 +2,7 @@ package votes
 
 import (
 	"github.com/make-software/casper-go-sdk/casper"
+	"go.uber.org/zap"
 
 	"casper-dao-middleware/internal/dao/di"
 	"casper-dao-middleware/internal/dao/entities"
@@ -34,6 +35,20 @@ func (s *TrackVote) Execute() error {
 
 	if err := s.saveVote(ballotCast); err != nil {
 		return err
+	}
+
+	// in case of Non VA vote in BidEscrow we should not calculate reputations history as
+	// Non VA provide capers
+	if s.GetDAOContractsMetadata().BidEscrowContractPackageHash.String() == s.voterContractPackageHash.String() {
+		account, err := s.GetEntityManager().AccountRepository().FindByHash(*ballotCast.Voter.ToHash())
+		if err != nil {
+			return err
+		}
+
+		if !account.IsVA {
+			zap.S().Infow("Not collecting reputation changes for Non VA in BidEscrow")
+			return nil
+		}
 	}
 
 	if err := s.collectReputationChanges(ballotCast, s.voterContractPackageHash); err != nil {
