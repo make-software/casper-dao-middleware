@@ -92,7 +92,7 @@ create table votes
     deploy_hash  binary(32) not null,
     voting_id    int unsigned not null,
     address      binary(32) not null,
-    amount       int unsigned not null,
+    amount       bigint unsigned not null,
     is_in_favour tinyint unsigned not null,
     is_canceled  tinyint unsigned not null,
     is_formal    tinyint unsigned not null,
