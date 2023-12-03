@@ -67,9 +67,9 @@ jobs:
       id: short_sha
       run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-    - uses: actions/checkout@v3
-      with:
-        ref: master
+    # - uses: actions/checkout@v3
+    #   with:
+    #     ref: master
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
