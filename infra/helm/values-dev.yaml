@@ -1,0 +1,34 @@
+#-------------------------------------------------------------------------------
+# Rate Oracle
+#-------------------------------------------------------------------------------
+rateOracle:
+  image:
+    # Docker image repository
+    repository: '494750395663.dkr.ecr.us-east-1.amazonaws.com/make/crdao/rate-oracle'
+    # Docker image tag
+    tag: sha-0ddee4d
+  # Defines a deadline (in whole seconds) for starting the Job, if that Job misses its scheduled time for any reason.
+  startingDeadlineSeconds: 20
+  # Defines if cronjob should be suspended
+  # Does not affect Jobs that the CronJob has already started.
+  suspend: false
+  # Defines when a cronjob should be executed
+  schedule: "*/1 * * * *"
+  nodeSelector: {}
+  dbMigration:
+    # Enable database migration scripts during cronjon execution
+    # This will create a separate init container
+    enabled: false
+  env:
+    # Environment variables specific to the cronjob
+    normal:
+      NODE_ADDRESS: "34.202.114.207"
+      NODE_PORT: "9999"
+      NODE_RPC_PORT: "7777"
+      LOG_LEVEL: "debug"
+      NETWORK_NAME: "casper-test"
+      SET_RATE_DEPLOYER_PRIVATE_KEY_PATH: "resources/secret_key.pem"
+      SET_RATE_CALL_PAYMENT_AMOUNT: "1000000000"
+      RATE_API_URL: "https://event-store-api-clarity-testnet.make.services/rates/1/amount"
+      CSPR_RATE_PROVIDER_CONTRACT_HASH: "975b351f07a4e348dc14306b3093e45f601da616574a5a6d8bf36aaed1a82633"
+      NODE_RPC_PORT: "7777"

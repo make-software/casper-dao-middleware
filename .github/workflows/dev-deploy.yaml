@@ -1,0 +1,95 @@
+name: (DEV) Build and deploy all images
+
+on:
+  push:
+    branches:
+      - 'master'
+    paths-ignore:
+      - 'infra/**'
+
+jobs:
+  build:
+    name: Build Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: rate
+            repository: RATE_ORACLE
+            dockerfile: rate-oracle.dockerfile
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: |
+          ${{ steps.login-ecr.outputs.registry }}/${{ secrets[format('ECR_REPOSITORY_{0}', matrix.repository)] }}
+        tags: |
+          type=sha
+          type=schedule
+          type=raw,value=latest
+          type=semver,pattern=v{{version}}
+
+    - name: Build and push up
+      uses: docker/build-push-action@v4
+      with:
+        file: infra/docker/${{ matrix.dockerfile }}
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  gitops_tasks:
+    name: GitOps Tasks
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Get short sha
+      id: short_sha
+      run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    - uses: actions/checkout@v3
+      with:
+        ref: master
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Update Image Repo
+      id: imgupd
+      uses: mikefarah/yq@master
+      with:
+        cmd: |
+          yq eval '.rateOracle.image.repository = "${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_RATE_ORACLE }}"' -i infra/helm/values-dev.yaml
+          yq eval '.rateOracle.image.tag = "sha-${{  steps.short_sha.outputs.short_sha }}"' -i infra/helm/values-dev.yaml
+
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: auto-apply image changes
