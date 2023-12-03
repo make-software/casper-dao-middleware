@@ -22,4 +22,6 @@ rateOracle:
   env:
     # Environment variables specific to the cronjob
     normal:
-      TEST: "test"
+      NODE_ADDRESS: "52.3.38.81"
+      NODE_PORT: "9999"
+      NODE_RPC_PORT: "7777"
