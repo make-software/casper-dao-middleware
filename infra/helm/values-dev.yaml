@@ -6,7 +6,7 @@ rateOracle:
     # Docker image repository
     repository: '494750395663.dkr.ecr.us-east-1.amazonaws.com/make/crdao/rate-oracle'
     # Docker image tag
-    tag: sha-0ddee4d
+    tag: sha-e2cdf6b
   # Defines a deadline (in whole seconds) for starting the Job, if that Job misses its scheduled time for any reason.
   startingDeadlineSeconds: 20
   # Defines if cronjob should be suspended
