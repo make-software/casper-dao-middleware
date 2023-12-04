@@ -45,6 +45,10 @@ spec:
           containers:
           - name: {{ .Chart.Name }}
             image: {{ .Values.rateOracle.image.repository }}:{{ .Values.rateOracle.image.tag }}
+            volumeMounts:
+            - mountPath: /app/resources/secret_key.pem
+              subPath: secret_key.pem
+              name: secret-key
             command:
             - /bin/sh
             - -c
@@ -62,3 +66,12 @@ spec:
                   key: {{ $key }}
             {{- end }}
           restartPolicy: OnFailure
+          volumes:
+          - name: secret-key
+            configMap:
+              name: {{ .Chart.Name }}-key
+              items:
+                - key: secret_key.pem
+                  path: secret_key.pem
+
+
