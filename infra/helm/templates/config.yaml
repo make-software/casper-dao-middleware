@@ -1,0 +1,8 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: {{ .Chart.Name }}-key
+data:
+    secret_key.pem: |-
+      {{- .Values.rateOracle.secret_key | nindent 8 }}
