@@ -13,7 +13,7 @@ rateOracle:
   # Does not affect Jobs that the CronJob has already started.
   suspend: false
   # Defines when a cronjob should be executed
-  schedule: "*/1 * * * *"
+  schedule: "0 0 * * *"
   nodeSelector: {}
   dbMigration:
     # Enable database migration scripts during cronjon execution
@@ -30,5 +30,4 @@ rateOracle:
       SET_RATE_DEPLOYER_PRIVATE_KEY_PATH: "/app/resources/secret_key.pem"
       SET_RATE_CALL_PAYMENT_AMOUNT: "1000000000"
       RATE_API_URL: "https://event-store-api-clarity-testnet.make.services/rates/1/amount"
-      CSPR_RATE_PROVIDER_CONTRACT_HASH: "975b351f07a4e348dc14306b3093e45f601da616574a5a6d8bf36aaed1a82633"
-      NODE_RPC_PORT: "7777"
+      CSPR_RATE_PROVIDER_CONTRACT_HASH: "4f2bc59ba31aad429419fc05e33c7690281be57e8b858887aeec9db13ed6cc82"
