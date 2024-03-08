@@ -1,3 +1,0 @@
-creation_rules:
-  - path_regex: secrets-dev.yaml
-    kms: arn:aws:kms:us-east-1:494750395663:key/f4b90c09-7359-4049-83b5-8581b169642a
